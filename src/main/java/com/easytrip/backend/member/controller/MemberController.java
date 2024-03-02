@@ -1,10 +1,9 @@
 package com.easytrip.backend.member.controller;
 
+import static com.easytrip.backend.type.PlatForm.KAKAO;
 import static com.easytrip.backend.type.PlatForm.LOCAL;
 import static com.easytrip.backend.type.PlatForm.NAVER;
 
-import com.easytrip.backend.member.dto.NaverMemberDto;
-import com.easytrip.backend.member.dto.NaverMemberDto.NaverMemberDetail;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
@@ -48,6 +47,12 @@ public class MemberController {
   @GetMapping("/login/naver")
   public ResponseEntity<TokenDto> naverLogin(@RequestParam(name = "code") String code) {
     TokenDto response = memberService.naverLogin(code, NAVER);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/login/kakao")
+  public ResponseEntity<TokenDto> kakaoLogin(@RequestParam(name = "code") String code) {
+    TokenDto response = memberService.kakaoLogin(code, KAKAO);
     return ResponseEntity.ok(response);
   }
 

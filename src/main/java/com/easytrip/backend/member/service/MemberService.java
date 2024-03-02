@@ -16,4 +16,6 @@ public interface MemberService {
   TokenDto login(LoginRequest loginRequest, PlatForm platForm);
 
   TokenDto naverLogin(String code, PlatForm platForm);
+
+  TokenDto kakaoLogin(String code, PlatForm platForm);
 }

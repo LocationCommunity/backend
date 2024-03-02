@@ -16,6 +16,7 @@ import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.repository.MemberRepository;
+import com.easytrip.backend.member.service.sns.KakaoLoginService;
 import com.easytrip.backend.member.service.sns.NaverLoginService;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.PlatForm;
@@ -37,6 +38,7 @@ public class MemberServiceImpl implements MemberService {
   private final PasswordEncoder passwordEncoder;
   private final TokenService tokenService;
   private final NaverLoginService naverLoginService;
+  private final KakaoLoginService kakaoLoginService;
 
   @Override
   @Transactional
@@ -50,16 +52,6 @@ public class MemberServiceImpl implements MemberService {
     // 비밀번호 체크가 불일치
     if (!signUpRequest.getPassword().equals(signUpRequest.getCheckPassword())) {
       throw new InvalidPasswordConfirmationException();
-    }
-
-    // 닉네임 중복
-    Optional<MemberEntity> byNickname = memberRepository.findByNickname(
-        signUpRequest.getNickname());
-    if (byNickname.isPresent()) {
-      MemberEntity member = byNickname.get();
-      if (member.getStatus().equals(MemberStatus.ACTIVE)) {
-        throw new DuplicateNicknameException();
-      }
     }
 
     // 중복가입인지 확인
@@ -125,6 +117,8 @@ public class MemberServiceImpl implements MemberService {
       switch (member.getPlatForm()) {
         case NAVER:
           throw new PlatFormUnMatchedException("NAVER 로 가입한 회원입니다. NAVER 로그인을 이용해주세요.");
+        case KAKAO:
+          throw new PlatFormUnMatchedException("KAKAO 로 가입한 회원입니다. KAKAO 로그인을 이용해주세요.");
       }
     }
 
@@ -153,7 +147,7 @@ public class MemberServiceImpl implements MemberService {
   public TokenDto naverLogin(String code, PlatForm platForm) {
 
     MemberEntity naverMember = naverLoginService.toEntityUser(code, platForm);
-    Optional<MemberEntity> byEmail= memberRepository.findByEmail(naverMember.getEmail());
+    Optional<MemberEntity> byEmail = memberRepository.findByEmail(naverMember.getEmail());
 
     // 기존에 가입한 회원
     if (byEmail.isPresent()) {
@@ -163,6 +157,8 @@ public class MemberServiceImpl implements MemberService {
         switch (member.getPlatForm()) {
           case LOCAL:
             throw new PlatFormUnMatchedException("이미 가입한 회원 입니다. 사이트 자체 로그인을 이용해주세요.");
+          case KAKAO:
+            throw new PlatFormUnMatchedException("KAKAO 로 가입한 회원입니다. KAKAO 로그인을 이용해주세요.");
         }
       }
       TokenDto token = tokenService.create(naverMember.getEmail(), naverMember.getAdminYn());
@@ -170,6 +166,41 @@ public class MemberServiceImpl implements MemberService {
     } else {
       // 새로운 회원(네이버로 회원가입과 동시에 로그인)
       MemberEntity member = naverMember.toBuilder()
+          .auth(true)
+          .adminYn(false)
+          .status(MemberStatus.ACTIVE)
+          .regDate(LocalDateTime.now())
+          .build();
+      memberRepository.save(member);
+
+      TokenDto token = tokenService.create(member.getEmail(), member.getAdminYn());
+      return token;
+    }
+  }
+
+  @Override
+  public TokenDto kakaoLogin(String code, PlatForm platForm) {
+
+    MemberEntity kakaoMember = kakaoLoginService.toEntityUser(code, platForm);
+    Optional<MemberEntity> byEmail = memberRepository.findByEmail(kakaoMember.getEmail());
+
+    // 기존에 가입한 회원
+    if (byEmail.isPresent()) {
+      MemberEntity member = byEmail.get();
+      // 가입경로 확인 후 로그인
+      if (!member.getPlatForm().equals(platForm)) {
+        switch (member.getPlatForm()) {
+          case LOCAL:
+            throw new PlatFormUnMatchedException("이미 가입한 회원 입니다. 사이트 자체 로그인을 이용해주세요.");
+          case NAVER:
+            throw new PlatFormUnMatchedException("NAVER 로 가입한 회원입니다. NAVER 로그인을 이용해주세요.");
+        }
+      }
+      TokenDto token = tokenService.create(kakaoMember.getEmail(), kakaoMember.getAdminYn());
+      return token;
+    } else {
+      // 새로운 회원(카카오로 회원가입과 동시에 로그인)
+      MemberEntity member = kakaoMember.toBuilder()
           .auth(true)
           .adminYn(false)
           .status(MemberStatus.ACTIVE)

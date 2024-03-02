@@ -36,10 +36,7 @@ public class MemberEntity {
 
   private String password;
   private String name;
-
-  @Column(unique = true)
   private String nickname;
-
   private Boolean auth;
   private String authCode;
   private String imageUrl;
