@@ -19,7 +19,7 @@ public class MemberController {
   private final MemberService memberService;
 
   @PostMapping("/sign-up")
-  public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+  public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
     String response = memberService.signUp(signUpRequest);
     return ResponseEntity.ok(response);
   }
