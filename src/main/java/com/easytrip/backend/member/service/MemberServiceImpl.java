@@ -8,6 +8,7 @@ import com.easytrip.backend.exception.impl.InvalidEmailException;
 import com.easytrip.backend.exception.impl.InvalidPasswordConfirmationException;
 import com.easytrip.backend.exception.impl.InvalidPasswordException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
+import com.easytrip.backend.exception.impl.PlatFormUnMatchedException;
 import com.easytrip.backend.exception.impl.SuspendedMemberException;
 import com.easytrip.backend.exception.impl.WaitingMemberException;
 import com.easytrip.backend.member.domain.MemberEntity;
@@ -114,10 +115,18 @@ public class MemberServiceImpl implements MemberService {
   }
 
   @Override
-  public TokenDto login(LoginRequest loginRequest) {
+  public TokenDto login(LoginRequest loginRequest, PlatForm platForm) {
 
     MemberEntity member = memberRepository.findByEmail(loginRequest.getEmail())
         .orElseThrow(() -> new NotFoundMemberException());
+
+    // 가입경로 확인
+    if (!member.getPlatForm().equals(platForm)) {
+      switch (member.getPlatForm()) {
+        case NAVER:
+          throw new PlatFormUnMatchedException("NAVER 로 가입한 회원입니다. NAVER 로그인을 이용해주세요.");
+      }
+    }
 
     // 회원 상태에 따른 exception
     if (member.getStatus().equals(MemberStatus.SUSPENDED)) {
@@ -140,13 +149,22 @@ public class MemberServiceImpl implements MemberService {
   }
 
   @Override
+  @Transactional
   public TokenDto naverLogin(String code, PlatForm platForm) {
 
     MemberEntity naverMember = naverLoginService.toEntityUser(code, platForm);
-    Optional<MemberEntity> byEmail = memberRepository.findByEmail(naverMember.getEmail());
+    Optional<MemberEntity> byEmail= memberRepository.findByEmail(naverMember.getEmail());
 
     // 기존에 가입한 회원
     if (byEmail.isPresent()) {
+      MemberEntity member = byEmail.get();
+      // 가입경로 확인 후 로그인
+      if (!member.getPlatForm().equals(platForm)) {
+        switch (member.getPlatForm()) {
+          case LOCAL:
+            throw new PlatFormUnMatchedException("이미 가입한 회원 입니다. 사이트 자체 로그인을 이용해주세요.");
+        }
+      }
       TokenDto token = tokenService.create(naverMember.getEmail(), naverMember.getAdminYn());
       return token;
     } else {

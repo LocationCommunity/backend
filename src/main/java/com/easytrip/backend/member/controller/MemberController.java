@@ -1,5 +1,6 @@
 package com.easytrip.backend.member.controller;
 
+import static com.easytrip.backend.type.PlatForm.LOCAL;
 import static com.easytrip.backend.type.PlatForm.NAVER;
 
 import com.easytrip.backend.member.dto.NaverMemberDto;
@@ -40,7 +41,7 @@ public class MemberController {
 
   @PostMapping("/login")
   public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginRequest loginRequest) {
-    TokenDto response = memberService.login(loginRequest);
+    TokenDto response = memberService.login(loginRequest, LOCAL);
     return ResponseEntity.ok(response);
   }
 

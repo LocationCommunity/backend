@@ -1,6 +1,5 @@
 package com.easytrip.backend.member.service;
 
-import com.easytrip.backend.member.dto.NaverMemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
@@ -14,7 +13,7 @@ public interface MemberService {
 
   String auth(String email, String code);
 
-  TokenDto login(LoginRequest loginRequest);
+  TokenDto login(LoginRequest loginRequest, PlatForm platForm);
 
   TokenDto naverLogin(String code, PlatForm platForm);
 }
