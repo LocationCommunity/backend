@@ -8,9 +8,11 @@ import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +33,7 @@ public class MemberController {
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/auth")
+  @GetMapping("/auth")
   public ResponseEntity<String> auth(@RequestParam(name = "email") String email,
       @RequestParam(name = "code") String code) {
     String response = memberService.auth(email, code);
@@ -56,4 +58,13 @@ public class MemberController {
     return ResponseEntity.ok(response);
   }
 
+  @DeleteMapping("/logout")
+  public ResponseEntity<String> logout(HttpServletRequest request) {
+    String accessToken = request.getHeader("Authorization");
+    if (accessToken != null && accessToken.startsWith("Bearer ")) {
+      accessToken = accessToken.substring(7); // "Bearer " 이후의 토큰 값만 추출
+    }
+    memberService.logout(accessToken);
+    return ResponseEntity.ok("로그아웃 완료");
+  }
 }

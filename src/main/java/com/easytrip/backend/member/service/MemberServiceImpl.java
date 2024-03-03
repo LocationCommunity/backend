@@ -2,11 +2,11 @@ package com.easytrip.backend.member.service;
 
 import com.easytrip.backend.components.MailComponents;
 import com.easytrip.backend.exception.impl.DuplicateEmailException;
-import com.easytrip.backend.exception.impl.DuplicateNicknameException;
 import com.easytrip.backend.exception.impl.InvalidAuthCodeException;
 import com.easytrip.backend.exception.impl.InvalidEmailException;
 import com.easytrip.backend.exception.impl.InvalidPasswordConfirmationException;
 import com.easytrip.backend.exception.impl.InvalidPasswordException;
+import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.exception.impl.PlatFormUnMatchedException;
 import com.easytrip.backend.exception.impl.SuspendedMemberException;
@@ -15,15 +15,21 @@ import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
+import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.member.service.sns.KakaoLoginService;
 import com.easytrip.backend.member.service.sns.NaverLoginService;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.PlatForm;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +45,8 @@ public class MemberServiceImpl implements MemberService {
   private final TokenService tokenService;
   private final NaverLoginService naverLoginService;
   private final KakaoLoginService kakaoLoginService;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final RedisTemplate redisTemplate;
 
   @Override
   @Transactional
@@ -211,6 +219,30 @@ public class MemberServiceImpl implements MemberService {
       TokenDto token = tokenService.create(member.getEmail(), member.getAdminYn());
       return token;
     }
+  }
+
+  @Override
+  public void logout(String accessToken) {
+
+    // 토큰이 유효한지 검증
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    // 토큰을 통해 사용자 정보 받아오기
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    // Redis에 해당 유저의 email로 저장된 refreshToken이 있는지 확인 후 있으면 삭제
+    if (redisTemplate.opsForValue().get("RefreshToken: " + authentication.getName()) != null) {
+      redisTemplate.delete("RefreshToken: " + authentication.getName());
+    }
+
+    // 해당 accessToken 유효시간을 가지고 와서 Redis에 BlackList로 추가
+    long expiration = jwtTokenProvider.getExpiration(accessToken);
+    long now = (new Date()).getTime();
+    long accessTokenExpiresIn = expiration - now;
+    redisTemplate.opsForValue()
+        .set(accessToken, "logout", accessTokenExpiresIn, TimeUnit.MILLISECONDS);
   }
 
   private void sendMail(SignUpRequest signUpRequest, MemberEntity member) {
