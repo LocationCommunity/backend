@@ -1,5 +1,6 @@
 package com.easytrip.backend.configuration;
 
+import com.easytrip.backend.member.jwt.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,11 +11,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
+
+  private final JwtTokenFilter jwtTokenFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -22,9 +26,10 @@ public class SecurityConfiguration {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             requests -> requests
-                .requestMatchers("/", "/members/sign-up", "/members/auth").permitAll())
+                .requestMatchers("/", "/members/sign-up", "/members/auth", "/members/login/**").permitAll())
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
-            SessionCreationPolicy.STATELESS)).build();
+            SessionCreationPolicy.STATELESS))
+        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();
   }
 
   @Bean
