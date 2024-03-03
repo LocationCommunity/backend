@@ -6,6 +6,7 @@ import static com.easytrip.backend.type.PlatForm.NAVER;
 
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
+import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -70,6 +72,20 @@ public class MemberController {
     String accessToken = getAccessToken(request);
     memberService.withdrawal(accessToken);
     return ResponseEntity.ok("회원탈퇴가 정상적으로 완료되었습니다.");
+  }
+
+  @PutMapping("/password")
+  public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetRequest resetRequest) {
+    String response = memberService.resetPassword(resetRequest);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/password")
+  public ResponseEntity<String> passwordAuth(@RequestParam(name = "email") String email,
+      @RequestParam(name = "code") String code,
+      @RequestParam(name = "resetPassword") String resetPassword) {
+    String response = memberService.passwordAuth(email, code, resetPassword);
+    return ResponseEntity.ok(response);
   }
 
   private static String getAccessToken(HttpServletRequest request) {
