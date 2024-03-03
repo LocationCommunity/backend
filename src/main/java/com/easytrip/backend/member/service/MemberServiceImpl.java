@@ -245,6 +245,29 @@ public class MemberServiceImpl implements MemberService {
         .set(accessToken, "logout", accessTokenExpiresIn, TimeUnit.MILLISECONDS);
   }
 
+  @Override
+  @Transactional
+  public void withdrawal(String accessToken) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    // 탈퇴한 회원의 상태를 탈퇴로 변경
+    MemberEntity withdrawnMember = member.toBuilder()
+        .status(MemberStatus.WITHDRAWN)
+        .build();
+    memberRepository.save(withdrawnMember);
+
+    // 나중에 탈퇴한 회원이 작성한 게시물을 어떻게 할지 작성
+  }
+
   private void sendMail(SignUpRequest signUpRequest, MemberEntity member) {
     String email = signUpRequest.getEmail();
     String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
