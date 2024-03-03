@@ -60,11 +60,24 @@ public class MemberController {
 
   @DeleteMapping("/logout")
   public ResponseEntity<String> logout(HttpServletRequest request) {
+    String accessToken = getAccessToken(request);
+    memberService.logout(accessToken);
+    return ResponseEntity.ok("로그아웃 완료");
+  }
+
+  @DeleteMapping("/withdrawal")
+  public ResponseEntity<String> withdrawal(HttpServletRequest request) {
+    String accessToken = getAccessToken(request);
+    memberService.withdrawal(accessToken);
+    return ResponseEntity.ok("회원탈퇴가 정상적으로 완료되었습니다.");
+  }
+
+  private static String getAccessToken(HttpServletRequest request) {
     String accessToken = request.getHeader("Authorization");
     if (accessToken != null && accessToken.startsWith("Bearer ")) {
       accessToken = accessToken.substring(7); // "Bearer " 이후의 토큰 값만 추출
     }
-    memberService.logout(accessToken);
-    return ResponseEntity.ok("로그아웃 완료");
+    return accessToken;
   }
+
 }

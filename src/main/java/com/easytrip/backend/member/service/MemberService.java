@@ -20,4 +20,6 @@ public interface MemberService {
   TokenDto kakaoLogin(String code, PlatForm platForm);
 
   void logout(String accessToken);
+
+  void withdrawal(String accessToken);
 }
