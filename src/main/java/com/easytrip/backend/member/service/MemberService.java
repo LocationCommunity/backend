@@ -18,4 +18,6 @@ public interface MemberService {
   TokenDto naverLogin(String code, PlatForm platForm);
 
   TokenDto kakaoLogin(String code, PlatForm platForm);
+
+  void logout(String accessToken);
 }
