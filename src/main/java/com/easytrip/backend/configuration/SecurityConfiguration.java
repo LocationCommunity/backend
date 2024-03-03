@@ -26,7 +26,8 @@ public class SecurityConfiguration {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             requests -> requests
-                .requestMatchers("/", "/members/sign-up", "/members/auth", "/members/login/**", "/members/logout").permitAll())
+                .requestMatchers("/", "/members/sign-up", "/members/auth", "/members/login/**",
+                    "/members/logout", "/members/password").permitAll())
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();

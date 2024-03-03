@@ -2,18 +2,21 @@ package com.easytrip.backend.member.service;
 
 import com.easytrip.backend.components.MailComponents;
 import com.easytrip.backend.exception.impl.DuplicateEmailException;
+import com.easytrip.backend.exception.impl.ExpiredException;
 import com.easytrip.backend.exception.impl.InvalidAuthCodeException;
 import com.easytrip.backend.exception.impl.InvalidEmailException;
 import com.easytrip.backend.exception.impl.InvalidPasswordConfirmationException;
 import com.easytrip.backend.exception.impl.InvalidPasswordException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
+import com.easytrip.backend.exception.impl.PasswordChangeNotAllowedException;
 import com.easytrip.backend.exception.impl.PlatFormUnMatchedException;
 import com.easytrip.backend.exception.impl.SuspendedMemberException;
 import com.easytrip.backend.exception.impl.WaitingMemberException;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
+import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
@@ -24,12 +27,14 @@ import com.easytrip.backend.type.PlatForm;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -266,6 +271,65 @@ public class MemberServiceImpl implements MemberService {
     memberRepository.save(withdrawnMember);
 
     // 나중에 탈퇴한 회원이 작성한 게시물을 어떻게 할지 작성
+  }
+
+  @Override
+  public String resetPassword(ResetRequest resetRequest) {
+
+    MemberEntity member = memberRepository.findByEmail(resetRequest.getEmail())
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    if (!member.getPlatForm().equals(PlatForm.LOCAL)) {
+      throw new PasswordChangeNotAllowedException();
+    }
+
+    String uuid = UUID.randomUUID().toString();
+    String encPassword = BCrypt.hashpw(resetRequest.getResetPassword(), BCrypt.gensalt());
+
+    // 비밀번호 변경코드와 기간 발급
+    MemberEntity memberEntity = member.toBuilder()
+        .passwordAuthCode(uuid)
+        .passwordDate(LocalDateTime.now().plusMinutes(30))
+        .build();
+    memberRepository.save(memberEntity);
+
+    String email = member.getEmail();
+    String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+    String title = "EZTrip 비밀번호 변경";
+    String message = "<h3>EZTrip 비밀번호 변경을 위해서 아래의 링크를 클릭하셔서 인증을 완료해주세요.</h3>" +
+        "<div><a href='" + baseUrl + "/members/password?email=" + email + "&code="
+        + memberEntity.getPasswordAuthCode() + "&resetPassword=" + encPassword
+        + "'> 인증 링크 </a></div>";
+    mailComponents.sendMail(email, title, message);
+
+    return "이메일을 확인해 인증을 진행해주세요.";
+  }
+
+  @Override
+  @Transactional
+  public String passwordAuth(String email, String code, String resetPassword) {
+
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    // 인증 코드가 다르면 exception 발생
+    if (!code.equals(member.getPasswordAuthCode())) {
+      throw new InvalidAuthCodeException();
+    }
+
+    // 비밀번호 변경 기간이 지나면 exception 발생
+    if (member.getPasswordDate().isBefore(LocalDateTime.now())) {
+      throw new ExpiredException();
+    }
+
+    MemberEntity memberEntity = member.toBuilder()
+        .password(resetPassword)
+        .passwordAuthCode(null)
+        .passwordDate(null)
+        .build();
+    memberRepository.save(memberEntity);
+
+    return "비밀번호 변경을 완료했습니다.";
   }
 
   private void sendMail(SignUpRequest signUpRequest, MemberEntity member) {
