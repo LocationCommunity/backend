@@ -69,6 +69,30 @@ public class JwtTokenProvider {
     return tokens;
   }
 
+  public String reissue(String email, Boolean isAdmin) {
+
+    Claims claims = Jwts.claims().setSubject(email);
+    claims.put("userId", email);
+
+    if (isAdmin != null && isAdmin) {
+      claims.put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+    } else {
+      claims.put("roles", Collections.singletonList("ROLE_USER"));
+    }
+
+    long now = (new Date()).getTime();
+    Date accessTokenExpiresIn = new Date(now + 3600000);
+
+    String accessToken = Jwts.builder()
+        .setClaims(claims)
+        .setIssuedAt(new Date(now))
+        .setExpiration(accessTokenExpiresIn)
+        .signWith(SignatureAlgorithm.HS256, key)
+        .compact();
+
+    return accessToken;
+  }
+
   public Authentication getAuthentication(String token) {
     Claims claims = getClaimsFromToken(token);
     String userId = claims.get("userId", String.class);

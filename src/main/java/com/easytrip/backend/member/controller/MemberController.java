@@ -11,6 +11,7 @@ import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.service.MemberService;
+import com.easytrip.backend.member.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
   private final MemberService memberService;
+  private final TokenService tokenService;
 
   @PostMapping("/sign-up")
   public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
@@ -64,14 +66,14 @@ public class MemberController {
 
   @DeleteMapping("/logout")
   public ResponseEntity<String> logout(HttpServletRequest request) {
-    String accessToken = getAccessToken(request);
+    String accessToken = getToken(request);
     memberService.logout(accessToken);
     return ResponseEntity.ok("로그아웃 완료");
   }
 
   @DeleteMapping("/withdrawal")
   public ResponseEntity<String> withdrawal(HttpServletRequest request) {
-    String accessToken = getAccessToken(request);
+    String accessToken = getToken(request);
     memberService.withdrawal(accessToken);
     return ResponseEntity.ok("회원탈퇴가 정상적으로 완료되었습니다.");
   }
@@ -92,7 +94,7 @@ public class MemberController {
 
   @GetMapping("/my-info")
   public ResponseEntity<MemberDto> myInfo(HttpServletRequest request) {
-    String accessToken = getAccessToken(request);
+    String accessToken = getToken(request);
     MemberDto response = memberService.myInfo(accessToken);
     return ResponseEntity.ok(response);
   }
@@ -100,17 +102,23 @@ public class MemberController {
   @PutMapping("/my-info")
   public ResponseEntity<MemberDto> update(HttpServletRequest request,
       @Valid @RequestBody UpdateRequest updateRequest) {
-    String accessToken = getAccessToken(request);
+    String accessToken = getToken(request);
     MemberDto response = memberService.update(accessToken, updateRequest);
     return ResponseEntity.ok(response);
   }
 
-  private static String getAccessToken(HttpServletRequest request) {
-    String accessToken = request.getHeader("Authorization");
-    if (accessToken != null && accessToken.startsWith("Bearer ")) {
-      accessToken = accessToken.substring(7); // "Bearer " 이후의 토큰 값만 추출
-    }
-    return accessToken;
+  @PostMapping("/reissue")
+  public ResponseEntity<String> reissue(HttpServletRequest request) {
+    String refreshToken = getToken(request);
+    String response = tokenService.reissue(refreshToken);
+    return ResponseEntity.ok(response);
   }
 
+  private static String getToken(HttpServletRequest request) {
+    String token = request.getHeader("Authorization");
+    if (token != null && token.startsWith("Bearer ")) {
+      token = token.substring(7); // "Bearer " 이후의 토큰 값만 추출
+    }
+    return token;
+  }
 }

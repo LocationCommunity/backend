@@ -7,4 +7,6 @@ import org.springframework.stereotype.Service;
 public interface TokenService {
 
   TokenDto create(String email, Boolean adminYn);
+
+  String reissue(String refreshToken);
 }
