@@ -14,10 +14,12 @@ import com.easytrip.backend.exception.impl.PlatFormUnMatchedException;
 import com.easytrip.backend.exception.impl.SuspendedMemberException;
 import com.easytrip.backend.exception.impl.WaitingMemberException;
 import com.easytrip.backend.member.domain.MemberEntity;
+import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
+import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.member.service.sns.KakaoLoginService;
@@ -279,6 +281,7 @@ public class MemberServiceImpl implements MemberService {
     MemberEntity member = memberRepository.findByEmail(resetRequest.getEmail())
         .orElseThrow(() -> new NotFoundMemberException());
 
+    // 사이트 자체 회원가입한 회원만 비밀번호 변경 가능
     if (!member.getPlatForm().equals(PlatForm.LOCAL)) {
       throw new PasswordChangeNotAllowedException();
     }
@@ -295,8 +298,8 @@ public class MemberServiceImpl implements MemberService {
 
     String email = member.getEmail();
     String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-    String title = "EZTrip 비밀번호 변경";
-    String message = "<h3>EZTrip 비밀번호 변경을 위해서 아래의 링크를 클릭하셔서 인증을 완료해주세요.</h3>" +
+    String title = "EzTrip 비밀번호 변경";
+    String message = "<h3>EzTrip 비밀번호 변경을 위해서 아래의 링크를 클릭하셔서 인증을 완료해주세요.</h3>" +
         "<div><a href='" + baseUrl + "/members/password?email=" + email + "&code="
         + memberEntity.getPasswordAuthCode() + "&resetPassword=" + encPassword
         + "'> 인증 링크 </a></div>";
@@ -332,11 +335,51 @@ public class MemberServiceImpl implements MemberService {
     return "비밀번호 변경을 완료했습니다.";
   }
 
+  @Override
+  public MemberDto myInfo(String accessToken) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    return MemberDto.of(member);
+  }
+
+  @Override
+  @Transactional
+  public MemberDto update(String accessToken, UpdateRequest updateRequest) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    MemberEntity updateMember = member.toBuilder()
+        .nickname(updateRequest.getNickname())
+        .imageUrl(updateRequest.getImageUrl())
+        .introduction(updateRequest.getIntroduction())
+        .build();
+    memberRepository.save(updateMember);
+
+    return MemberDto.of(updateMember);
+  }
+
   private void sendMail(SignUpRequest signUpRequest, MemberEntity member) {
     String email = signUpRequest.getEmail();
     String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-    String title = "EZTrip 회원인증 메일";
-    String message = "<h3>EZTrip 회원가입에 성공했습니다. 아래의 링크를 클릭하셔서 회원인증을 완료해주세요.</h3>" +
+    String title = "EzTrip 회원인증 메일";
+    String message = "<h3>EzTrip 회원가입에 성공했습니다. 아래의 링크를 클릭하셔서 회원인증을 완료해주세요.</h3>" +
         "<div><a href='" + baseUrl + "/members/auth?email=" + email + "&code="
         + member.getAuthCode() + "'> 인증 링크 </a></div>";
     mailComponents.sendMail(email, title, message);

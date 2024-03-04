@@ -27,7 +27,8 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(
             requests -> requests
                 .requestMatchers("/", "/members/sign-up", "/members/auth", "/members/login/**",
-                    "/members/logout", "/members/password").permitAll())
+                    "/members/password").permitAll()
+                .requestMatchers("/members/logout", "/members/my-info").hasRole("USER"))
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();

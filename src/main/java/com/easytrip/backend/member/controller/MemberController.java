@@ -4,10 +4,12 @@ import static com.easytrip.backend.type.PlatForm.KAKAO;
 import static com.easytrip.backend.type.PlatForm.LOCAL;
 import static com.easytrip.backend.type.PlatForm.NAVER;
 
+import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
+import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -85,6 +87,21 @@ public class MemberController {
       @RequestParam(name = "code") String code,
       @RequestParam(name = "resetPassword") String resetPassword) {
     String response = memberService.passwordAuth(email, code, resetPassword);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/my-info")
+  public ResponseEntity<MemberDto> myInfo(HttpServletRequest request) {
+    String accessToken = getAccessToken(request);
+    MemberDto response = memberService.myInfo(accessToken);
+    return ResponseEntity.ok(response);
+  }
+
+  @PutMapping("/my-info")
+  public ResponseEntity<MemberDto> update(HttpServletRequest request,
+      @Valid @RequestBody UpdateRequest updateRequest) {
+    String accessToken = getAccessToken(request);
+    MemberDto response = memberService.update(accessToken, updateRequest);
     return ResponseEntity.ok(response);
   }
 
