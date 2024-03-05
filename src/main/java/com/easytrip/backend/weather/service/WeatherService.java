@@ -7,4 +7,6 @@ import org.springframework.stereotype.Service;
 public interface WeatherService {
 
   WeatherDto getData(Double x, Double y);
+
+  WeatherDto getData(String address);
 }

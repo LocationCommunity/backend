@@ -21,4 +21,10 @@ public class WeatherController {
     WeatherDto response = weatherService.getData(x, y);
     return ResponseEntity.ok(response);
   }
+
+  @GetMapping("/search")
+  public ResponseEntity<WeatherDto> search(@RequestParam String address) {
+    WeatherDto response = weatherService.getData(address);
+    return ResponseEntity.ok(response);
+  }
 }

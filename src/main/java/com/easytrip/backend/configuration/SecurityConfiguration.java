@@ -27,7 +27,7 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(
             requests -> requests
                 .requestMatchers("/", "/members/sign-up", "/members/auth", "/members/login/**",
-                    "/members/password", "/weather/data").permitAll()
+                    "/members/password", "/weather/**").permitAll()
                 .requestMatchers("/members/logout", "/members/my-info", ("/members/reissue")).hasRole("USER"))
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS))
