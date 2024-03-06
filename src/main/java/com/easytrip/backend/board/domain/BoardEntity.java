@@ -38,6 +38,8 @@ public class BoardEntity {
     @CreationTimestamp
     private Timestamp createDate;
 
+    private String status;
+
 
 
 }

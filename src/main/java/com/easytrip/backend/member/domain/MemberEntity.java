@@ -33,7 +33,6 @@ public class MemberEntity {
 
   @Column(unique = true)
   private String email;
-
   private String password;
   private String name;
   private String nickname;
