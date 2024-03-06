@@ -59,8 +59,11 @@ public class WeatherServiceImpl implements WeatherService {
     }
 
     // Redis에 저장
-    LocalTime nextHour = LocalTime.of(now.getHour() + 1, 0);
-    long secondsUntilNextHour = now.until(LocalDateTime.of(now.toLocalDate(), nextHour), ChronoUnit.SECONDS);
+    LocalDateTime nextHourDateTime = LocalDateTime.of(now.toLocalDate(), now.toLocalTime().withMinute(0).withSecond(0)).plusHours(1);
+    if (nextHourDateTime.isAfter(LocalDateTime.of(now.toLocalDate(), LocalTime.of(23, 59, 59)))) {
+      nextHourDateTime = LocalDateTime.of(now.toLocalDate().plusDays(1), LocalTime.of(0, 0));
+    }
+    long secondsUntilNextHour = now.until(nextHourDateTime, ChronoUnit.SECONDS);
     redisWeatherTemplate.opsForValue().set("Address: " + address, weather, secondsUntilNextHour, TimeUnit.SECONDS);
 
     return weather;
@@ -94,9 +97,13 @@ public class WeatherServiceImpl implements WeatherService {
     }
 
     // Redis에 저장
-    LocalTime nextHour = LocalTime.of(now.getHour() + 1, 0);
-    long secondsUntilNextHour = now.until(LocalDateTime.of(now.toLocalDate(), nextHour), ChronoUnit.SECONDS);
+    LocalDateTime nextHourDateTime = LocalDateTime.of(now.toLocalDate(), now.toLocalTime().withMinute(0).withSecond(0)).plusHours(1);
+    if (nextHourDateTime.isAfter(LocalDateTime.of(now.toLocalDate(), LocalTime.of(23, 59, 59)))) {
+      nextHourDateTime = LocalDateTime.of(now.toLocalDate().plusDays(1), LocalTime.of(0, 0));
+    }
+    long secondsUntilNextHour = now.until(nextHourDateTime, ChronoUnit.SECONDS);
     redisWeatherTemplate.opsForValue().set("Address: " + address, weather, secondsUntilNextHour, TimeUnit.SECONDS);
+
 
     return weather;
   }
@@ -145,7 +152,7 @@ public class WeatherServiceImpl implements WeatherService {
     return coordinates;
   }
 
-  // 위경도를 받아 해당 지역의 주소를 받아오는 메서드
+  // 위경도를 받아 해당 지역의 주소(법정동)를 받아오는 메서드
   private String getAddress(Double x, Double y) {
     RestTemplate restTemplate = new RestTemplate();
     String apiUrl = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?" +
