@@ -137,6 +137,7 @@ public class WeatherServiceImpl implements WeatherService {
       // "x"와 "y" 값을 추출
       coordinates[0] = firstAddress.path("x").asDouble();
       coordinates[1] = firstAddress.path("y").asDouble();
+
     } catch (Exception e) {
       e.printStackTrace();
     }
