@@ -36,6 +36,6 @@ public class PlaceRequest {
   @NotBlank(message = "장소의 설명을 적어주세요.")
   private String placeInfo;
 
-  @NotBlank(message = "장소의 카테고리는 없을 수 없습니다.")
+  @NotNull(message = "장소의 카테고리는 없을 수 없습니다.")
   private PlaceCategory category;
 }
