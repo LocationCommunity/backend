@@ -3,11 +3,13 @@ package com.easytrip.backend.place.service;
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
+import com.easytrip.backend.exception.impl.NotFoundPlaceException;
 import com.easytrip.backend.exception.impl.ParsingException;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.place.repository.PlaceRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,6 +76,21 @@ public class PlaceServiceImpl implements PlaceService {
     placeRepository.save(place);
 
     return "장소를 공유했습니다.";
+  }
+
+  @Override
+  public PlaceDto getInfo(String accessToken, Long placeId) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+
+    PlaceDto result = PlaceDto.of(place);
+
+    return result;
   }
 
   @Value("${spring.keys.naver-client-id}")
