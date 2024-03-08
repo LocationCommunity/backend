@@ -3,6 +3,7 @@ package com.easytrip.backend.place.controller;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.place.service.PlaceService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +20,7 @@ public class PlaceController {
 
   @PostMapping("/share")
   public ResponseEntity<?> PlaceShare(HttpServletRequest request,
-      @RequestBody PlaceRequest placeRequest) {
+      @Valid @RequestBody PlaceRequest placeRequest) {
     String accessToken = getToken(request);
     String response = placeService.share(accessToken, placeRequest);
     return ResponseEntity.ok(response);
