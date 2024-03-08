@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface PlaceRepository extends JpaRepository<PlaceEntity, Long> {
 
   Optional<PlaceEntity> findByAddress(String address);
+
+  Optional<PlaceEntity> findByPlaceId(Long placeId);
 }
