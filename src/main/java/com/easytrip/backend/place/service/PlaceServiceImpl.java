@@ -9,12 +9,14 @@ import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.place.repository.PlaceRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,6 +91,19 @@ public class PlaceServiceImpl implements PlaceService {
         .orElseThrow(() -> new NotFoundPlaceException());
 
     PlaceDto result = PlaceDto.of(place);
+
+    return result;
+  }
+
+  @Override
+  public List<MapDto> getMapData(String accessToken, Double x, Double y) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    List<PlaceEntity> bySql = placeRepository.findBySql(x, y);
+    List<MapDto> result = MapDto.listOf(bySql);
 
     return result;
   }
