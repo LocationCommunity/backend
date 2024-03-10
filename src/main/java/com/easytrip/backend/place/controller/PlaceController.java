@@ -1,10 +1,12 @@
 package com.easytrip.backend.place.controller;
 
+import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.place.service.PlaceService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -34,6 +37,14 @@ public class PlaceController {
       @PathVariable Long placeId) {
     String accessToken = getToken(request);
     PlaceDto response = placeService.getInfo(accessToken, placeId);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/map")
+  public ResponseEntity<List<MapDto>> getMapData(HttpServletRequest request, @RequestParam Double x,
+      @RequestParam Double y) {
+    String accessToken = getToken(request);
+    List<MapDto> response = placeService.getMapData(accessToken, x, y);
     return ResponseEntity.ok(response);
   }
 
