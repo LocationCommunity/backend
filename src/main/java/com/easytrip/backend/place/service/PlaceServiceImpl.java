@@ -2,6 +2,7 @@ package com.easytrip.backend.place.service;
 
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
+import com.easytrip.backend.exception.impl.NotFoundBookmarkException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.exception.impl.NotFoundPlaceException;
 import com.easytrip.backend.exception.impl.ParsingException;
@@ -19,6 +20,7 @@ import com.easytrip.backend.type.PlaceCategory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -91,10 +93,25 @@ public class PlaceServiceImpl implements PlaceService {
       throw new InvalidTokenException();
     }
 
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
     PlaceEntity place = placeRepository.findByPlaceId(placeId)
         .orElseThrow(() -> new NotFoundPlaceException());
 
-    PlaceDto result = PlaceDto.of(place);
+    Optional<BookmarkPlaceEntity> byMemberIdAndPlaceId = bookmarkPlaceRepository.findByMemberIdAndPlaceId(
+        member, place);
+
+    PlaceDto result = new PlaceDto();
+    if (byMemberIdAndPlaceId.isPresent()) {
+      result = PlaceDto.of(place, true);
+
+      return result;
+    }
+
+    result = PlaceDto.of(place, false);
 
     return result;
   }
@@ -119,9 +136,27 @@ public class PlaceServiceImpl implements PlaceService {
       throw new InvalidTokenException();
     }
 
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
     List<PlaceEntity> byAddressContaining = placeRepository.findByAddressContainingAndCategory(
         state, category);
-    List<PlaceDto> result = PlaceDto.listOf(byAddressContaining);
+
+    List<BookmarkPlaceEntity> bookmark = new ArrayList<>();
+    List<Boolean> bookmarkYn = new ArrayList<>();
+    for (PlaceEntity place : byAddressContaining) {
+      Optional<BookmarkPlaceEntity> byMemberIdAndPlaceId = bookmarkPlaceRepository.findByMemberIdAndPlaceId(
+          member, place);
+      if (byMemberIdAndPlaceId.isPresent()) {
+        bookmarkYn.add(true);
+      } else {
+        bookmarkYn.add(false);
+      }
+    }
+
+    List<PlaceDto> result = PlaceDto.listOf(byAddressContaining, bookmarkYn);
 
     return result;
   }
