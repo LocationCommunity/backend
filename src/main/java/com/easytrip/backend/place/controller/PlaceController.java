@@ -60,6 +60,15 @@ public class PlaceController {
     return ResponseEntity.ok(response);
   }
 
+  @PostMapping("/info/{placeId}/report")
+  public ResponseEntity<String> placeReport(HttpServletRequest request,
+      @PathVariable Long placeId) {
+    String accessToken = getToken(request);
+    String response = placeService.report(accessToken, placeId);
+
+    return ResponseEntity.ok(response);
+  }
+
   private static String getToken(HttpServletRequest request) {
     String token = request.getHeader("Authorization");
     if (token != null && token.startsWith("Bearer ")) {
