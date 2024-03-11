@@ -141,8 +141,9 @@ public class MemberController {
   public ResponseEntity<String> bookmarkCancel(HttpServletRequest request,
       @PathVariable Long bookmarkId) {
     String accessToken = getToken(request);
-    memberService.bookmarkCancel(accessToken, bookmarkId);
+    String response = memberService.bookmarkCancel(accessToken, bookmarkId);
 
+    return ResponseEntity.ok(response);
   }
 
   private static String getToken(HttpServletRequest request) {
