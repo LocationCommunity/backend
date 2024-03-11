@@ -8,5 +8,6 @@ public enum PlaceCategory {
   BAR, // 술집
   MUSEUM, // 박물관, 전시관
   SHOPPING, // 쇼핑
-  PARK // 공원
+  PARK, // 공원
+  ENTERTAINMENT // 오락시설(공연장, 놀이동산 등)
 }

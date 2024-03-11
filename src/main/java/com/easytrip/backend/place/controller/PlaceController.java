@@ -4,8 +4,10 @@ import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.place.service.PlaceService;
+import com.easytrip.backend.type.PlaceCategory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +47,16 @@ public class PlaceController {
       @RequestParam Double y) {
     String accessToken = getToken(request);
     List<MapDto> response = placeService.getMapData(accessToken, x, y);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/list")
+  public ResponseEntity<List<PlaceDto>> placeList(HttpServletRequest request,
+      @RequestParam String state,
+      @Valid @NotNull(message = "장소의 카테고리는 없을 수 없습니다.") @RequestParam PlaceCategory category) {
+    String accessToken = getToken(request);
+    List<PlaceDto> response = placeService.getList(accessToken, state, category);
+
     return ResponseEntity.ok(response);
   }
 

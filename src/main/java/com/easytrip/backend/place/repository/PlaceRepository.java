@@ -1,6 +1,7 @@
 package com.easytrip.backend.place.repository;
 
 import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.type.PlaceCategory;
 import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Optional;
@@ -21,4 +22,6 @@ public interface PlaceRepository extends JpaRepository<PlaceEntity, Long> {
       "6371 * acos(cos(radians(:y)) * cos(radians(place.y)) * cos(radians(place.x) - radians(:x)) + "
       + "sin(radians(:y)) * sin(radians(place.y))) <= 3", nativeQuery = true)
   List<PlaceEntity> findBySql(@Param("x") Double x, @Param("y") Double y);
+
+  List<PlaceEntity> findByAddressContainingAndCategory(String state, PlaceCategory category);
 }

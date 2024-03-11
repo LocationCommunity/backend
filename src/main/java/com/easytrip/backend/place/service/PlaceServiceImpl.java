@@ -13,6 +13,7 @@ import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.place.repository.PlaceRepository;
+import com.easytrip.backend.type.PlaceCategory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -104,6 +105,20 @@ public class PlaceServiceImpl implements PlaceService {
 
     List<PlaceEntity> bySql = placeRepository.findBySql(x, y);
     List<MapDto> result = MapDto.listOf(bySql);
+
+    return result;
+  }
+
+  @Override
+  public List<PlaceDto> getList(String accessToken, String state, PlaceCategory category) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    List<PlaceEntity> byAddressContaining = placeRepository.findByAddressContainingAndCategory(
+        state, category);
+    List<PlaceDto> result = PlaceDto.listOf(byAddressContaining);
 
     return result;
   }

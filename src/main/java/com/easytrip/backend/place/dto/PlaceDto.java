@@ -3,6 +3,8 @@ package com.easytrip.backend.place.dto;
 
 import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.PlaceCategory;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +27,12 @@ public class PlaceDto {
   private Integer reportCnt;
   private Long bookmarkCnt;
 
+  public static List<PlaceDto> listOf(List<PlaceEntity> placeEntities) {
+
+    return placeEntities.stream()
+        .map(PlaceDto::of)
+        .collect(Collectors.toList());
+  }
 
   public static PlaceDto of(PlaceEntity placeEntity) {
 
