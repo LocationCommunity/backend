@@ -19,4 +19,6 @@ public interface PlaceService {
   List<PlaceDto> getList(String accessToken, String state, PlaceCategory category);
 
   String report(String accessToken, Long placeId);
+
+  String bookmark(String accessToken, Long placeId);
 }
