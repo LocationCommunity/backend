@@ -4,6 +4,7 @@ import static com.easytrip.backend.type.PlatForm.KAKAO;
 import static com.easytrip.backend.type.PlatForm.LOCAL;
 import static com.easytrip.backend.type.PlatForm.NAVER;
 
+import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
@@ -14,10 +15,12 @@ import com.easytrip.backend.member.service.MemberService;
 import com.easytrip.backend.member.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +39,7 @@ public class MemberController {
   @PostMapping("/sign-up")
   public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
     String response = memberService.signUp(signUpRequest);
+
     return ResponseEntity.ok(response);
   }
 
@@ -43,24 +47,28 @@ public class MemberController {
   public ResponseEntity<String> auth(@RequestParam(name = "email") String email,
       @RequestParam(name = "code") String code) {
     String response = memberService.auth(email, code);
+
     return ResponseEntity.ok(response);
   }
 
   @PostMapping("/login")
   public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginRequest loginRequest) {
     TokenDto response = memberService.login(loginRequest, LOCAL);
+
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/login/naver")
   public ResponseEntity<TokenDto> naverLogin(@RequestParam(name = "code") String code) {
     TokenDto response = memberService.naverLogin(code, NAVER);
+
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/login/kakao")
   public ResponseEntity<TokenDto> kakaoLogin(@RequestParam(name = "code") String code) {
     TokenDto response = memberService.kakaoLogin(code, KAKAO);
+
     return ResponseEntity.ok(response);
   }
 
@@ -68,6 +76,7 @@ public class MemberController {
   public ResponseEntity<String> logout(HttpServletRequest request) {
     String accessToken = getToken(request);
     memberService.logout(accessToken);
+
     return ResponseEntity.ok("로그아웃 완료");
   }
 
@@ -75,12 +84,14 @@ public class MemberController {
   public ResponseEntity<String> withdrawal(HttpServletRequest request) {
     String accessToken = getToken(request);
     memberService.withdrawal(accessToken);
+
     return ResponseEntity.ok("회원탈퇴가 정상적으로 완료되었습니다.");
   }
 
   @PutMapping("/password")
   public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetRequest resetRequest) {
     String response = memberService.resetPassword(resetRequest);
+
     return ResponseEntity.ok(response);
   }
 
@@ -89,6 +100,7 @@ public class MemberController {
       @RequestParam(name = "code") String code,
       @RequestParam(name = "resetPassword") String resetPassword) {
     String response = memberService.passwordAuth(email, code, resetPassword);
+
     return ResponseEntity.ok(response);
   }
 
@@ -96,6 +108,7 @@ public class MemberController {
   public ResponseEntity<MemberDto> myInfo(HttpServletRequest request) {
     String accessToken = getToken(request);
     MemberDto response = memberService.myInfo(accessToken);
+
     return ResponseEntity.ok(response);
   }
 
@@ -104,6 +117,7 @@ public class MemberController {
       @Valid @RequestBody UpdateRequest updateRequest) {
     String accessToken = getToken(request);
     MemberDto response = memberService.update(accessToken, updateRequest);
+
     return ResponseEntity.ok(response);
   }
 
@@ -111,6 +125,24 @@ public class MemberController {
   public ResponseEntity<String> reissue(HttpServletRequest request) {
     String refreshToken = getToken(request);
     String response = tokenService.reissue(refreshToken);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/bookmark")
+  public ResponseEntity<List<BookmarkDto>> myBookmark(HttpServletRequest request) {
+    String accessToken = getToken(request);
+    List<BookmarkDto> response = memberService.myBookmark(accessToken);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @DeleteMapping("/bookmark/{bookmarkId}")
+  public ResponseEntity<String> bookmarkCancel(HttpServletRequest request,
+      @PathVariable Long bookmarkId) {
+    String accessToken = getToken(request);
+    String response = memberService.bookmarkCancel(accessToken, bookmarkId);
+
     return ResponseEntity.ok(response);
   }
 

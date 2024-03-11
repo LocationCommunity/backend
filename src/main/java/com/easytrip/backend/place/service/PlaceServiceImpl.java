@@ -8,10 +8,12 @@ import com.easytrip.backend.exception.impl.ParsingException;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
+import com.easytrip.backend.place.domain.BookmarkPlaceEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
+import com.easytrip.backend.place.repository.BookmarkPlaceRepository;
 import com.easytrip.backend.place.repository.PlaceRepository;
 import com.easytrip.backend.type.PlaceCategory;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,6 +41,7 @@ public class PlaceServiceImpl implements PlaceService {
   private final MemberRepository memberRepository;
   private final ObjectMapper objectMapper;
   private final PlaceRepository placeRepository;
+  private final BookmarkPlaceRepository bookmarkPlaceRepository;
 
   @Override
   @Transactional
@@ -142,9 +145,58 @@ public class PlaceServiceImpl implements PlaceService {
     // 신고개수가 100개 이상이면 place 삭제
     if (placeEntity.getReportCnt() >= 100) {
       placeRepository.delete(placeEntity);
+
+      // 북마크로 되어있던 것도 삭제
+      List<BookmarkPlaceEntity> byPlaceId = bookmarkPlaceRepository.findByPlaceId(placeEntity);
+      bookmarkPlaceRepository.deleteAll(byPlaceId);
     }
 
     return "신고를 완료했습니다.";
+  }
+
+  @Override
+  @Transactional
+  public String bookmark(String accessToken, Long placeId) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+
+    // 이미 북마크 한 장소일 경우 북마크 취소되게
+    Optional<BookmarkPlaceEntity> byMemberIdAndPlaceId = bookmarkPlaceRepository.findByMemberIdAndPlaceId(
+        member, place);
+    if (byMemberIdAndPlaceId.isPresent()) {
+      BookmarkPlaceEntity bookmarkPlace = byMemberIdAndPlaceId.get();
+      bookmarkPlaceRepository.delete(bookmarkPlace);
+
+      PlaceEntity placeEntity = place.toBuilder()
+          .bookmarkCnt(place.getBookmarkCnt() - 1)
+          .build();
+      placeRepository.save(placeEntity);
+
+      return "해당 장소 북마크를 해제 했습니다.";
+    }
+
+    PlaceEntity placeEntity = place.toBuilder()
+        .bookmarkCnt(place.getBookmarkCnt() + 1)
+        .build();
+    placeRepository.save(placeEntity);
+
+    BookmarkPlaceEntity bookmarkPlace = BookmarkPlaceEntity.builder()
+        .memberId(member)
+        .placeId(place)
+        .build();
+    bookmarkPlaceRepository.save(bookmarkPlace);
+
+    return "해당 장소를 북마크 했습니다.";
   }
 
   @Value("${spring.keys.naver-client-id}")

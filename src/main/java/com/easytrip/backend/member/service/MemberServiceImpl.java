@@ -8,12 +8,15 @@ import com.easytrip.backend.exception.impl.InvalidEmailException;
 import com.easytrip.backend.exception.impl.InvalidPasswordConfirmationException;
 import com.easytrip.backend.exception.impl.InvalidPasswordException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
+import com.easytrip.backend.exception.impl.NotFoundBookmarkException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
+import com.easytrip.backend.exception.impl.NotFoundPlaceException;
 import com.easytrip.backend.exception.impl.PasswordChangeNotAllowedException;
 import com.easytrip.backend.exception.impl.PlatFormUnMatchedException;
 import com.easytrip.backend.exception.impl.SuspendedMemberException;
 import com.easytrip.backend.exception.impl.WaitingMemberException;
 import com.easytrip.backend.member.domain.MemberEntity;
+import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
@@ -24,10 +27,13 @@ import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.member.service.sns.KakaoLoginService;
 import com.easytrip.backend.member.service.sns.NaverLoginService;
+import com.easytrip.backend.place.domain.BookmarkPlaceEntity;
+import com.easytrip.backend.place.repository.BookmarkPlaceRepository;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.PlatForm;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +60,7 @@ public class MemberServiceImpl implements MemberService {
   private final KakaoLoginService kakaoLoginService;
   private final JwtTokenProvider jwtTokenProvider;
   private final RedisTemplate redisTemplate;
+  private final BookmarkPlaceRepository bookmarkPlaceRepository;
 
   @Override
   @Transactional
@@ -375,6 +382,40 @@ public class MemberServiceImpl implements MemberService {
     return MemberDto.of(updateMember);
   }
 
+  @Override
+  public List<BookmarkDto> myBookmark(String accessToken) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    List<BookmarkPlaceEntity> byMemberId = bookmarkPlaceRepository.findByMemberId(member);
+    List<BookmarkDto> result = BookmarkDto.listOf(byMemberId);
+
+    return result;
+  }
+
+  @Override
+  @Transactional
+  public String bookmarkCancel(String accessToken, Long bookmarkId) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    BookmarkPlaceEntity bookmarkPlace = bookmarkPlaceRepository.findByBookmarkId(bookmarkId)
+        .orElseThrow(() -> new NotFoundBookmarkException());
+    bookmarkPlaceRepository.delete(bookmarkPlace);
+
+    return "해당 장소 북마크를 해제 했습니다.";
+  }
+
   private void sendMail(SignUpRequest signUpRequest, MemberEntity member) {
     String email = signUpRequest.getEmail();
     String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
@@ -384,7 +425,6 @@ public class MemberServiceImpl implements MemberService {
         + member.getAuthCode() + "'> 인증 링크 </a></div>";
     mailComponents.sendMail(email, title, message);
   }
-
 
   private boolean isValidEmail(String email) {
     return EmailValidator.getInstance().isValid(email);
