@@ -123,6 +123,30 @@ public class PlaceServiceImpl implements PlaceService {
     return result;
   }
 
+  @Override
+  @Transactional
+  public String report(String accessToken, Long placeId) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+
+    PlaceEntity placeEntity = place.toBuilder()
+        .reportCnt(place.getReportCnt() + 1)
+        .build();
+    placeRepository.save(placeEntity);
+
+    // 신고개수가 100개 이상이면 place 삭제
+    if (placeEntity.getReportCnt() >= 100) {
+      placeRepository.delete(placeEntity);
+    }
+
+    return "신고를 완료했습니다.";
+  }
+
   @Value("${spring.keys.naver-client-id}")
   private String clientId;
   @Value("${spring.keys.naver-client-secret}")
