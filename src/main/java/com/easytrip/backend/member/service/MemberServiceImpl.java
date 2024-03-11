@@ -426,7 +426,6 @@ public class MemberServiceImpl implements MemberService {
     mailComponents.sendMail(email, title, message);
   }
 
-
   private boolean isValidEmail(String email) {
     return EmailValidator.getInstance().isValid(email);
   }
