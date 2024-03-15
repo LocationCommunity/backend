@@ -1,8 +1,7 @@
 package com.easytrip.backend.member.domain;
 
 import com.easytrip.backend.type.MemberStatus;
-import com.easytrip.backend.type.PlatForm;
-import jakarta.persistence.Column;
+import com.easytrip.backend.type.Platform;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,9 +28,8 @@ public class MemberEntity {
   private Long memberId;
 
   @Enumerated(EnumType.STRING)
-  private PlatForm platForm;
+  private Platform platform;
 
-  @Column(unique = true)
   private String email;
   private String password;
   private String name;

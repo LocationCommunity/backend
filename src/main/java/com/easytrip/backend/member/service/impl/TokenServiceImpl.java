@@ -1,4 +1,4 @@
-package com.easytrip.backend.member.service;
+package com.easytrip.backend.member.service.impl;
 
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
@@ -6,6 +6,8 @@ import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
+import com.easytrip.backend.member.service.TokenService;
+import com.easytrip.backend.type.Platform;
 import io.jsonwebtoken.Claims;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -21,17 +23,17 @@ public class TokenServiceImpl implements TokenService {
   private final MemberRepository memberRepository;
 
   @Override
-  public TokenDto create(String email, Boolean adminYn) {
+  public TokenDto create(String email, Boolean adminYn, Platform platform) {
 
     // AccessToken, RefreshToken 생성
-    TokenDto token = jwtTokenProvider.createTokens(email, adminYn);
+    TokenDto token = jwtTokenProvider.createTokens(email, adminYn, platform);
 
     // Redis 에 RefreshToken 저장
     String refreshToken = token.getRefreshToken();
     long refreshTokenExpiresIn = 86400000;
 
     redisTemplate.opsForValue()
-        .set("RefreshToken: " + email, refreshToken, refreshTokenExpiresIn, TimeUnit.MILLISECONDS);
+        .set("RefreshToken: " + email + ", Platform: " + platform, refreshToken, refreshTokenExpiresIn, TimeUnit.MILLISECONDS);
 
     return token;
   }
@@ -47,7 +49,10 @@ public class TokenServiceImpl implements TokenService {
     // Redis에서 해당 사용자의 refreshToken이 있는지 화인하고 있다면 동일한지 확인
     Claims refreshTokenClaims = jwtTokenProvider.getClaimsFromToken(refreshToken);
     String email = refreshTokenClaims.getSubject();
-    String storedRefreshToken = (String) redisTemplate.opsForValue().get("RefreshToken: " + email);
+    String platformString = refreshTokenClaims.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    String storedRefreshToken = (String) redisTemplate.opsForValue().get("RefreshToken: " + email + ", Platform: " + platform);
     if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
       throw new InvalidTokenException();
     }

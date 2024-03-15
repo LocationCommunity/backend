@@ -1,10 +1,11 @@
-package com.easytrip.backend.member.service.sns;
+package com.easytrip.backend.member.service.sns.impl;
 
 import com.easytrip.backend.configuration.NaverConfiguration;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.NaverMemberDto;
 import com.easytrip.backend.member.dto.NaverTokenDto;
-import com.easytrip.backend.type.PlatForm;
+import com.easytrip.backend.member.service.sns.OAuth2LoginService;
+import com.easytrip.backend.type.Platform;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,19 +17,19 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class NaverLoginService implements OAuth2LoginService {
+public class NaverLoginServiceImpl implements OAuth2LoginService {
 
   private final RestTemplate restTemplate = new RestTemplate();
   private final NaverConfiguration naverConfiguration;
 
   @Override
-  public MemberEntity toEntityUser(String code, PlatForm platForm) {
+  public MemberEntity toEntityUser(String code, Platform platForm) {
 
     String accessToken = toRequestAccessToken(code);
     NaverMemberDto.NaverMemberDetail profile = toRequestProfile(accessToken);
 
     return MemberEntity.builder()
-        .platForm(platForm)
+        .platform(platForm)
         .email(profile.getEmail())
         .name(profile.getName())
         .nickname(profile.getNickname())

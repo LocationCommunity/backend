@@ -1,4 +1,4 @@
-package com.easytrip.backend.place.service;
+package com.easytrip.backend.place.service.impl;
 
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
@@ -16,6 +16,7 @@ import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.place.repository.BookmarkPlaceRepository;
 import com.easytrip.backend.place.repository.PlaceRepository;
+import com.easytrip.backend.place.service.PlaceService;
 import com.easytrip.backend.type.PlaceCategory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,13 +41,12 @@ import org.springframework.web.client.RestTemplate;
 public class PlaceServiceImpl implements PlaceService {
 
   private final JwtTokenProvider jwtTokenProvider;
-  private final MemberRepository memberRepository;
   private final ObjectMapper objectMapper;
+  private final MemberRepository memberRepository;
   private final PlaceRepository placeRepository;
   private final BookmarkPlaceRepository bookmarkPlaceRepository;
 
   @Override
-  @Transactional
   public String share(String accessToken, PlaceRequest placeRequest) {
 
     // 토큰이 유효한지 검증

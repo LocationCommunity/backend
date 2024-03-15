@@ -1,6 +1,6 @@
 package com.easytrip.backend.type;
 
-public enum PlatForm {
+public enum Platform {
   LOCAL,
   NAVER,
   KAKAO

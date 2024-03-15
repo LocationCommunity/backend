@@ -1,6 +1,7 @@
 package com.easytrip.backend.member.jwt;
 
 import com.easytrip.backend.member.dto.TokenDto;
+import com.easytrip.backend.type.Platform;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,29 +35,35 @@ public class JwtTokenProvider {
     this.key = Keys.hmacShaKeyFor(keyBytes);
   }
 
-  public TokenDto createTokens(String email, Boolean isAdmin) {
-    Claims claims = Jwts.claims().setSubject(email);
-    claims.put("userId", email);
+  public TokenDto createTokens(String email, Boolean isAdmin, Platform platForm) {
+
+    // AccessToken 클레임 설정
+    Claims accessTokenClaims  = Jwts.claims().setSubject(email);
+    accessTokenClaims .put("platform", platForm);
 
     if (isAdmin != null && isAdmin) {
-      claims.put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+      accessTokenClaims .put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
     } else {
-      claims.put("roles", Collections.singletonList("ROLE_USER"));
+      accessTokenClaims .put("roles", Collections.singletonList("ROLE_USER"));
     }
+
+    // RefreshToken 클레임 설정
+    Claims refreshTokenClaims = Jwts.claims().setSubject(email);
+    refreshTokenClaims .put("platform", platForm);
 
     long now = (new Date()).getTime();
     Date accessTokenExpiresIn = new Date(now + 3600000);
     Date refreshTokenExpiresIn = new Date(now + 86400000);
 
     String accessToken = Jwts.builder()
-        .setClaims(claims)
+        .setClaims(accessTokenClaims )
         .setIssuedAt(new Date(now))
         .setExpiration(accessTokenExpiresIn)
         .signWith(SignatureAlgorithm.HS256, key)
         .compact();
 
     String refreshToken = Jwts.builder()
-        .setSubject(email)
+        .setClaims(refreshTokenClaims)
         .setIssuedAt(new Date(now))
         .setExpiration(refreshTokenExpiresIn)
         .signWith(SignatureAlgorithm.HS256, key)
@@ -73,6 +81,7 @@ public class JwtTokenProvider {
 
     Claims claims = Jwts.claims().setSubject(email);
     claims.put("userId", email);
+//    claims .put("platform", platForm);
 
     if (isAdmin != null && isAdmin) {
       claims.put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
@@ -95,7 +104,7 @@ public class JwtTokenProvider {
 
   public Authentication getAuthentication(String token) {
     Claims claims = getClaimsFromToken(token);
-    String userId = claims.get("userId", String.class);
+    String userId = claims.getSubject();
     Collection<? extends GrantedAuthority> authorities = getRolesFromToken(token)
         .stream()
         .map(SimpleGrantedAuthority::new)
@@ -105,11 +114,13 @@ public class JwtTokenProvider {
   }
 
   public String resolveToken(HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-      return bearerToken.substring(7); // "Bearer " 다음의 토큰 부분 반환
+    final String BEARER = "Bearer ";
+
+    String token = request.getHeader("Authorization");
+    if (token != null && token.startsWith(BEARER)) {
+      token = token.substring(BEARER.length()); // "Bearer " 이후의 토큰 값만 추출
     }
-    return null;
+    return token;
   }
 
   public boolean validateToken(String token) {
