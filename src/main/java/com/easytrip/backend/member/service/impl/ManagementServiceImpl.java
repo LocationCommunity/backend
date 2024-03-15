@@ -302,6 +302,16 @@ public class ManagementServiceImpl implements ManagementService {
     if (byEmail.isPresent()) {
       MemberEntity member = byEmail.get();
 
+      if (member.getStatus().equals(MemberStatus.SUSPENDED)) {
+        throw new SuspendedMemberException();
+      } else if (member.getStatus().equals(MemberStatus.WITHDRAWN)) {
+        MemberEntity memberEntity = member.toBuilder()
+            .status(MemberStatus.ACTIVE)
+            .regDate(LocalDateTime.now())
+            .build();
+        memberRepository.save(memberEntity);
+      }
+
       TokenCreateDto result = TokenCreateDto.builder()
           .email(member.getEmail())
           .adminYn(member.getAdminYn())
