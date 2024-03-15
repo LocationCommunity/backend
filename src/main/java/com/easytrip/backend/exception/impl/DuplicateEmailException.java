@@ -17,6 +17,6 @@ public class DuplicateEmailException extends AbstractException {
 
   @Override
   public String getMessage() {
-    return "이미 존재하는 이메일입니다.";
+    return "이미 가입한 이메일입니다.";
   }
 }
