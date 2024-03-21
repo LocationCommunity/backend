@@ -27,7 +27,7 @@ public class PlaceController {
   private final PlaceService placeService;
 
   @PostMapping("/share")
-  public ResponseEntity<String> PlaceShare(HttpServletRequest request,
+  public ResponseEntity<String> placeShare(HttpServletRequest request,
       @Valid @RequestBody PlaceRequest placeRequest) {
     String accessToken = getToken(request);
     String response = placeService.share(accessToken, placeRequest);
@@ -79,9 +79,12 @@ public class PlaceController {
   }
 
   private static String getToken(HttpServletRequest request) {
+
+    final String BEARER = "Bearer ";
+
     String token = request.getHeader("Authorization");
-    if (token != null && token.startsWith("Bearer ")) {
-      token = token.substring(7); // "Bearer " 이후의 토큰 값만 추출
+    if (token != null && token.startsWith(BEARER)) {
+      token = token.substring(BEARER.length()); // "Bearer " 이후의 토큰 값만 추출
     }
     return token;
   }

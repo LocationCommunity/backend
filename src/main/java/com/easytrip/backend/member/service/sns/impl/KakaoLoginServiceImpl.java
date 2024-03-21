@@ -1,10 +1,11 @@
-package com.easytrip.backend.member.service.sns;
+package com.easytrip.backend.member.service.sns.impl;
 
 import com.easytrip.backend.configuration.KakaoConfiguration;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.KakaoMemberDto;
 import com.easytrip.backend.member.dto.KakaoTokenDto;
-import com.easytrip.backend.type.PlatForm;
+import com.easytrip.backend.member.service.sns.OAuth2LoginService;
+import com.easytrip.backend.type.Platform;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,20 +17,20 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class KakaoLoginService implements OAuth2LoginService {
+public class KakaoLoginServiceImpl implements OAuth2LoginService {
 
   private final RestTemplate restTemplate = new RestTemplate();
   private final KakaoConfiguration kakaoConfiguration;
 
   @Override
-  public MemberEntity toEntityUser(String code, PlatForm platForm) {
+  public MemberEntity toEntityUser(String code, Platform platForm) {
 
     String accessToken = toRequestAccessToken(code);
     KakaoMemberDto profile = toRequestProfile(accessToken);
 
     // 비즈니스로 전환하지 않는 이상 이름 정보는 가져올 수 없어서 일단은 nickname으로 대체
     return MemberEntity.builder()
-        .platForm(platForm)
+        .platform(platForm)
         .email(profile.getKakaoAccount().getEmail())
         .name(profile.getKakaoAccount().getProfile().getNickname())
         .nickname(profile.getKakaoAccount().getProfile().getNickname())

@@ -2,7 +2,7 @@ package com.easytrip.backend.member.dto.request;
 
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.type.MemberStatus;
-import com.easytrip.backend.type.PlatForm;
+import com.easytrip.backend.type.Platform;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
@@ -40,32 +40,12 @@ public class SignUpRequest {
   private String imageUrl;
   private String introduction;
 
-  public static MemberEntity signUpInput(SignUpRequest signUpRequest) {
-    String uuid = UUID.randomUUID().toString();
-    String encPassword = BCrypt.hashpw(signUpRequest.getPassword(), BCrypt.gensalt());
-
-    return MemberEntity.builder()
-        .platForm(PlatForm.LOCAL)
-        .email(signUpRequest.getEmail())
-        .password(encPassword)
-        .name(signUpRequest.getName())
-        .nickname(signUpRequest.getNickname())
-        .regDate(LocalDateTime.now())
-        .auth(false)
-        .authCode(uuid)
-        .imageUrl(signUpRequest.getImageUrl())
-        .introduction(signUpRequest.getIntroduction())
-        .status(MemberStatus.WAITING_FOR_APPROVAL)
-        .adminYn(false)
-        .build();
-  }
-
-  public static MemberEntity reSignUpInput(MemberEntity member, SignUpRequest signUpRequest) {
+  public static MemberEntity signUpInput(MemberEntity member, SignUpRequest signUpRequest) {
     String uuid = UUID.randomUUID().toString();
     String encPassword = BCrypt.hashpw(signUpRequest.getPassword(), BCrypt.gensalt());
 
     return member.toBuilder()
-        .platForm(PlatForm.LOCAL)
+        .platform(Platform.LOCAL)
         .email(signUpRequest.getEmail())
         .password(encPassword)
         .name(signUpRequest.getName())

@@ -1,6 +1,7 @@
-package com.easytrip.backend.member.service;
+package com.easytrip.backend.member.service.impl;
 
 import com.easytrip.backend.components.MailComponents;
+import com.easytrip.backend.exception.impl.AlreadyAuthenticatedException;
 import com.easytrip.backend.exception.impl.DuplicateEmailException;
 import com.easytrip.backend.exception.impl.ExpiredException;
 import com.easytrip.backend.exception.impl.InvalidAuthCodeException;
@@ -8,32 +9,24 @@ import com.easytrip.backend.exception.impl.InvalidEmailException;
 import com.easytrip.backend.exception.impl.InvalidPasswordConfirmationException;
 import com.easytrip.backend.exception.impl.InvalidPasswordException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
-import com.easytrip.backend.exception.impl.NotFoundBookmarkException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
-import com.easytrip.backend.exception.impl.NotFoundPlaceException;
-import com.easytrip.backend.exception.impl.PasswordChangeNotAllowedException;
-import com.easytrip.backend.exception.impl.PlatFormUnMatchedException;
 import com.easytrip.backend.exception.impl.SuspendedMemberException;
 import com.easytrip.backend.exception.impl.WaitingMemberException;
 import com.easytrip.backend.member.domain.MemberEntity;
-import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
-import com.easytrip.backend.member.dto.TokenDto;
+import com.easytrip.backend.member.dto.TokenCreateDto;
 import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
-import com.easytrip.backend.member.service.sns.KakaoLoginService;
-import com.easytrip.backend.member.service.sns.NaverLoginService;
-import com.easytrip.backend.place.domain.BookmarkPlaceEntity;
-import com.easytrip.backend.place.repository.BookmarkPlaceRepository;
+import com.easytrip.backend.member.service.ManagementService;
 import com.easytrip.backend.type.MemberStatus;
-import com.easytrip.backend.type.PlatForm;
+import com.easytrip.backend.type.Platform;
+import io.jsonwebtoken.Claims;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -41,30 +34,23 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
-public class MemberServiceImpl implements MemberService {
+public class ManagementServiceImpl implements ManagementService {
 
   private final MemberRepository memberRepository;
   private final MailComponents mailComponents;
-  private final PasswordEncoder passwordEncoder;
-  private final TokenService tokenService;
-  private final NaverLoginService naverLoginService;
-  private final KakaoLoginService kakaoLoginService;
   private final JwtTokenProvider jwtTokenProvider;
   private final RedisTemplate redisTemplate;
-  private final BookmarkPlaceRepository bookmarkPlaceRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
-  @Transactional
-  public String signUp(SignUpRequest signUpRequest) {
+  public void signUp(SignUpRequest signUpRequest, Platform platForm) {
 
     // 올바르지 않은 이메일
     if (!isValidEmail(signUpRequest.getEmail())) {
@@ -76,43 +62,36 @@ public class MemberServiceImpl implements MemberService {
       throw new InvalidPasswordConfirmationException();
     }
 
+    MemberEntity member = null;
+
     // 중복가입인지 확인
-    Optional<MemberEntity> byEmail = memberRepository.findByEmail(signUpRequest.getEmail());
+    Optional<MemberEntity> byEmail = memberRepository.findByEmailAndPlatform(
+        signUpRequest.getEmail(), platForm);
     if (byEmail.isPresent()) {
-      MemberEntity member = byEmail.get();
+      member = byEmail.get();
 
       // 탈퇴상태가 아니면 중복가입 exception
       if (!member.getStatus().equals(MemberStatus.WITHDRAWN)) {
         throw new DuplicateEmailException();
-      } else {
-        // 재가입
-        MemberEntity reMember = SignUpRequest.reSignUpInput(member, signUpRequest);
-        memberRepository.save(reMember);
-
-        sendMail(signUpRequest, reMember);
-
-        return "가입한 이메일을 확인해 회원인증을 진행해주세요.";
       }
     }
 
-    // 신규가입
-    MemberEntity member = SignUpRequest.signUpInput(signUpRequest);
-    memberRepository.save(member);
+    if (member == null) {
+      member = new MemberEntity();
+    }
 
+    member = memberRepository.save(SignUpRequest.signUpInput(member, signUpRequest));
     sendMail(signUpRequest, member);
-
-    return "가입한 이메일을 확인해 회원인증을 진행해주세요.";
   }
 
   @Override
-  @Transactional
-  public String auth(String email, String code) {
+  public void auth(String email, String code, Platform platform) {
 
-    MemberEntity member = memberRepository.findByEmail(email)
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     if (member.getAuth()) {
-      return "이미 인증을 완료 하셨습니다.";
+      throw new AlreadyAuthenticatedException();
     }
 
     if (!code.equals(member.getAuthCode())) {
@@ -124,25 +103,13 @@ public class MemberServiceImpl implements MemberService {
         .status(MemberStatus.ACTIVE)
         .build();
     memberRepository.save(memberEntity);
-
-    return "인증을 완료 했습니다.";
   }
 
   @Override
-  public TokenDto login(LoginRequest loginRequest, PlatForm platForm) {
+  public TokenCreateDto login(LoginRequest loginRequest, Platform platForm) {
 
-    MemberEntity member = memberRepository.findByEmail(loginRequest.getEmail())
+    MemberEntity member = memberRepository.findByEmailAndPlatform(loginRequest.getEmail(), platForm)
         .orElseThrow(() -> new NotFoundMemberException());
-
-    // 가입경로 확인
-    if (!member.getPlatForm().equals(platForm)) {
-      switch (member.getPlatForm()) {
-        case NAVER:
-          throw new PlatFormUnMatchedException("NAVER 로 가입한 회원입니다. NAVER 로그인을 이용해주세요.");
-        case KAKAO:
-          throw new PlatFormUnMatchedException("KAKAO 로 가입한 회원입니다. KAKAO 로그인을 이용해주세요.");
-      }
-    }
 
     // 회원 상태에 따른 exception
     if (member.getStatus().equals(MemberStatus.SUSPENDED)) {
@@ -153,86 +120,29 @@ public class MemberServiceImpl implements MemberService {
       throw new NotFoundMemberException();
     }
 
-    // 패스워드 검증
-    if (passwordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
-      // 로그인 성공, 토큰 발급
-      TokenDto token = tokenService.create(member.getEmail(), member.getAdminYn());
-      return token;
-    } else {
-      // 로그인 실패
+    // 비밀번호 확인
+    if (!passwordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
       throw new InvalidPasswordException();
     }
+
+    TokenCreateDto result = TokenCreateDto.builder()
+        .email(member.getEmail())
+        .adminYn(member.getAdminYn())
+        .build();
+
+    return result;
   }
 
   @Override
-  @Transactional
-  public TokenDto naverLogin(String code, PlatForm platForm) {
+  public TokenCreateDto naverLogin(MemberEntity naverMember, Platform platForm) {
 
-    MemberEntity naverMember = naverLoginService.toEntityUser(code, platForm);
-    Optional<MemberEntity> byEmail = memberRepository.findByEmail(naverMember.getEmail());
-
-    // 기존에 가입한 회원
-    if (byEmail.isPresent()) {
-      MemberEntity member = byEmail.get();
-      // 가입경로 확인 후 로그인
-      if (!member.getPlatForm().equals(platForm)) {
-        switch (member.getPlatForm()) {
-          case LOCAL:
-            throw new PlatFormUnMatchedException("이미 가입한 회원 입니다. 사이트 자체 로그인을 이용해주세요.");
-          case KAKAO:
-            throw new PlatFormUnMatchedException("KAKAO 로 가입한 회원입니다. KAKAO 로그인을 이용해주세요.");
-        }
-      }
-      TokenDto token = tokenService.create(naverMember.getEmail(), naverMember.getAdminYn());
-      return token;
-    } else {
-      // 새로운 회원(네이버로 회원가입과 동시에 로그인)
-      MemberEntity member = naverMember.toBuilder()
-          .auth(true)
-          .adminYn(false)
-          .status(MemberStatus.ACTIVE)
-          .regDate(LocalDateTime.now())
-          .build();
-      memberRepository.save(member);
-
-      TokenDto token = tokenService.create(member.getEmail(), member.getAdminYn());
-      return token;
-    }
+    return snsLogin(naverMember, platForm);
   }
 
   @Override
-  public TokenDto kakaoLogin(String code, PlatForm platForm) {
+  public TokenCreateDto kakaoLogin(MemberEntity kakaoMember, Platform platForm) {
 
-    MemberEntity kakaoMember = kakaoLoginService.toEntityUser(code, platForm);
-    Optional<MemberEntity> byEmail = memberRepository.findByEmail(kakaoMember.getEmail());
-
-    // 기존에 가입한 회원
-    if (byEmail.isPresent()) {
-      MemberEntity member = byEmail.get();
-      // 가입경로 확인 후 로그인
-      if (!member.getPlatForm().equals(platForm)) {
-        switch (member.getPlatForm()) {
-          case LOCAL:
-            throw new PlatFormUnMatchedException("이미 가입한 회원 입니다. 사이트 자체 로그인을 이용해주세요.");
-          case NAVER:
-            throw new PlatFormUnMatchedException("NAVER 로 가입한 회원입니다. NAVER 로그인을 이용해주세요.");
-        }
-      }
-      TokenDto token = tokenService.create(kakaoMember.getEmail(), kakaoMember.getAdminYn());
-      return token;
-    } else {
-      // 새로운 회원(카카오로 회원가입과 동시에 로그인)
-      MemberEntity member = kakaoMember.toBuilder()
-          .auth(true)
-          .adminYn(false)
-          .status(MemberStatus.ACTIVE)
-          .regDate(LocalDateTime.now())
-          .build();
-      memberRepository.save(member);
-
-      TokenDto token = tokenService.create(member.getEmail(), member.getAdminYn());
-      return token;
-    }
+    return snsLogin(kakaoMember, platForm);
   }
 
   @Override
@@ -244,11 +154,14 @@ public class MemberServiceImpl implements MemberService {
     }
 
     // 토큰을 통해 사용자 정보 받아오기
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
 
     // Redis에 해당 유저의 email로 저장된 refreshToken이 있는지 확인 후 있으면 삭제
-    if (redisTemplate.opsForValue().get("RefreshToken: " + authentication.getName()) != null) {
-      redisTemplate.delete("RefreshToken: " + authentication.getName());
+    if (redisTemplate.opsForValue().get("RefreshToken: " + authentication.getName() + ", Platform: " + platform) != null) {
+      redisTemplate.delete("RefreshToken: " + authentication.getName() + ", Platform: " + platform);
     }
 
     // 해당 accessToken 유효시간을 가지고 와서 Redis에 BlackList로 추가
@@ -260,17 +173,20 @@ public class MemberServiceImpl implements MemberService {
   }
 
   @Override
-  @Transactional
   public void withdrawal(String accessToken) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
       throw new InvalidTokenException();
     }
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    MemberEntity member = memberRepository.findByEmail(email)
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     // 탈퇴한 회원의 상태를 탈퇴로 변경
@@ -283,15 +199,10 @@ public class MemberServiceImpl implements MemberService {
   }
 
   @Override
-  public String resetPassword(ResetRequest resetRequest) {
+  public void resetPassword(ResetRequest resetRequest, Platform platform) {
 
-    MemberEntity member = memberRepository.findByEmail(resetRequest.getEmail())
+    MemberEntity member = memberRepository.findByEmailAndPlatform(resetRequest.getEmail(), platform)
         .orElseThrow(() -> new NotFoundMemberException());
-
-    // 사이트 자체 회원가입한 회원만 비밀번호 변경 가능
-    if (!member.getPlatForm().equals(PlatForm.LOCAL)) {
-      throw new PasswordChangeNotAllowedException();
-    }
 
     String uuid = UUID.randomUUID().toString();
     String encPassword = BCrypt.hashpw(resetRequest.getResetPassword(), BCrypt.gensalt());
@@ -311,15 +222,12 @@ public class MemberServiceImpl implements MemberService {
         + memberEntity.getPasswordAuthCode() + "&resetPassword=" + encPassword
         + "'> 인증 링크 </a></div>";
     mailComponents.sendMail(email, title, message);
-
-    return "이메일을 확인해 인증을 진행해주세요.";
   }
 
   @Override
-  @Transactional
-  public String passwordAuth(String email, String code, String resetPassword) {
+  public void passwordAuth(String email, String code, String resetPassword, Platform platform) {
 
-    MemberEntity member = memberRepository.findByEmail(email)
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     // 인증 코드가 다르면 exception 발생
@@ -338,8 +246,6 @@ public class MemberServiceImpl implements MemberService {
         .passwordDate(null)
         .build();
     memberRepository.save(memberEntity);
-
-    return "비밀번호 변경을 완료했습니다.";
   }
 
   @Override
@@ -349,27 +255,34 @@ public class MemberServiceImpl implements MemberService {
       throw new InvalidTokenException();
     }
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    MemberEntity member = memberRepository.findByEmail(email)
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     return MemberDto.of(member);
   }
 
   @Override
-  @Transactional
   public MemberDto update(String accessToken, UpdateRequest updateRequest) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
       throw new InvalidTokenException();
     }
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    MemberEntity member = memberRepository.findByEmail(email)
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     MemberEntity updateMember = member.toBuilder()
@@ -382,38 +295,44 @@ public class MemberServiceImpl implements MemberService {
     return MemberDto.of(updateMember);
   }
 
-  @Override
-  public List<BookmarkDto> myBookmark(String accessToken) {
+  private TokenCreateDto snsLogin(MemberEntity snsMember, Platform platForm) {
+    Optional<MemberEntity> byEmail = memberRepository.findByEmailAndPlatform(snsMember.getEmail(),
+        platForm);
+    // 기존에 가입한 회원
+    if (byEmail.isPresent()) {
+      MemberEntity member = byEmail.get();
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
+      if (member.getStatus().equals(MemberStatus.SUSPENDED)) {
+        throw new SuspendedMemberException();
+      } else if (member.getStatus().equals(MemberStatus.WITHDRAWN)) {
+        MemberEntity memberEntity = member.toBuilder()
+            .status(MemberStatus.ACTIVE)
+            .regDate(LocalDateTime.now())
+            .build();
+        memberRepository.save(memberEntity);
+      }
+
+      TokenCreateDto result = TokenCreateDto.builder()
+          .email(member.getEmail())
+          .adminYn(member.getAdminYn())
+          .build();
+      return result;
+    } else {
+      // 새로운 회원(sns로 회원가입과 동시에 로그인)
+      MemberEntity newMember = snsMember.toBuilder()
+          .auth(true)
+          .adminYn(false)
+          .status(MemberStatus.ACTIVE)
+          .regDate(LocalDateTime.now())
+          .build();
+      memberRepository.save(newMember);
+
+      TokenCreateDto result = TokenCreateDto.builder()
+          .email(newMember.getEmail())
+          .adminYn(newMember.getAdminYn())
+          .build();
+      return result;
     }
-
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
-
-    MemberEntity member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundMemberException());
-
-    List<BookmarkPlaceEntity> byMemberId = bookmarkPlaceRepository.findByMemberId(member);
-    List<BookmarkDto> result = BookmarkDto.listOf(byMemberId);
-
-    return result;
-  }
-
-  @Override
-  @Transactional
-  public String bookmarkCancel(String accessToken, Long bookmarkId) {
-
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
-
-    BookmarkPlaceEntity bookmarkPlace = bookmarkPlaceRepository.findByBookmarkId(bookmarkId)
-        .orElseThrow(() -> new NotFoundBookmarkException());
-    bookmarkPlaceRepository.delete(bookmarkPlace);
-
-    return "해당 장소 북마크를 해제 했습니다.";
   }
 
   private void sendMail(SignUpRequest signUpRequest, MemberEntity member) {
