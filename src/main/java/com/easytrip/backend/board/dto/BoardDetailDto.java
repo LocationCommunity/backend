@@ -13,6 +13,7 @@ public class BoardDetailDto {
 
     private Long boardId;
     private String title;
+    private String content;
     private String nickname;
     private Integer likeCnt;
     private LocalDateTime createDate;

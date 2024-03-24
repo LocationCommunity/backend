@@ -2,11 +2,11 @@ package com.easytrip.backend.board.service;
 
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.domain.BoardLikeEntity;
-import com.easytrip.backend.board.dto.BoardDetailDto;
-import com.easytrip.backend.board.dto.BoardListDto;
-import com.easytrip.backend.board.dto.BoardRequestDto;
+import com.easytrip.backend.board.domain.ImageEntity;
+import com.easytrip.backend.board.dto.*;
 import com.easytrip.backend.board.repository.BoardLikeRepository;
 import com.easytrip.backend.board.repository.BoardRepository;
+import com.easytrip.backend.board.repository.ImageRepository;
 import com.easytrip.backend.exception.impl.*;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.repository.MemberRepository;
@@ -37,21 +37,26 @@ public class BoardServiceImpl implements BoardService {
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
     private final BoardLikeRepository boardLikeRepository;
+    private final ImageRepository imageRepository;
 
     /**
      * 게시글 작성
+     *
      * @param boardRequestDto
+     * @param postPlaceDto
      * @return string
      */
-    @Override
+
     @Transactional
-    public String writePost(BoardRequestDto boardRequestDto, MultipartFile file) throws Exception {
+    public String writePost(BoardRequestDto boardRequestDto, MultipartFile file, PostPlaceDto postPlaceDto) throws Exception {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 저장할 경로 지정
-        String projectPath = System.getProperty("user.dir") + "\\src.\\main\\resource\\static\\files";
+
+         //1안
+       // 저장할 경로 지정
+        String projectPath = System.getProperty("user.dir") + "\\src.\\main\\resources\\static\\files";
         UUID uuid = UUID.randomUUID();
 
         // 랜덤식별자_원래이름
@@ -61,6 +66,38 @@ public class BoardServiceImpl implements BoardService {
         File saveFile = new File(projectPath, fileName);
 
         file.transferTo(saveFile);
+
+
+
+        /* 2안
+        MultipartFile boardFile = boardImageDto.getImageFile();
+        String originalFileName = boardFile.getOriginalFilename();
+        String storedFileName =  uuid + "_" + originalFileName;
+        String savePath = "C:/easytrip_img/" + storedFileName;
+        boardFile.transferTo(new File(savePath));
+        BoardEntity boardEntity = BoardEntity.toSaveFileEntity(boardImageDto);
+        Long savedId = boardRepository.save(boardEntity).getBoardId();
+        BoardEntity boardEntity2 = boardRepository.findById(savedId).get();
+
+        ImageEntity.toImageEntity(boardEntity2, originalFileName, storedFileName);
+        */
+
+//        @PostMapping(DEFAULT_URI + "/multi")
+//        public String uploadMulti(@RequestParam("files") List<MultipartFile> files) throws Exception {
+//            String rootPath = FileSystemView.getFileSystemView().getHomeDirectory().toString();
+//            String basePath = rootPath + "/" + "multi";
+//            // 파일 업로드(여러개) 처리 부분
+//            for(MultipartFile file : files) {
+//                String originalName = file.getOriginalFilename();
+//                String filePath = basePath + "/" + originalName;
+//                File dest = new File(filePath);
+//                file.transferTo(dest);
+//            }
+//            return "uploaded";
+//        }
+
+
+
 
         MemberEntity member = memberRepository.findByEmail(email)
                 .orElseThrow(InvalidTokenException::new);
@@ -89,13 +126,15 @@ public class BoardServiceImpl implements BoardService {
 
     /**
      * 게시글 수정
+     *
      * @param boardId
      * @param boardRequestDto
+     * @param postPlaceDto
      * @return string
      */
     @Override
     @Transactional
-    public String updatePost(Long boardId, BoardRequestDto boardRequestDto, MultipartFile file) throws Exception {
+    public String updatePost(Long boardId, BoardRequestDto boardRequestDto, MultipartFile file, PostPlaceDto postPlaceDto) throws Exception {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
