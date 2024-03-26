@@ -18,5 +18,17 @@ public class BoardDetailDto {
     private Integer likeCnt;
     private LocalDateTime createDate;
 
+//    private Long placeId;
+//
+//    private String placeName;
+//
+//    private String address;
+//
+//    private Double x;
+//
+//    private Double y;
+//
+//    private String placeLink;
+
 
 }

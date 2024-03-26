@@ -1,14 +1,16 @@
 package com.easytrip.backend.board.dto;
 
+import com.easytrip.backend.board.domain.BoardEntity;
 import lombok.*;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-public class PostPlaceDto {
+@Data
+public class BoardPlaceDto {
 
+
+    private Long placeId;
 
     private String placeName;
 
@@ -19,5 +21,6 @@ public class PostPlaceDto {
     private Double y;
 
     private String placeLink;
+
 
 }

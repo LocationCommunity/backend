@@ -1,5 +1,6 @@
 package com.easytrip.backend.board.service;
 
+import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.dto.*;
 
 
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface BoardService {
@@ -19,7 +21,7 @@ public interface BoardService {
 
     List<BoardListDto> getList(Boolean sortByLikes);
 
-    BoardDetailDto getDetail(Long boardId);
+    Optional<BoardEntity> getDetail(Long boardId, BoardDetailDto boardDetailDto);
 
     List<BoardListDto> getMyPost();
 
