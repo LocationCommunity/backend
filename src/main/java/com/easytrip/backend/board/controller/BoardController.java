@@ -96,7 +96,7 @@ public class BoardController {
      */
 
     // 작동 안됨 keyword is not present
-    // http://localhost:8080/boards/search  { "keyword" : " asd " , "searchOption" : " TITLE "  }  json = error
+    // http://localhost:8080/boards/search  { "keyword" : " asd " , "searchOption" : " TITLE "  }  json = error.
     @GetMapping("/search")
     public ResponseEntity<List<BoardListDto>> search(
             @Valid @NotNull(message = "검색어를 입력해주세요.")

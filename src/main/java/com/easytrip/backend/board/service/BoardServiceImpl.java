@@ -283,7 +283,6 @@ public class BoardServiceImpl implements BoardService{
 //            } else {
 //                log.info("post delete user: {}, postId: {}", email, boardId);
 //            }
-
             return "게시글이 삭제되었습니다.";
 
         }

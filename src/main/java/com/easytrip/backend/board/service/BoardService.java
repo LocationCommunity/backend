@@ -3,7 +3,6 @@ package com.easytrip.backend.board.service;
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.dto.*;
 
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
