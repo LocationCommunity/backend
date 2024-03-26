@@ -16,6 +16,7 @@ public class BoardDetailDto {
     private String content;
     private String nickname;
     private Integer likeCnt;
+
     private LocalDateTime createDate;
 
 //    private Long placeId;

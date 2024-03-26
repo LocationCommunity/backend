@@ -2,7 +2,6 @@ package com.easytrip.backend.board.dto;
 
 import com.easytrip.backend.board.domain.BoardEntity;
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;

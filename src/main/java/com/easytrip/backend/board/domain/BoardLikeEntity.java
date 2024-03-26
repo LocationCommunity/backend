@@ -1,5 +1,4 @@
 package com.easytrip.backend.board.domain;
-
 import com.easytrip.backend.member.domain.MemberEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

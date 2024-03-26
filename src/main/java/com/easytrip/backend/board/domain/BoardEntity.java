@@ -1,7 +1,7 @@
 package com.easytrip.backend.board.domain;
 
 
-import com.easytrip.backend.board.dto.BoardPlaceDto;
+
 import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;

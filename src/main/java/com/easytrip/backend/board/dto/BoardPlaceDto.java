@@ -1,6 +1,6 @@
 package com.easytrip.backend.board.dto;
 
-import com.easytrip.backend.board.domain.BoardEntity;
+
 import lombok.*;
 
 @Builder
