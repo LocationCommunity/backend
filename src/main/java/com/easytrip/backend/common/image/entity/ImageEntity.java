@@ -26,6 +26,11 @@ public class ImageEntity {
 
     private String fileName;
 
+    @ManyToOne
+    @JoinColumn(name ="boardId")
+    private BoardEntity boardId;
+
+
 
     private String filePath;
 

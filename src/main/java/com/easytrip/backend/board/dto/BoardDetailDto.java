@@ -19,17 +19,17 @@ public class BoardDetailDto {
 
     private LocalDateTime createDate;
 
-//    private Long placeId;
-//
-//    private String placeName;
-//
-//    private String address;
-//
-//    private Double x;
-//
-//    private Double y;
-//
-//    private String placeLink;
+    private Long placeId;
+
+    private String placeName;
+
+    private String address;
+
+    private Double x;
+
+    private Double y;
+
+    private String placeLink;
 
 
 }

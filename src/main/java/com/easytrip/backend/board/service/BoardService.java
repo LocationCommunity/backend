@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public interface BoardService {
 
-    String writePost(BoardRequestDto boardRequestDto,BoardPlaceDto boardPlaceDto, List<MultipartFile> files) throws Exception;
+    String writePost(BoardRequestDto boardRequestDto, List<MultipartFile> files, Long placeId) throws Exception;
 
     String updatePost(Long boardId, BoardRequestDto boardRequestDto, List<MultipartFile> files) throws Exception;
 
@@ -20,7 +20,7 @@ public interface BoardService {
 
     List<BoardListDto> getList(Boolean sortByLikes);
 
-    Optional<BoardEntity> getDetail(Long boardId, BoardDetailDto boardDetailDto);
+    BoardDetailDto getDetail(Long boardId, BoardDetailDto boardDetailDto);
 
     List<BoardListDto> getMyPost();
 

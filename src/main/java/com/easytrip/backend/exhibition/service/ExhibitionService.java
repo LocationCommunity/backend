@@ -12,7 +12,7 @@ public interface ExhibitionService {
 
 
     // 전시회 등록
-    ExhibitionEntity postExInfo(ExhibitionDto exhibitionDto);
+    String postExInfo(ExhibitionDto exhibitionDto);
 
 
     // 전시회 정보 불러오기

@@ -36,7 +36,7 @@ public class PlaceController {
 
   @GetMapping("/info/{placeId}")
   public ResponseEntity<PlaceDto> getInfo(HttpServletRequest request,
-      @PathVariable Long placeId) {
+      @PathVariable("placeId") Long placeId) {
     String accessToken = getToken(request);
     PlaceDto response = placeService.getInfo(accessToken, placeId);
     return ResponseEntity.ok(response);

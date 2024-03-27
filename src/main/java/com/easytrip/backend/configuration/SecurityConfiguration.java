@@ -26,8 +26,8 @@ public class SecurityConfiguration {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             requests -> requests
-                .requestMatchers("/", "/members/sign-up", "/members/auth", "/members/login/**",
-                    "/members/password", "/weather/**").permitAll()
+                .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
+                    "/members/password", "/weather/**", ("/boards/**"), ("/exhibitions/**"), ("/place/**")).permitAll()
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
                     "/members/reissue", "/members/bookmark", "/place/**").hasRole("USER"))
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(

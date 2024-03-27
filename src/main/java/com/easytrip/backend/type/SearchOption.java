@@ -7,12 +7,12 @@ import lombok.Getter;
 @Getter
 public enum SearchOption {
 
-    TITLE("title"),
-    CONTENT("content"),
-    TITLE_AND_CONTENT("titleAndContent"),
-    NICKNAME("nickname");
+    TITLE,
+    CONTENT,
+    TITLE_AND_CONTENT,
+    NICKNAME
 
-    private final String value;
+
 
 
 

@@ -32,43 +32,42 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     // 전시회 등록
     @Override
-    public ExhibitionEntity postExInfo(ExhibitionDto exhibitionDto) {
+    public String postExInfo(ExhibitionDto exhibitionDto) {
 
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = null;
-
-
-        MemberEntity member = memberRepository.findByEmail(email)
-                .orElseThrow(InvalidTokenException::new);
-
-        if (authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(role -> role.equals("ROLE_MEMBER") )) {
-
-
-
-
-
-            throw new NotMatchAuthorityException();
-
-        }
-
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        String email = null;
+//
+//
+//        MemberEntity member = memberRepository.findByEmail(email)
+//                .orElseThrow(InvalidTokenException::new);
+//
+//        if (authentication.getAuthorities().stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .anyMatch(role -> role.equals("ROLE_MEMBER") )) {
+//
+//
+//
+//
+//
+//            throw new NotMatchAuthorityException();
+//
+//        }
+//
 
         ExhibitionEntity exhibition = ExhibitionEntity.builder()
                 .title(exhibitionDto.getTitle())
                 .address(exhibitionDto.getAddress())
-                .memberId(member)
-                .start_date(LocalDateTime.now())
-                .end_date(LocalDateTime.now())
                 .exInfo(exhibitionDto.getExInfo())
                 .exLink(exhibitionDto.getExLink())
+                .start_date(LocalDateTime.of(2024, 3, 26, 3, 0))
+                .end_date(LocalDateTime.of(2024, 4, 15, 6, 0))
                 .build();
         exhibitionRepository.save(exhibition);
 
 
-        return exhibition;
+        return "전시회 정보를 저장 완료하였습니다.";
     }
 
     // 전시회 정보 불러오기

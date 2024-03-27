@@ -16,32 +16,32 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Builder
-@Table(name = "Exhibitions")
+@Table(name = "exhibitions")
 public class ExhibitionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long exId;
 
-    @Column
+
     private String title;
 
-    @Column
+
     private String address;
 
-    @Column
+
     private LocalDateTime start_date;
 
-    @Column
+
     private LocalDateTime end_date;
 
-    @Column
+
     private LocalDateTime update_date;
 
-    @Column
+
     private String exLink;
 
-    @Column
+
     private String exInfo;
 
 

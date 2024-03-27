@@ -11,6 +11,7 @@ import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.exception.impl.*;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.repository.MemberRepository;
+import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.place.repository.PlaceRepository;
 import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.SearchOption;
@@ -44,42 +45,22 @@ public class BoardServiceImpl implements BoardService{
     private final PlaceRepository placeRepository;
 
 
-    /**
-     * 게시글 작성
-     *
-     *
-     *
-     */
 
 
-    public String writePost(BoardRequestDto boardRequestDto, BoardPlaceDto boardPlaceDto, List<MultipartFile> files) throws Exception{
+    public String writePost(BoardRequestDto boardRequestDto, List<MultipartFile> files, Long placeId) throws Exception{
+
+
 
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        String email = authentication.getName();
-
-
-
-
-//        @PostMapping(DEFAULT_URI + "/multi")
-//        public String uploadMulti(@RequestParam("files") List<MultipartFile> files) throws Exception {
-//            String rootPath = FileSystemView.getFileSystemView().getHomeDirectory().toString();
-//            String basePath = rootPath + "/" + "multi";
-//            // 파일 업로드(여러개) 처리 부분
-//            for(MultipartFile file : files) {
-//                String originalName = file.getOriginalFilename();
-//                String filePath = basePath + "/" + originalName;
-//                File dest = new File(filePath);
-//                file.transferTo(dest);
-//            }
-//            return "uploaded";
-//        }
-
-
-
-
+//
 //
 //        MemberEntity member = memberRepository.findByEmail(email)
 //                .orElseThrow(InvalidTokenException::new);
+
+        // 장소
+        PlaceEntity place = placeRepository.findByPlaceId(placeId).orElseThrow(NotFoundPlaceException::new);
+
 
         BoardEntity board = BoardEntity.builder()
                 .title(boardRequestDto.getTitle())
@@ -87,12 +68,13 @@ public class BoardServiceImpl implements BoardService{
 //                .nickname(member.getNickname())
                 .content(boardRequestDto.getContent())
                 .likeCnt(0)
+                .placeId(place)
                 .status(BoardStatus.ACTIVE)
                 .createDate(LocalDateTime.now())
                 .build();
         boardRepository.save(board);
 
-//        ImageEntity image1 = new ImageEntity(get)
+
 
 
 //        [     이미지    ]
@@ -121,24 +103,21 @@ public class BoardServiceImpl implements BoardService{
                     .filePath("/boards/" + fileName)
                     .useType(UseType.BOARD)
                     .build();
+
             imageRepository.save(image);
 
 
 
-            // [     장소    ]
+
+         //    [     장소    ]
             // placeLink 구현해야함
-           BoardPlaceDto place = BoardPlaceDto.builder()
-                    .placeName(boardPlaceDto.getPlaceName())
-                    .address(boardPlaceDto.getAddress())
-                    .x(boardPlaceDto.getX())
-                    .y(boardPlaceDto.getY())
-                    .build();
 
-
+//            PlaceEntity byPlaceId = placeRepository.findByPlaceId(placeId).orElseThrow(NotFoundPostException::new);
+//
+//            boardRepository.save(byPlaceId);
 
 
         }
-
 
 //        log.info(
 //                "post write admin: {}, post content - title: {}, content: {},",
@@ -148,45 +127,39 @@ public class BoardServiceImpl implements BoardService{
         return "게시글 작성이 완료되었습니다.";
     }
 
-    /**
-     * 게시물 수정
-     * @param boardId
-     * @param boardRequestDto
-     * @return
-     */
+
     @Override
     public String updatePost(Long boardId, BoardRequestDto boardRequestDto, List<MultipartFile> files) throws Exception {
 
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
 //        MemberEntity member = new MemberEntity();
         BoardEntity board = new BoardEntity();
-////
+//
 //        String email = null;
 //
 //        if (authentication.getAuthorities().stream()
 //                .map(GrantedAuthority::getAuthority)
 //                .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-//            //admin
+//            // admin
 //            board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
 //
 //
 //        } else {
-//            //member
+//            // member
 //            email = authentication.getName();
 //            member = memberRepository.findByEmail(email).orElseThrow(InvalidTokenException::new);
 
-            //post exist
+//            // post exist
 //            BoardEntity boardEntity = boardRepository.findByBoardId(boardId)
 //                    .orElseThrow(NotFoundPostException::new);
 //        }
-
-//        have benn deleted post
+//
+////        have benn deleted post
 //        if (board.getStatus().equals(BoardStatus.INACTIVE)) {
 //            throw new DeletePostException();
 //        }
 //
-////         ??boardId
+//        // ??boardId
 //        board = boardRepository.findByBoardIdAndMemberId(boardId, member)
 //                .orElseThrow(InvalidAuthCodeException::new);
 
@@ -202,13 +175,6 @@ public class BoardServiceImpl implements BoardService{
                     .build();
             boardRepository.save(boardEntity);
 
-
-
-
-
-
-
-
         //로그처리
 //        if (authentication.getAuthorities().stream()
 //                .map(GrantedAuthority::getAuthority)
@@ -221,7 +187,6 @@ public class BoardServiceImpl implements BoardService{
 //                    "post update user: {}, postId: {}, post content - title: {}, content: {}",
 //                    email, boardId, boardRequestDto.getTitle(), boardRequestDto.getContent());
 //        }
-
 
         return "게시물을 수정했습니다.";
     }
@@ -238,7 +203,7 @@ public class BoardServiceImpl implements BoardService{
 //
 //        MemberEntity member = new MemberEntity();
         BoardEntity board = new BoardEntity();
-
+//
 //        String email = null;
 //
 //        if (authentication.getAuthorities().stream()
@@ -257,7 +222,7 @@ public class BoardServiceImpl implements BoardService{
 //            board = boardRepository.findByBoardIdAndMemberId(boardId, member)
 //                    .orElseThrow(NotFoundPostException::new);
 //        }
-            // have been deleted post
+//            // have been deleted post
 //            if (board.getStatus().equals(BoardStatus.INACTIVE)) {
 //                throw new DeletePostException();
 //            }
@@ -269,10 +234,8 @@ public class BoardServiceImpl implements BoardService{
             boardRepository.save(deletePost);
 
             // 좋아요 삭제 처리
-//            List<BoardLikeEntity> deletePostLikes = boardLikeRepository.findByBoardId(board);
-//            boardLikeRepository.deleteAll(deletePostLikes);
-
-
+            List<BoardLikeEntity> deletePostLikes = boardLikeRepository.findByBoardId(board);
+            boardLikeRepository.deleteAll(deletePostLikes);
 
 //            // 로그 처리
 //            if (authentication.getAuthorities().stream()
@@ -302,14 +265,8 @@ public class BoardServiceImpl implements BoardService{
         return BoardListDto.listOf(boards);
     }
 
-    /**
-     * 게시글 확인
-     *
-     * @param boardId
-     * @return string
-     */
     @Override
-    public Optional<BoardEntity> getDetail(Long boardId, BoardDetailDto boardDetailDto) {
+    public BoardDetailDto getDetail(Long boardId, BoardDetailDto boardDetailDto) {
 
         BoardEntity boardEntity = boardRepository.findByBoardId(boardId)
                 .orElseThrow(NotFoundPostException::new);
@@ -320,43 +277,32 @@ public class BoardServiceImpl implements BoardService{
         }
 
 
-//        BoardDetailDto boardDetail = BoardDetailDto.builder()
-//                .boardId(boardEntity.getBoardId())
-//                .title(boardEntity.getTitle())
-//                .content(boardEntity.getContent())
-//                .nickname(boardEntity.getNickname())
-//                .likeCnt(boardEntity.getLikeCnt())
-//                .createDate(boardEntity.getCreateDate())
-//                .placeName(boardDetailDto.getPlaceName())
-//                .x(boardDetailDto.getX())
-//                .y(boardDetailDto.getY())
-//                .placeLink("http://localhost:8080/place/info/placeId" + placeId)
-//                .build();
+                // dto to Entity
+//        BoardEntity board = BoardEntity.builder().build();
+//        .title(boardDetailDto.getContent()
 
 
 
+            // Entity to dto
+        BoardDetailDto boardDetail = BoardDetailDto.builder()
+                .boardId(boardEntity.getBoardId())
+                .title(boardEntity.getTitle())
+                .content(boardEntity.getContent())
+                .nickname(boardEntity.getNickname())
+                .likeCnt(boardEntity.getLikeCnt())
+                .createDate(boardEntity.getCreateDate())
+                .placeId(boardEntity.getPlaceId().getPlaceId())
+                .placeName(boardEntity.getPlaceId().getPlaceName())
+                .address(boardEntity.getPlaceId().getAddress())
+                .x(boardEntity.getPlaceId().getX())
+                .y(boardEntity.getPlaceId().getY())
+                .placeLink("http://localhost:8080/place/info/" + boardEntity.getPlaceId().getPlaceId())
+                .build();
 
-
-
-//        String placeId = null;
-//
-//        BoardPlaceDto place = BoardPlaceDto.builder()
-//                .placeName(boardPlaceDto.getPlaceName())
-//                .address(boardPlaceDto.getAddress())
-//                .x(boardPlaceDto.getX())
-//                .y(boardPlaceDto.getY())
-//                .placeLink("http://localhost:8080/place/placeId" + placeId )
-//                .build();
-
-
-
-        return boardRepository.findById(boardId);
+        return boardDetail;
     }
 
-    /**
-     * 나의 게시글
-     * @return
-     */
+
     @Override
     public List<BoardListDto> getMyPost() {
 
@@ -372,10 +318,7 @@ public class BoardServiceImpl implements BoardService{
         return BoardListDto.listOf(boards);
     }
 
-    /**
-     * 게시글 좋아요
-     * @param boardId
-     */
+
     @Override
     @Transactional
     public void likes(Long boardId) {
@@ -420,24 +363,18 @@ public class BoardServiceImpl implements BoardService{
         }
     }
 
-    /**
-     * 검색기능
-     * @param keyword
-     * @param searchOption
-     * @return
-     */
     @Override
     public List<BoardListDto> search(String keyword, String searchOption) {
 
         List<BoardEntity> boards = new ArrayList<>();
 
-        if (searchOption.equals(SearchOption.TITLE.getValue())) {
+        if (searchOption.equals(SearchOption.TITLE)) {
             boards = boardRepository.findByTitleContainingAndStatus(keyword, BoardStatus.ACTIVE);
-        } else if (searchOption.equals(SearchOption.CONTENT.getValue())) {
+        } else if (searchOption.equals(SearchOption.CONTENT)) {
             boards = boardRepository.findByContentContainingAndStatus(keyword, BoardStatus.ACTIVE);
-        } else if (searchOption.equals(SearchOption.TITLE_AND_CONTENT.getValue())) {
+        } else if (searchOption.equals(SearchOption.TITLE_AND_CONTENT)) {
             boards = boardRepository.findByTitleContainingAndContentContainingAndStatus(keyword, keyword, BoardStatus.ACTIVE);
-        } else if (searchOption.equals(SearchOption.NICKNAME.getValue())) {
+        } else if (searchOption.equals(SearchOption.NICKNAME)) {
             boards = boardRepository.findByNicknameAndStatus(keyword, BoardStatus.ACTIVE);
         } else {
             throw new InvalidSearchOptionException();

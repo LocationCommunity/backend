@@ -8,8 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/exhibition")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/exhibitions")
 public class ExhibitionController {
 
     private final ExhibitionService exhibitionService;
@@ -17,10 +18,10 @@ public class ExhibitionController {
 
 
     //전시회 등록
-    @PostMapping("/")
-    public ResponseEntity<ExhibitionEntity> postExInfo(ExhibitionDto exhibitionDto) {
+    @PostMapping
+    public ResponseEntity<String> postExInfo(@RequestBody  ExhibitionDto exhibitionDto) {
 
-        ExhibitionEntity response = exhibitionService.postExInfo(exhibitionDto);
+        String response = exhibitionService.postExInfo(exhibitionDto);
 
         return ResponseEntity.ok(response);
 
