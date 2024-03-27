@@ -39,3 +39,4 @@ out/
 *.yaml
 *.yml
 *.properties
+/src/main/resources/static/files/**
