@@ -6,6 +6,7 @@ import com.easytrip.backend.components.MailComponents;
 import com.easytrip.backend.exception.impl.AlreadyAuthenticatedException;
 import com.easytrip.backend.exception.impl.DuplicateEmailException;
 import com.easytrip.backend.exception.impl.ExpiredException;
+import com.easytrip.backend.exception.impl.ImageSaveException;
 import com.easytrip.backend.exception.impl.InvalidAuthCodeException;
 import com.easytrip.backend.exception.impl.InvalidEmailException;
 import com.easytrip.backend.exception.impl.InvalidPasswordConfirmationException;
@@ -97,7 +98,7 @@ public class ManagementServiceImpl implements ManagementService {
       try {
         file.transferTo(saveFile);
       } catch (Exception e) {
-        throw new RuntimeException("이미지 저장 실패");
+        throw new ImageSaveException();
       }
 
       ImageEntity image = ImageEntity.builder()
@@ -332,7 +333,7 @@ public class ManagementServiceImpl implements ManagementService {
       try {
         file.transferTo(saveFile);
       } catch (Exception e) {
-        throw new RuntimeException("이미지 저장 실패");
+        throw new ImageSaveException();
       }
 
       ImageEntity image = ImageEntity.builder()

@@ -36,7 +36,6 @@ public class PlaceEntity {
   private String address;
   private Double x;
   private Double y;
-  private String placeImage;
   private String placeInfo;
 
   @Enumerated(EnumType.STRING)
