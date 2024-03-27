@@ -10,11 +10,12 @@ import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.type.Platform;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public interface MemberService {
 
-  void signUp(SignUpRequest signUpRequest, Platform platform);
+  void signUp(SignUpRequest signUpRequest, MultipartFile file, Platform platform);
 
   void auth(String email, String code, Platform platform);
 
@@ -34,7 +35,7 @@ public interface MemberService {
 
   MemberDto myInfo(String accessToken);
 
-  MemberDto update(String accessToken, UpdateRequest updateRequest);
+  MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file);
 
   String reissue(String refreshToken);
 

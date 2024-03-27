@@ -1,11 +1,14 @@
 package com.easytrip.backend.member.service.sns.impl;
 
 import com.easytrip.backend.configuration.NaverConfiguration;
+import com.easytrip.backend.exception.impl.NotFoundPlaceException;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.NaverMemberDto;
 import com.easytrip.backend.member.dto.NaverTokenDto;
 import com.easytrip.backend.member.service.sns.OAuth2LoginService;
+import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.Platform;
+import java.lang.reflect.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
