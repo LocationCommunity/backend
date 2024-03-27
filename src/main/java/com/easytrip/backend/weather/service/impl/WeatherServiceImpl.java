@@ -1,7 +1,8 @@
-package com.easytrip.backend.weather.service;
+package com.easytrip.backend.weather.service.impl;
 
 import com.easytrip.backend.exception.impl.ParsingException;
 import com.easytrip.backend.weather.dto.WeatherDto;
+import com.easytrip.backend.weather.service.WeatherService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
