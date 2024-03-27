@@ -1,43 +1,72 @@
 package com.easytrip.backend.board.domain;
 
+
+
+import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
+import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.type.BoardStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Timestamp;
+
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Table(name = "boards")
 public class BoardEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long boardId;
 
-    @Column(nullable = false, length = 100)
+
     private String title;
 
-    @Lob
+    private String nickname;
+
     private String content;
 
-    @Column(nullable = false, length = 20)
-    private String category;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Many = Board, One = Member
+    @ManyToOne
     @JoinColumn(name = "memberId")
-    private MemberEntity member; // DB는 오브젝트를 저장할 수 있다. FK, 자바는 오브젝트를 저장 할 수 있다.
+    private MemberEntity memberId;
 
-    @CreationTimestamp
-    private Timestamp createDate;
+    @ManyToOne
+    @JoinColumn(name = "placeId")
+    private PlaceEntity placeId;
+
+    @OneToMany
+    @JoinColumn(name = "imageId")
+    private List<ImageEntity> imageId;
+
+
+    private Integer likeCnt;
+
+    private LocalDateTime createDate;
+
+    private LocalDateTime modDate;
+
+    private LocalDateTime deleteDate;
+
+
+    @Enumerated(EnumType.STRING)
+    private BoardStatus status;
+
+
+
 
 
 
 }
+
+

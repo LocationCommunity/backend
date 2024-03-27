@@ -1,52 +1,31 @@
 package com.easytrip.backend.board.service;
 
 import com.easytrip.backend.board.domain.BoardEntity;
-import com.easytrip.backend.board.repository.BoardRepository;
-import com.easytrip.backend.member.domain.MemberEntity;
+import com.easytrip.backend.board.dto.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
-public class BoardService {
-    @Autowired
-    private BoardRepository boardRepository;
+public interface BoardService {
 
-    public BoardService(BoardRepository boardRepository) {
-        this.boardRepository = boardRepository;
-    }
+    String writePost(BoardRequestDto boardRequestDto,BoardPlaceDto boardPlaceDto, List<MultipartFile> files) throws Exception;
 
+    String updatePost(Long boardId, BoardRequestDto boardRequestDto, List<MultipartFile> files) throws Exception;
 
-    @Transactional
-    public void writePost(BoardEntity board, MemberEntity member) {
+    String deletePost(Long boardId);
 
-        board.setMember(member);
-        boardRepository.save(board);
-    }
+    List<BoardListDto> getList(Boolean sortByLikes);
 
-    public Page<BoardEntity> getPostList(Pageable pageable) {
-        return boardRepository.findAll(pageable);
-    }
+    Optional<BoardEntity> getDetail(Long boardId, BoardDetailDto boardDetailDto);
 
-    @Transactional(readOnly = true)
-    public BoardEntity getPost(long id) {
-        return boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Failed to load post : cannot find post id"));
+    List<BoardListDto> getMyPost();
 
-    }
+    void likes(Long boardId);
 
-    @Transactional
-    public void deletePost(long id) {
-        boardRepository.deleteById(id);
-    }
+    List<BoardListDto> search(String keyword, String searchOption);
 
-    @Transactional
-    public void updatePost(long id, BoardEntity requestBoard) {
-        BoardEntity board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Failed to load post : cannot find post id"));//영속화
-        board.setTitle(requestBoard.getTitle());
-        board.setContent(requestBoard.getContent());
-        // 이때 더티체킹 - 자동 업데이트
-    }
 }
