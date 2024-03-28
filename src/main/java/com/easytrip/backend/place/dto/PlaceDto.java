@@ -19,6 +19,7 @@ import lombok.Setter;
 @Builder
 public class PlaceDto {
 
+  private Long placeId;
   private String nickName;
   private String placeName;
   private String address;
@@ -39,6 +40,7 @@ public class PlaceDto {
   public static PlaceDto of(PlaceEntity placeEntity, Boolean bookmarkYn, List<String> imageUrl) {
 
     return PlaceDto.builder()
+        .placeId(placeEntity.getPlaceId())
         .nickName(placeEntity.getMemberId().getNickname())
         .placeName(placeEntity.getPlaceName())
         .address(placeEntity.getAddress())
