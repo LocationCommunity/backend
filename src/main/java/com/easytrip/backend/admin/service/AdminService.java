@@ -21,4 +21,6 @@ public interface AdminService {
       MultipartFile file);
 
   List<MemberDetailDto> searchMember(String accessToken, String keyword, SearchOption searchOption);
+
+  PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest, List<MultipartFile> file);
 }
