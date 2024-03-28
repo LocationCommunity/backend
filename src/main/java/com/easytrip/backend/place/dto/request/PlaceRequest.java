@@ -30,9 +30,6 @@ public class PlaceRequest {
   @DecimalMax(value = "132.0", message = "유효하지 않은 y 좌표입니다.")
   private Double y;
 
-  @NotBlank(message = "장소의 이미지를 올려주세요.")
-  private String placeImage;
-
   @NotBlank(message = "장소의 설명을 적어주세요.")
   private String placeInfo;
 

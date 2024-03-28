@@ -1,3 +1,4 @@
+
 package com.easytrip.backend.board.service;
 
 import com.easytrip.backend.board.domain.BoardEntity;
@@ -446,7 +447,6 @@ public class BoardServiceImpl implements BoardService {
             return BoardListDto.listOf(boards);
         }
     }
-
 
 
 

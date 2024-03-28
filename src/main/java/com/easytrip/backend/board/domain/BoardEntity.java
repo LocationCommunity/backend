@@ -1,3 +1,4 @@
+
 package com.easytrip.backend.board.domain;
 
 
@@ -64,5 +65,6 @@ public class BoardEntity {
 
 
 }
+
 
 
