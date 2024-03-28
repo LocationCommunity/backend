@@ -26,11 +26,10 @@ public class ExhibitionController {
     //전시회 등록
     @PostMapping()
     public void postExInfo(@RequestPart(value = "boardRequestDto")  ExhibitionDto exhibitionDto,
-                                             @RequestPart(value = "files")List<MultipartFile> files
+                                             @RequestPart(value = "files", required = false)List<MultipartFile> files
                                              , @RequestPart(value = "placeId") Long placeId)  {
 
          exhibitionService.postEx(exhibitionDto, files, placeId);
-
 
 
     }
@@ -52,7 +51,7 @@ public class ExhibitionController {
     @PutMapping("/{exId}")
     public void updateEx(@PathVariable ("exId") Long exId,
                          @RequestPart(value = "exhibitionDto") ExhibitionDto exhibitionDto,
-                         @RequestPart(value = "files") List<MultipartFile> files) {
+                         @RequestPart(value = "files", required = false ) List<MultipartFile> files) {
 
         exhibitionService.updateEx(exhibitionDto, exId, files);
 

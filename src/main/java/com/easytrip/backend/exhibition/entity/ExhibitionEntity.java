@@ -66,7 +66,6 @@ public class ExhibitionEntity {
 
     private String filePath;
 
-
     @Enumerated(EnumType.STRING)
     private ExStatus status;
 

@@ -18,7 +18,7 @@ public class ExhibitionDto {
 
     private String title;
 
-    private String address;
+    private String Address_ex;
 
     private LocalDateTime start_date;
 
@@ -29,6 +29,19 @@ public class ExhibitionDto {
     private String exLink;
 
     private String exInfo;
+
+
+    private Long placeId;
+
+    private String placeName;
+
+    private String address;
+
+    private Double x;
+
+    private Double y;
+
+    private String placeLink;
 
 
 

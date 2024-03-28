@@ -5,6 +5,9 @@ public enum UseType {
 
     BOARD,
     PLACE,
+
+    EXHIBITION,
+
     PROFILE,
     MESSAGE
 

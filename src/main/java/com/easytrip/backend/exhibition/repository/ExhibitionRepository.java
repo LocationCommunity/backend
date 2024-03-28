@@ -15,9 +15,8 @@ public interface ExhibitionRepository extends JpaRepository<ExhibitionEntity, Lo
 
     Optional<ExhibitionEntity> findByExId(Long exId);
 
-    Optional<ExhibitionEntity> findByExIdAndMemberId(Long exId, MemberEntity member);
 
-//    List<ExhibitionEntity> findByExIdand
+
 
 
 }

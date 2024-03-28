@@ -4,10 +4,7 @@ import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.exception.NotfoundImageException;
 import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
-import com.easytrip.backend.exception.impl.DeletePostException;
-import com.easytrip.backend.exception.impl.InvalidTokenException;
-import com.easytrip.backend.exception.impl.NotFoundExhibition;
-import com.easytrip.backend.exception.impl.NotMatchAuthorityException;
+import com.easytrip.backend.exception.impl.*;
 import com.easytrip.backend.exhibition.dto.ExListDto;
 import com.easytrip.backend.exhibition.dto.ExhibitionDto;
 import com.easytrip.backend.exhibition.entity.ExhibitionEntity;
@@ -16,6 +13,9 @@ import com.easytrip.backend.exhibition.service.ExhibitionService;
 
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.repository.MemberRepository;
+import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.place.repository.PlaceRepository;
+import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.ExStatus;
 import com.easytrip.backend.type.UseType;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +42,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final ExhibitionRepository exhibitionRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
+    private final PlaceRepository placeRepository;
 
 
     // 전시회 등록
@@ -58,6 +59,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         MemberEntity member = memberRepository.findByEmail(email)
                 .orElseThrow(InvalidTokenException::new);
 
+        PlaceEntity place = placeRepository.findByPlaceId(placeId)
+                .orElseThrow(NotFoundPlaceException::new);
+
         if (authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_MEMBER"))) {
@@ -66,16 +70,21 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             throw new NotMatchAuthorityException();
 //
         }
-//
 
+        //admin
+//
         ExhibitionEntity exhibition = ExhibitionEntity.builder()
                 .title(exhibitionDto.getTitle())
                 .exName(exhibitionDto.getExName())
+                .memberId(member)
+                .placdId(place)
                 .address(exhibitionDto.getAddress())
                 .exInfo(exhibitionDto.getExInfo())
                 .exLink(exhibitionDto.getExLink())
+                .status(ExStatus.ACTIVE)
                 .start_date(LocalDateTime.of(2024, 3, 26, 3, 0))
                 .end_date(LocalDateTime.of(2024, 4, 15, 6, 0))
+                .regDate(LocalDateTime.now())
                 .build();
         exhibitionRepository.save(exhibition);
 
@@ -85,13 +94,13 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\exhibitions\\boards";
             UUID uuid = UUID.randomUUID();
 
-            // 랜덤식별자_원래이름
+
             String fileName = uuid + "_" + file.getOriginalFilename();
 
-            // 빈 껍데기 생성
+
             File saveFile = new File(projectPath, fileName);
 
-            // transferTo --> Exception 필요
+
             try {
                 file.transferTo(saveFile);
             } catch (IOException e) {
@@ -99,11 +108,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             }
 
 
-            // 이미지 저장 Board
             ImageEntity image = ImageEntity.builder()
                     .fileName(fileName)
                     .filePath("/exhibitions/" + fileName)
-                    .useType(UseType.BOARD)
+                    .useType(UseType.EXHIBITION)
                     .build();
 
             imageRepository.save(image);
@@ -177,13 +185,13 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\exhibitions";
                 UUID uuid = UUID.randomUUID();
 
-                // 랜덤식별자_원래이름
+
                 String fileName = uuid + "_" + file.getOriginalFilename();
 
-                // 빈 껍데기 생성
+
                 File saveFile = new File(projectPath, fileName);
 
-                // transferTo --> Exception 필요
+
                 try {
                     file.transferTo(saveFile);
                 } catch (IOException e) {
@@ -230,7 +238,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         if (authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-            //admin
+
 
             email = authentication.getName();
             exhibition = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);

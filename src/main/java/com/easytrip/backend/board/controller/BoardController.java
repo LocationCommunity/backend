@@ -31,7 +31,7 @@ public class BoardController {
     // 이미지 업로드 (MultiPartFile) Rest Api 구현 시 모든 값 RequestPart으로 맵핑 필수
    @PostMapping
     public ResponseEntity<String> writePost(@RequestPart(value = "boardRequestDto") BoardRequestDto boardRequestDto
-                                            , @RequestPart(value = "files") List<MultipartFile> files
+                                            , @RequestPart(value = "files", required = false) List<MultipartFile> files
                                             , @RequestPart(value = "placeId") Long placeId) throws Exception{
         String response = boardService.writePost(boardRequestDto, files, placeId);
 
@@ -44,7 +44,7 @@ public class BoardController {
     @PostMapping("/{boardId}")
     public ResponseEntity<String> updatePost(@Valid @PathVariable("boardId") Long boardId,
                                              @RequestPart(value = ("boardRequestDto")) BoardRequestDto boardRequestDto,
-                                             @RequestPart(value = ("files")) List<MultipartFile> files) throws Exception {
+                                             @RequestPart(value = ("files"), required = false) List<MultipartFile> files) throws Exception {
 
         String response = boardService.updatePost(boardId, boardRequestDto, files);
 
