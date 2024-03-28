@@ -4,6 +4,9 @@ import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.admin.service.AdminService;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.service.ManagementService;
+import com.easytrip.backend.place.dto.PlaceDto;
+import com.easytrip.backend.place.dto.request.PlaceRequest;
+import com.easytrip.backend.place.service.PlaceService;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.SearchOption;
 import java.util.List;
@@ -17,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminServiceImpl implements AdminService {
 
   private final ManagementService managementService;
+  private final PlaceService placeService;
 
   @Override
   @Transactional
@@ -40,5 +44,11 @@ public class AdminServiceImpl implements AdminService {
   public List<MemberDetailDto> searchMember(String accessToken, String keyword,
       SearchOption searchOption) {
     return managementService.searchMember(accessToken, keyword, searchOption);
+  }
+
+  @Override
+  public PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest,
+      List<MultipartFile> files) {
+    return placeService.updatePlace(accessToken, placeId, placeRequest, files);
   }
 }

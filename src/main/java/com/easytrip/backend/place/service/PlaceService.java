@@ -22,4 +22,7 @@ public interface PlaceService {
   void report(String accessToken, Long placeId);
 
   void bookmark(String accessToken, Long placeId);
+
+  PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest,
+      List<MultipartFile> files);
 }

@@ -64,4 +64,13 @@ public class AdminController {
         searchOption);
     return ResponseEntity.ok(result);
   }
+
+  @PutMapping("/place/{placeId}")
+  public ResponseEntity<PlaceDto> updatePlace(HttpServletRequest request,
+      @PathVariable Long placeId, @RequestPart(name = "placeRequest") PlaceRequest placeRequest,
+      @RequestPart(name = "file") List<MultipartFile> files) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    PlaceDto result = adminService.updatePlace(accessToken, placeId, placeRequest, files);
+    return ResponseEntity.ok(result);
+  }
 }

@@ -5,7 +5,6 @@ import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;
 import com.easytrip.backend.exception.impl.ImageSaveException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
-import com.easytrip.backend.exception.impl.NotFoundBookmarkException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.exception.impl.NotFoundPlaceException;
 import com.easytrip.backend.exception.impl.ParsingException;
@@ -268,6 +267,76 @@ public class PlaceServiceImpl implements PlaceService {
           .build();
       bookmarkPlaceRepository.save(bookmarkPlace);
     }
+  }
+
+  @Override
+  @Transactional
+  public PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest,
+      List<MultipartFile> files) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+
+    String address = getAddress(placeRequest.getX(), placeRequest.getY());
+
+    if (!files.isEmpty() || files != null) {
+      // 기존의 이미지를 삭제하고 새로운 이미지로 대체
+      List<ImageEntity> images = imageRepository.findByPlaceId(place);
+      imageRepository.deleteAll(images);
+
+      for (MultipartFile file : files) {
+        String uuid = UUID.randomUUID().toString();
+        String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\places";
+        String fileName = uuid + "_" + file.getOriginalFilename();
+        File saveFile = new File(projectPath, fileName);
+        try {
+          file.transferTo(saveFile);
+        } catch (Exception e) {
+          throw new ImageSaveException();
+        }
+
+        ImageEntity image = ImageEntity.builder()
+            .fileName(fileName)
+            .filePath(projectPath + "\\" + fileName)
+            .useType(UseType.PLACE)
+            .placeId(place)
+            .build();
+        imageRepository.save(image);
+      }
+    }
+
+    PlaceEntity updatePlace = place.toBuilder()
+        .placeName(placeRequest.getPlaceName())
+        .address(address)
+        .x(placeRequest.getX())
+        .y(placeRequest.getY())
+        .placeInfo(placeRequest.getPlaceInfo())
+        .category(placeRequest.getCategory())
+        .build();
+    placeRepository.save(updatePlace);
+
+    List<ImageEntity> images = imageRepository.findByPlaceId(place);
+    List<String> imageUrl = new ArrayList<>();
+    for (ImageEntity image : images) {
+      imageUrl.add(image.getFilePath());
+    }
+
+    PlaceDto result = PlaceDto.builder()
+        .nickName(updatePlace.getMemberId().getNickname())
+        .placeName(updatePlace.getPlaceName())
+        .address(updatePlace.getAddress())
+        .placeImage(imageUrl)
+        .placeInfo(updatePlace.getPlaceInfo())
+        .category(updatePlace.getCategory())
+        .reportCnt(updatePlace.getReportCnt())
+        .bookmarkCnt(updatePlace.getBookmarkCnt())
+        .build();
+
+    return result;
   }
 
   @Value("${spring.keys.naver-client-id}")
