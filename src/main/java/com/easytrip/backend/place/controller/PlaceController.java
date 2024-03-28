@@ -4,6 +4,7 @@ import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
+import com.easytrip.backend.place.dto.request.PlaceUpdateRequest;
 import com.easytrip.backend.place.service.PlaceService;
 import com.easytrip.backend.type.PlaceCategory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -33,9 +35,9 @@ public class PlaceController {
   @PostMapping("/share")
   public void placeShare(HttpServletRequest request,
       @Valid @RequestPart(name = "placeRequest") PlaceRequest placeRequest,
-      @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> file) {
+      @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> files) {
     String accessToken = jwtTokenProvider.resolveToken(request);
-    placeService.share(accessToken, placeRequest, file);
+    placeService.share(accessToken, placeRequest, files);
   }
 
   @GetMapping("/share")
@@ -43,6 +45,14 @@ public class PlaceController {
     String accessToken = jwtTokenProvider.resolveToken(request);
     List<PlaceDto> result = placeService.getMyShare(accessToken);
     return ResponseEntity.ok(result);
+  }
+
+  @PutMapping("/share/{placeId}")
+  public void myShareUpdate(HttpServletRequest request, @Valid @PathVariable Long placeId,
+      @Valid @RequestPart(name = "placeUpdateRequest") PlaceUpdateRequest placeUpdateRequest,
+      @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> files) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    placeService.myShareUpdate(accessToken, placeId, placeUpdateRequest, files);
   }
 
   @GetMapping("/info/{placeId}")

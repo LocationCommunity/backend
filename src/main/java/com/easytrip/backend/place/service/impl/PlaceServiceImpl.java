@@ -5,6 +5,7 @@ import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.exception.UnsupportedImageTypeException;
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;
 import com.easytrip.backend.exception.impl.ImageSaveException;
+import com.easytrip.backend.exception.impl.InvalidAuthException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.exception.impl.NotFoundPlaceException;
@@ -17,14 +18,18 @@ import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
+import com.easytrip.backend.place.dto.request.PlaceUpdateRequest;
 import com.easytrip.backend.place.repository.BookmarkPlaceRepository;
 import com.easytrip.backend.place.repository.PlaceRepository;
 import com.easytrip.backend.place.service.PlaceService;
 import com.easytrip.backend.type.PlaceCategory;
+import com.easytrip.backend.type.Platform;
 import com.easytrip.backend.type.UseType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import jakarta.validation.Valid;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +73,12 @@ public class PlaceServiceImpl implements PlaceService {
     // 토큰을 통해 사용자 정보 받아오기
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
-    MemberEntity member = memberRepository.findByEmail(email)
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     // 받은 위경도를 주소로 변경
@@ -140,7 +150,12 @@ public class PlaceServiceImpl implements PlaceService {
     // 토큰을 통해 사용자 정보 받아오기
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
-    MemberEntity member = memberRepository.findByEmail(email)
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     List<PlaceEntity> placeEntities = placeRepository.findAllByMemberId(member);
@@ -170,6 +185,81 @@ public class PlaceServiceImpl implements PlaceService {
   }
 
   @Override
+  @Transactional
+  public void myShareUpdate(String accessToken, Long placeId,
+      @Valid PlaceUpdateRequest placeUpdateRequest, List<MultipartFile> files) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    // 토큰을 통해 사용자 정보 받아오기
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+
+    // 자신이 공유한 장소가 아닐 경우
+    if (!place.getMemberId().equals(member)) {
+      throw new InvalidAuthException();
+    }
+
+    if (!files.isEmpty() || files != null) {
+      // 기존의 이미지를 삭제하고 새로운 이미지로 대체
+      List<ImageEntity> images = imageRepository.findByPlaceId(place);
+      imageRepository.deleteAll(images);
+
+      for (MultipartFile file : files) {
+        String uuid = UUID.randomUUID().toString();
+        String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\places";
+        String fileName = uuid + "_" + file.getOriginalFilename();
+
+        // 파일 이름에서 확장자 추출
+        String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+        // 지원하는 이미지 파일 확장자 목록
+        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+        // 확장자가 이미지 파일인지 확인
+        if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+          File saveFile = new File(projectPath, fileName);
+          try {
+            file.transferTo(saveFile);
+          } catch (Exception e) {
+            throw new ImageSaveException();
+          }
+        } else {
+          // 이미지 파일이 아닌 경우에 대한 처리
+          throw new UnsupportedImageTypeException();
+        }
+
+        ImageEntity image = ImageEntity.builder()
+            .fileName(fileName)
+            .filePath(projectPath + "\\" + fileName)
+            .useType(UseType.PLACE)
+            .placeId(place)
+            .build();
+        imageRepository.save(image);
+      }
+    }
+
+    PlaceEntity updatePlace = place.toBuilder()
+        .placeName(placeUpdateRequest.getPlaceName())
+        .placeInfo(placeUpdateRequest.getPlaceInfo())
+        .category(placeUpdateRequest.getCategory())
+        .build();
+    placeRepository.save(updatePlace);
+  }
+
+  @Override
   public PlaceDto getInfo(String accessToken, Long placeId) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
@@ -178,7 +268,12 @@ public class PlaceServiceImpl implements PlaceService {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
-    MemberEntity member = memberRepository.findByEmail(email)
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     PlaceEntity place = placeRepository.findByPlaceId(placeId)
@@ -227,7 +322,12 @@ public class PlaceServiceImpl implements PlaceService {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
-    MemberEntity member = memberRepository.findByEmail(email)
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     List<PlaceEntity> byAddressContaining = placeRepository.findByAddressContainingAndCategory(
@@ -293,7 +393,12 @@ public class PlaceServiceImpl implements PlaceService {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
-    MemberEntity member = memberRepository.findByEmail(email)
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     PlaceEntity place = placeRepository.findByPlaceId(placeId)
