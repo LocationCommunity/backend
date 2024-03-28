@@ -339,6 +339,18 @@ public class PlaceServiceImpl implements PlaceService {
     return result;
   }
 
+  @Override
+  @Transactional
+  public void deletePlace(String accessToken, Long placeId) {
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+    placeRepository.delete(place);
+
+    List<ImageEntity> images = imageRepository.findByPlaceId(place);
+    imageRepository.deleteAll(images);
+  }
+
   @Value("${spring.keys.naver-client-id}")
   private String clientId;
   @Value("${spring.keys.naver-client-secret}")
