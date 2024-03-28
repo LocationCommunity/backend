@@ -1,5 +1,6 @@
 package com.easytrip.backend.place.controller;
 
+import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.place.dto.MapDto;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
@@ -25,19 +26,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlaceController {
 
   private final PlaceService placeService;
+  private final JwtTokenProvider jwtTokenProvider;
 
   @PostMapping("/share")
   public ResponseEntity<String> placeShare(HttpServletRequest request,
       @Valid @RequestBody PlaceRequest placeRequest) {
-    String accessToken = getToken(request);
+    String accessToken = jwtTokenProvider.resolveToken(request);
     String response = placeService.share(accessToken, placeRequest);
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/info/{placeId}")
   public ResponseEntity<PlaceDto> getInfo(HttpServletRequest request,
-      @PathVariable("placeId") Long placeId) {
-    String accessToken = getToken(request);
+      @PathVariable(value = "placeId") Long placeId) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
     PlaceDto response = placeService.getInfo(accessToken, placeId);
     return ResponseEntity.ok(response);
   }
@@ -45,7 +47,7 @@ public class PlaceController {
   @GetMapping("/map")
   public ResponseEntity<List<MapDto>> getMapData(HttpServletRequest request, @RequestParam Double x,
       @RequestParam Double y) {
-    String accessToken = getToken(request);
+    String accessToken = jwtTokenProvider.resolveToken(request);
     List<MapDto> response = placeService.getMapData(accessToken, x, y);
     return ResponseEntity.ok(response);
   }
@@ -54,7 +56,7 @@ public class PlaceController {
   public ResponseEntity<List<PlaceDto>> placeList(HttpServletRequest request,
       @RequestParam String state,
       @Valid @NotNull(message = "장소의 카테고리는 없을 수 없습니다.") @RequestParam PlaceCategory category) {
-    String accessToken = getToken(request);
+    String accessToken = jwtTokenProvider.resolveToken(request);
     List<PlaceDto> response = placeService.getList(accessToken, state, category);
 
     return ResponseEntity.ok(response);
@@ -62,8 +64,8 @@ public class PlaceController {
 
   @PostMapping("/info/{placeId}/report")
   public ResponseEntity<String> placeReport(HttpServletRequest request,
-      @PathVariable Long placeId) {
-    String accessToken = getToken(request);
+      @PathVariable(value = "placeId") Long placeId) {
+    String accessToken = jwtTokenProvider.resolveToken(request);;
     String response = placeService.report(accessToken, placeId);
 
     return ResponseEntity.ok(response);
@@ -71,21 +73,10 @@ public class PlaceController {
 
   @PostMapping("/info/{placeId}/bookmark")
   public ResponseEntity<String> placeBookmark(HttpServletRequest request,
-      @PathVariable Long placeId) {
-    String accessToken = getToken(request);
+      @PathVariable (value = "placeId") Long placeId) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
     String response = placeService.bookmark(accessToken, placeId);
 
     return ResponseEntity.ok(response);
-  }
-
-  private static String getToken(HttpServletRequest request) {
-
-    final String BEARER = "Bearer ";
-
-    String token = request.getHeader("Authorization");
-    if (token != null && token.startsWith(BEARER)) {
-      token = token.substring(BEARER.length()); // "Bearer " 이후의 토큰 값만 추출
-    }
-    return token;
   }
 }

@@ -1,5 +1,8 @@
 package com.easytrip.backend.member.service.impl;
 
+
+import com.easytrip.backend.common.image.entity.ImageEntity;
+import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.components.MailComponents;
 import com.easytrip.backend.exception.impl.AlreadyAuthenticatedException;
 import com.easytrip.backend.exception.impl.DuplicateEmailException;
@@ -24,7 +27,9 @@ import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.member.service.ManagementService;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.Platform;
+import com.easytrip.backend.type.UseType;
 import io.jsonwebtoken.Claims;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
@@ -37,6 +42,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
@@ -48,9 +54,10 @@ public class ManagementServiceImpl implements ManagementService {
   private final JwtTokenProvider jwtTokenProvider;
   private final RedisTemplate redisTemplate;
   private final PasswordEncoder passwordEncoder;
+  private final ImageRepository imageRepository;
 
   @Override
-  public void signUp(SignUpRequest signUpRequest, Platform platForm) {
+  public void signUp(SignUpRequest signUpRequest, MultipartFile file, Platform platForm) {
 
     // 올바르지 않은 이메일
     if (!isValidEmail(signUpRequest.getEmail())) {
@@ -80,7 +87,35 @@ public class ManagementServiceImpl implements ManagementService {
       member = new MemberEntity();
     }
 
-    member = memberRepository.save(SignUpRequest.signUpInput(member, signUpRequest));
+    // 프로필 이미지 저장
+    if (file.isEmpty() || file == null) {
+      member = memberRepository.save(SignUpRequest.signUpInput(member, signUpRequest, null));
+    } else {
+      String uuid = UUID.randomUUID().toString();
+      String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
+      String fileName = uuid + "_" + file.getOriginalFilename();
+      File saveFile = new File(projectPath, fileName);
+      try {
+        file.transferTo(saveFile);
+      } catch (Exception e) {
+        throw new RuntimeException("이미지 저장 실패");
+      }
+
+      ImageEntity image = ImageEntity.builder()
+          .fileName(fileName)
+          .filePath(projectPath + "\\" + fileName)
+          .useType(UseType.PROFILE)
+          .memberId(member)
+          .build();
+
+      member = memberRepository.save(SignUpRequest.signUpInput(member, signUpRequest, image));
+
+      ImageEntity imageEntity = image.toBuilder()
+          .memberId(member)
+          .build();
+      imageRepository.save(imageEntity);
+    }
+
     sendMail(signUpRequest, member);
   }
 
@@ -269,7 +304,7 @@ public class ManagementServiceImpl implements ManagementService {
   }
 
   @Override
-  public MemberDto update(String accessToken, UpdateRequest updateRequest) {
+  public MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
       throw new InvalidTokenException();
@@ -285,9 +320,36 @@ public class ManagementServiceImpl implements ManagementService {
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
+    String imageUrl;
+
+    // 프로필 이미지 저장
+    if (file.isEmpty() || file == null) {
+      imageUrl = null;
+    } else {
+      String uuid = UUID.randomUUID().toString();
+      String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
+      String fileName = uuid + "_" + file.getOriginalFilename();
+      File saveFile = new File(projectPath, fileName);
+      try {
+        file.transferTo(saveFile);
+      } catch (Exception e) {
+        throw new RuntimeException("이미지 저장 실패");
+      }
+
+      ImageEntity image = ImageEntity.builder()
+          .fileName(fileName)
+          .filePath(projectPath + "\\" + fileName)
+          .useType(UseType.PROFILE)
+          .memberId(member)
+          .build();
+      imageRepository.save(image);
+
+      imageUrl = image.getFilePath();
+    }
+
     MemberEntity updateMember = member.toBuilder()
         .nickname(updateRequest.getNickname())
-        .imageUrl(updateRequest.getImageUrl())
+        .imageUrl(imageUrl)
         .introduction(updateRequest.getIntroduction())
         .build();
     memberRepository.save(updateMember);

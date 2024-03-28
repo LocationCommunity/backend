@@ -51,9 +51,17 @@ public class JwtTokenProvider {
     Claims refreshTokenClaims = Jwts.claims().setSubject(email);
     refreshTokenClaims .put("platform", platForm);
 
+    if (isAdmin != null && isAdmin) {
+      refreshTokenClaims .put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
+    } else {
+      refreshTokenClaims .put("roles", Collections.singletonList("ROLE_USER"));
+    }
+
     long now = (new Date()).getTime();
-    Date accessTokenExpiresIn = new Date(now + 3600000);
+    Date accessTokenExpiresIn = new Date(now + 7200000);
     Date refreshTokenExpiresIn = new Date(now + 86400000);
+
+
 
     String accessToken = Jwts.builder()
         .setClaims(accessTokenClaims )
