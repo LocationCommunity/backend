@@ -260,6 +260,42 @@ public class PlaceServiceImpl implements PlaceService {
   }
 
   @Override
+  @Transactional
+  public void myShareDelete(String accessToken, Long placeId) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+
+    if (!place.getMemberId().equals(member)) {
+      throw new InvalidAuthException();
+    }
+
+    placeRepository.delete(place);
+
+    // 해당 장소 북마크를 모두 삭제
+    List<BookmarkPlaceEntity> bookmarks = bookmarkPlaceRepository.findAllByPlaceId(place);
+    bookmarkPlaceRepository.deleteAll(bookmarks);
+
+    // 헤딩 징소 이미지 삭제
+    List<ImageEntity> images = imageRepository.findByPlaceId(place);
+    imageRepository.deleteAll(images);
+  }
+
+  @Override
   public PlaceDto getInfo(String accessToken, Long placeId) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {

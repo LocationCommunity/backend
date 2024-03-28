@@ -20,6 +20,8 @@ public interface PlaceService {
   void myShareUpdate(String accessToken, Long placeId, @Valid PlaceUpdateRequest placeUpdateRequest,
       List<MultipartFile> files);
 
+  void myShareDelete(String accessToken, Long placeId);
+
   PlaceDto getInfo(String accessToken, Long placeId);
 
   List<MapDto> getMapData(String accessToken, Double x, Double y);

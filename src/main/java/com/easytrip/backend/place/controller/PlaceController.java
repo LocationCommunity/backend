@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,11 +49,17 @@ public class PlaceController {
   }
 
   @PutMapping("/share/{placeId}")
-  public void myShareUpdate(HttpServletRequest request, @Valid @PathVariable Long placeId,
+  public void myShareUpdate(HttpServletRequest request, @PathVariable Long placeId,
       @Valid @RequestPart(name = "placeUpdateRequest") PlaceUpdateRequest placeUpdateRequest,
       @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> files) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     placeService.myShareUpdate(accessToken, placeId, placeUpdateRequest, files);
+  }
+
+  @DeleteMapping("/share/{placeId}")
+  public void myShareDelete(HttpServletRequest request, @PathVariable Long placeId) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    placeService.myShareDelete(accessToken, placeId);
   }
 
   @GetMapping("/info/{placeId}")

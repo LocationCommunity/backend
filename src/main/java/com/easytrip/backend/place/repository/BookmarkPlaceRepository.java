@@ -18,4 +18,6 @@ public interface BookmarkPlaceRepository extends JpaRepository<BookmarkPlaceEnti
   Optional<BookmarkPlaceEntity> findByMemberIdAndPlaceId(MemberEntity member, PlaceEntity place);
 
   Optional<BookmarkPlaceEntity> findByBookmarkId(Long bookmarkId);
+
+  List<BookmarkPlaceEntity> findAllByPlaceId(PlaceEntity place);
 }
