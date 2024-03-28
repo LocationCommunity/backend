@@ -19,6 +19,9 @@ import com.easytrip.backend.type.Platform;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +34,11 @@ public class MemberServiceImpl implements MemberService {
   private final KakaoLoginServiceImpl kakaoLoginService;
 
   @Override
-  public void signUp(SignUpRequest signUpRequest, Platform platform) {
-    managementService.signUp(signUpRequest, platform);
+
+  @Transactional
+  public void signUp(SignUpRequest signUpRequest, MultipartFile file, Platform platform) {
+    managementService.signUp(signUpRequest, file, platform);
+
   }
 
   @Override
@@ -92,8 +98,11 @@ public class MemberServiceImpl implements MemberService {
   }
 
   @Override
-  public MemberDto update(String accessToken, UpdateRequest updateRequest) {
-    MemberDto result = managementService.update(accessToken, updateRequest);
+
+  @Transactional
+  public MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file) {
+    MemberDto result = managementService.update(accessToken, updateRequest, file);
+
     return result;
   }
 

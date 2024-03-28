@@ -1,3 +1,4 @@
+
 package com.easytrip.backend.board.controller;
 
 import com.easytrip.backend.board.domain.BoardEntity;
@@ -114,3 +115,4 @@ public class BoardController {
     }
 
 }
+

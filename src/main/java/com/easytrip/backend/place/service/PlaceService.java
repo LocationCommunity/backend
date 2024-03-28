@@ -6,11 +6,12 @@ import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.type.PlaceCategory;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public interface PlaceService {
 
-  String share(String accessToken, PlaceRequest placeRequest);
+  void share(String accessToken, PlaceRequest placeRequest, List<MultipartFile> files);
 
   PlaceDto getInfo(String accessToken, Long placeId);
 
@@ -18,7 +19,10 @@ public interface PlaceService {
 
   List<PlaceDto> getList(String accessToken, String state, PlaceCategory category);
 
-  String report(String accessToken, Long placeId);
+  void report(String accessToken, Long placeId);
 
-  String bookmark(String accessToken, Long placeId);
+  void bookmark(String accessToken, Long placeId);
+
+  PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest,
+      List<MultipartFile> files);
 }

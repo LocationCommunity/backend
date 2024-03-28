@@ -1,3 +1,4 @@
+
 package com.easytrip.backend.board.service;
 
 import com.easytrip.backend.board.domain.BoardEntity;

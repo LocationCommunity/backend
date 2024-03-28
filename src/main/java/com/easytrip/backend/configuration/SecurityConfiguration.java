@@ -29,7 +29,8 @@ public class SecurityConfiguration {
                 .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
                     "/members/password", "/weather/**",  ("/exhibitions/**")).permitAll()
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
-                    "/members/reissue", "/members/bookmark", "/place/**").hasRole("USER"))
+                    "/members/reissue", "/members/bookmark", "/place/**").hasRole("USER")
+                .requestMatchers("/admin/**").hasRole("ADMIN"))
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();
