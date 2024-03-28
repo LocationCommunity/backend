@@ -1,8 +1,10 @@
 package com.easytrip.backend.place.service.impl;
 
+import com.easytrip.backend.common.image.domain.ImageEntity;
+import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;
+import com.easytrip.backend.exception.impl.ImageSaveException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
-import com.easytrip.backend.exception.impl.NotFoundBookmarkException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.exception.impl.NotFoundPlaceException;
 import com.easytrip.backend.exception.impl.ParsingException;
@@ -18,12 +20,15 @@ import com.easytrip.backend.place.repository.BookmarkPlaceRepository;
 import com.easytrip.backend.place.repository.PlaceRepository;
 import com.easytrip.backend.place.service.PlaceService;
 import com.easytrip.backend.type.PlaceCategory;
+import com.easytrip.backend.type.UseType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -35,6 +40,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -45,9 +51,11 @@ public class PlaceServiceImpl implements PlaceService {
   private final MemberRepository memberRepository;
   private final PlaceRepository placeRepository;
   private final BookmarkPlaceRepository bookmarkPlaceRepository;
+  private final ImageRepository imageRepository;
 
   @Override
-  public String share(String accessToken, PlaceRequest placeRequest) {
+  @Transactional
+  public void share(String accessToken, PlaceRequest placeRequest, List<MultipartFile> files) {
 
     // 토큰이 유효한지 검증
     if (!jwtTokenProvider.validateToken(accessToken)) {
@@ -75,7 +83,6 @@ public class PlaceServiceImpl implements PlaceService {
         .address(address)
         .x(placeRequest.getX())
         .y(placeRequest.getY())
-        .placeImage(placeRequest.getPlaceImage())
         .placeInfo(placeRequest.getPlaceInfo())
         .category(placeRequest.getCategory())
         .reportCnt(0)
@@ -83,7 +90,26 @@ public class PlaceServiceImpl implements PlaceService {
         .build();
     placeRepository.save(place);
 
-    return "장소를 공유했습니다.";
+    // 이미지 저장
+    for (MultipartFile file : files) {
+      String uuid = UUID.randomUUID().toString();
+      String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\places";
+      String fileName = uuid + "_" + file.getOriginalFilename();
+      File saveFile = new File(projectPath, fileName);
+      try {
+        file.transferTo(saveFile);
+      } catch (Exception e) {
+        throw new ImageSaveException();
+      }
+
+      ImageEntity image = ImageEntity.builder()
+          .fileName(fileName)
+          .filePath(projectPath + "\\" + fileName)
+          .useType(UseType.PLACE)
+          .placeId(place)
+          .build();
+      imageRepository.save(image);
+    }
   }
 
   @Override
@@ -104,14 +130,20 @@ public class PlaceServiceImpl implements PlaceService {
     Optional<BookmarkPlaceEntity> byMemberIdAndPlaceId = bookmarkPlaceRepository.findByMemberIdAndPlaceId(
         member, place);
 
+    List<ImageEntity> images = imageRepository.findByPlaceId(place);
+    List<String> imageUrl = new ArrayList<>();
+    for (ImageEntity image : images) {
+      imageUrl.add(image.getFilePath());
+    }
+
     PlaceDto result = new PlaceDto();
     if (byMemberIdAndPlaceId.isPresent()) {
-      result = PlaceDto.of(place, true);
+      result = PlaceDto.of(place, true, imageUrl);
 
       return result;
     }
 
-    result = PlaceDto.of(place, false);
+    result = PlaceDto.of(place, false, imageUrl);
 
     return result;
   }
@@ -144,7 +176,7 @@ public class PlaceServiceImpl implements PlaceService {
     List<PlaceEntity> byAddressContaining = placeRepository.findByAddressContainingAndCategory(
         state, category);
 
-    List<BookmarkPlaceEntity> bookmark = new ArrayList<>();
+    List<List<String>> imageUrl = new ArrayList<>();
     List<Boolean> bookmarkYn = new ArrayList<>();
     for (PlaceEntity place : byAddressContaining) {
       Optional<BookmarkPlaceEntity> byMemberIdAndPlaceId = bookmarkPlaceRepository.findByMemberIdAndPlaceId(
@@ -154,16 +186,23 @@ public class PlaceServiceImpl implements PlaceService {
       } else {
         bookmarkYn.add(false);
       }
+
+      List<String> url = new ArrayList<>();
+      List<ImageEntity> images = imageRepository.findByPlaceId(place);
+      for (ImageEntity image : images) {
+        url.add(image.getFilePath());
+      }
+      imageUrl.add(url);
     }
 
-    List<PlaceDto> result = PlaceDto.listOf(byAddressContaining, bookmarkYn);
+    List<PlaceDto> result = PlaceDto.listOf(byAddressContaining, bookmarkYn, imageUrl);
 
     return result;
   }
 
   @Override
   @Transactional
-  public String report(String accessToken, Long placeId) {
+  public void report(String accessToken, Long placeId) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
       throw new InvalidTokenException();
@@ -185,13 +224,11 @@ public class PlaceServiceImpl implements PlaceService {
       List<BookmarkPlaceEntity> byPlaceId = bookmarkPlaceRepository.findByPlaceId(placeEntity);
       bookmarkPlaceRepository.deleteAll(byPlaceId);
     }
-
-    return "신고를 완료했습니다.";
   }
 
   @Override
   @Transactional
-  public String bookmark(String accessToken, Long placeId) {
+  public void bookmark(String accessToken, Long placeId) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
       throw new InvalidTokenException();
@@ -217,21 +254,101 @@ public class PlaceServiceImpl implements PlaceService {
           .build();
       placeRepository.save(placeEntity);
 
-      return "해당 장소 북마크를 해제 했습니다.";
+
+    } else {
+      PlaceEntity placeEntity = place.toBuilder()
+          .bookmarkCnt(place.getBookmarkCnt() + 1)
+          .build();
+      placeRepository.save(placeEntity);
+
+      BookmarkPlaceEntity bookmarkPlace = BookmarkPlaceEntity.builder()
+          .memberId(member)
+          .placeId(place)
+          .build();
+      bookmarkPlaceRepository.save(bookmarkPlace);
+    }
+  }
+
+  @Override
+  @Transactional
+  public PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest,
+      List<MultipartFile> files) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
     }
 
-    PlaceEntity placeEntity = place.toBuilder()
-        .bookmarkCnt(place.getBookmarkCnt() + 1)
-        .build();
-    placeRepository.save(placeEntity);
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
 
-    BookmarkPlaceEntity bookmarkPlace = BookmarkPlaceEntity.builder()
-        .memberId(member)
-        .placeId(place)
-        .build();
-    bookmarkPlaceRepository.save(bookmarkPlace);
+    String address = getAddress(placeRequest.getX(), placeRequest.getY());
 
-    return "해당 장소를 북마크 했습니다.";
+    if (!files.isEmpty() || files != null) {
+      // 기존의 이미지를 삭제하고 새로운 이미지로 대체
+      List<ImageEntity> images = imageRepository.findByPlaceId(place);
+      imageRepository.deleteAll(images);
+
+      for (MultipartFile file : files) {
+        String uuid = UUID.randomUUID().toString();
+        String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\places";
+        String fileName = uuid + "_" + file.getOriginalFilename();
+        File saveFile = new File(projectPath, fileName);
+        try {
+          file.transferTo(saveFile);
+        } catch (Exception e) {
+          throw new ImageSaveException();
+        }
+
+        ImageEntity image = ImageEntity.builder()
+            .fileName(fileName)
+            .filePath(projectPath + "\\" + fileName)
+            .useType(UseType.PLACE)
+            .placeId(place)
+            .build();
+        imageRepository.save(image);
+      }
+    }
+
+    PlaceEntity updatePlace = place.toBuilder()
+        .placeName(placeRequest.getPlaceName())
+        .address(address)
+        .x(placeRequest.getX())
+        .y(placeRequest.getY())
+        .placeInfo(placeRequest.getPlaceInfo())
+        .category(placeRequest.getCategory())
+        .build();
+    placeRepository.save(updatePlace);
+
+    List<ImageEntity> images = imageRepository.findByPlaceId(place);
+    List<String> imageUrl = new ArrayList<>();
+    for (ImageEntity image : images) {
+      imageUrl.add(image.getFilePath());
+    }
+
+    PlaceDto result = PlaceDto.builder()
+        .nickName(updatePlace.getMemberId().getNickname())
+        .placeName(updatePlace.getPlaceName())
+        .address(updatePlace.getAddress())
+        .placeImage(imageUrl)
+        .placeInfo(updatePlace.getPlaceInfo())
+        .category(updatePlace.getCategory())
+        .reportCnt(updatePlace.getReportCnt())
+        .bookmarkCnt(updatePlace.getBookmarkCnt())
+        .build();
+
+    return result;
+  }
+
+  @Override
+  @Transactional
+  public void deletePlace(String accessToken, Long placeId) {
+
+    PlaceEntity place = placeRepository.findByPlaceId(placeId)
+        .orElseThrow(() -> new NotFoundPlaceException());
+    placeRepository.delete(place);
+
+    List<ImageEntity> images = imageRepository.findByPlaceId(place);
+    imageRepository.deleteAll(images);
   }
 
   @Value("${spring.keys.naver-client-id}")

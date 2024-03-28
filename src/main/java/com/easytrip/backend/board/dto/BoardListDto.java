@@ -22,7 +22,7 @@ public class BoardListDto {
     private Integer likeCnt;
 
 
-    //entity to dto
+
     public static List<BoardListDto> listOf(List<BoardEntity> boardEntities) {
         return boardEntities.stream()
                 .map(BoardListDto::of)

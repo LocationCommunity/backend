@@ -6,11 +6,13 @@ import com.easytrip.backend.type.BoardStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
+
 
     Optional<BoardEntity> findALlByMemberId(MemberEntity member);
     List<BoardEntity> findByStatusOrderByCreateDateDesc(BoardStatus status);
@@ -38,9 +40,5 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
     List<BoardEntity> findByTitleContainingAndContentContainingAndStatus(String keyword, String keyword2, BoardStatus status);
 
     List<BoardEntity> findByNickname(String keyword);
-
-
-
-
 
 }
