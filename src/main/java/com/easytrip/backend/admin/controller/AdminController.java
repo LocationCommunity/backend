@@ -69,7 +69,7 @@ public class AdminController {
   @PutMapping("/place/{placeId}")
   public ResponseEntity<PlaceDto> updatePlace(HttpServletRequest request,
       @PathVariable Long placeId, @RequestPart(name = "placeRequest") PlaceRequest placeRequest,
-      @RequestPart(name = "file") List<MultipartFile> files) {
+      @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> files) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     PlaceDto result = adminService.updatePlace(accessToken, placeId, placeRequest, files);
     return ResponseEntity.ok(result);
