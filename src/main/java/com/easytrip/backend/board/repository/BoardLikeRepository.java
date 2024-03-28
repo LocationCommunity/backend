@@ -19,3 +19,4 @@ public interface BoardLikeRepository extends JpaRepository<BoardLikeEntity, Long
 
 
 }
+

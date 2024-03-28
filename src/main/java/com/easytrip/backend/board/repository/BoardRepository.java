@@ -13,32 +13,32 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
-  Optional<BoardEntity> findALlByMemberId(MemberEntity member);
-  List<BoardEntity> findByStatusOrderByCreateDateDesc(BoardStatus status);
 
-  List<BoardEntity> findByStatusOrderByLikeCntDesc(BoardStatus status);
+    Optional<BoardEntity> findALlByMemberId(MemberEntity member);
+    List<BoardEntity> findByStatusOrderByCreateDateDesc(BoardStatus status);
 
-  Optional<BoardEntity> findByBoardId(Long boardId);
+    List<BoardEntity> findByStatusOrderByLikeCntDesc(BoardStatus status);
 
-  Optional<BoardEntity> findByBoardIdAndMemberId(Long boardId, MemberEntity member);
+    Optional<BoardEntity> findByBoardId(Long boardId);
 
-  List<BoardEntity> findByMemberIdAndStatus(MemberEntity member, BoardStatus status);
+    Optional<BoardEntity> findByBoardIdAndMemberId(Long boardId, MemberEntity member);
 
-  List<BoardEntity> findByTitleContainingAndStatus(String title, BoardStatus status);
+    List<BoardEntity> findByMemberIdAndStatus(MemberEntity member, BoardStatus status);
 
-  List<BoardEntity> findByContentContainingAndStatus(String content, BoardStatus status);
+    List<BoardEntity> findByTitleContainingAndStatus(String title, BoardStatus status);
 
-  List<BoardEntity> findByNicknameAndStatus(String nickname, BoardStatus status);
+    List<BoardEntity> findByContentContainingAndStatus(String content, BoardStatus status);
 
-  Optional<BoardEntity> findByBoardIdAndStatus(Long boardId, BoardStatus status);
+    List<BoardEntity> findByNicknameAndStatus(String nickname, BoardStatus status);
 
-  List<BoardEntity> findByTitleContaining(String keyword);
+    Optional<BoardEntity> findByBoardIdAndStatus(Long boardId, BoardStatus status);
 
-  List<BoardEntity> findByContentContaining(String keyword);
+    List<BoardEntity> findByTitleContaining(String keyword);
 
-  List<BoardEntity> findByTitleContainingAndContentContainingAndStatus(String keyword, String keyword2, BoardStatus status);
+    List<BoardEntity> findByContentContaining(String keyword);
 
-  List<BoardEntity> findByNickname(String keyword);
+    List<BoardEntity> findByTitleContainingAndContentContainingAndStatus(String keyword, String keyword2, BoardStatus status);
 
-  List<BoardEntity> findByMemberId(MemberEntity member);
+    List<BoardEntity> findByNickname(String keyword);
+
 }
