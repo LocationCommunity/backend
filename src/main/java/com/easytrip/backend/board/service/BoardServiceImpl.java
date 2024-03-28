@@ -181,7 +181,6 @@ public class BoardServiceImpl implements BoardService {
         board = boardRepository.findByBoardIdAndMemberId(boardId, member)
                 .orElseThrow(InvalidAuthCodeException::new);
 
-
         board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
 
         BoardEntity boardEntity = board.toBuilder()

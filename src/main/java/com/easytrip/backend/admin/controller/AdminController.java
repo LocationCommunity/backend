@@ -75,7 +75,7 @@ public class AdminController {
     return ResponseEntity.ok(result);
   }
 
-  @DeleteMapping("place/{placeId}")
+  @DeleteMapping("/place/{placeId}")
   public void deletePlace(HttpServletRequest request, @PathVariable Long placeId) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     adminService.deletePlace(accessToken, placeId);
