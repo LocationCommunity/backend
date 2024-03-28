@@ -1,4 +1,4 @@
-package com.easytrip.backend.weather.service.impl;
+package com.easytrip.backend.weather.service;
 
 import org.springframework.stereotype.Service;
 

@@ -1,16 +1,9 @@
 package com.easytrip.backend.place.domain;
 
+import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.type.PlaceCategory;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +24,8 @@ public class PlaceEntity {
   @ManyToOne
   @JoinColumn(name = "member_id")
   private MemberEntity memberId;
+
+
 
   private String placeName;
   private String address;

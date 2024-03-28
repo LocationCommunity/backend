@@ -30,4 +30,15 @@ public class NaverMemberDto {
     private String nickname;
     private String imageUrl;
   }
+
+  public static NaverMemberDto.NaverMemberDetail of(MemberEntity memberEntity) {
+
+    return NaverMemberDetail.builder()
+        .email(memberEntity.getEmail())
+        .name(memberEntity.getName())
+        .nickname(memberEntity.getNickname())
+        .imageUrl(memberEntity.getImageUrl())
+        .build();
+  }
+
 }

@@ -26,9 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,9 +37,8 @@ public class MemberController {
   private final JwtTokenProvider jwtTokenProvider;
 
   @PostMapping("/sign-up")
-  public void signUp(@Valid @RequestPart(value = "signUpRequest") SignUpRequest signUpRequest,
-      @RequestPart(value = "file") MultipartFile file) {
-    memberService.signUp(signUpRequest, file, LOCAL);
+  public void signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+    memberService.signUp(signUpRequest, LOCAL);
   }
 
   @GetMapping("/auth")
@@ -105,9 +102,9 @@ public class MemberController {
 
   @PutMapping("/my-info")
   public ResponseEntity<MemberDto> update(HttpServletRequest request,
-      @Valid @RequestPart(name = "updateRequest") UpdateRequest updateRequest, @RequestPart(name = "file") MultipartFile file) {
+      @Valid @RequestBody UpdateRequest updateRequest) {
     String accessToken = jwtTokenProvider.resolveToken(request);
-    MemberDto response = memberService.update(accessToken, updateRequest, file);
+    MemberDto response = memberService.update(accessToken, updateRequest);
 
     return ResponseEntity.ok(response);
   }

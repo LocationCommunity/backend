@@ -1,6 +1,5 @@
 package com.easytrip.backend.member.dto.request;
 
-import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.Platform;
@@ -37,14 +36,13 @@ public class SignUpRequest {
 
   @NotBlank(message = "닉네임은 공백일 수 없습니다.")
   private String nickname;
+
+  private String imageUrl;
   private String introduction;
 
-  public static MemberEntity signUpInput(MemberEntity member, SignUpRequest signUpRequest,
-      ImageEntity image) {
+  public static MemberEntity signUpInput(MemberEntity member, SignUpRequest signUpRequest) {
     String uuid = UUID.randomUUID().toString();
     String encPassword = BCrypt.hashpw(signUpRequest.getPassword(), BCrypt.gensalt());
-
-    String imageUrl = (image != null) ? image.getFilePath() : null;
 
     return member.toBuilder()
         .platform(Platform.LOCAL)
@@ -55,7 +53,7 @@ public class SignUpRequest {
         .regDate(LocalDateTime.now())
         .auth(false)
         .authCode(uuid)
-        .imageUrl(imageUrl)
+        .imageUrl(signUpRequest.getImageUrl())
         .introduction(signUpRequest.getIntroduction())
         .status(MemberStatus.WAITING_FOR_APPROVAL)
         .adminYn(false)

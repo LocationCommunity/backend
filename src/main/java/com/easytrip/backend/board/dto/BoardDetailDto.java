@@ -1,3 +1,4 @@
+
 package com.easytrip.backend.board.dto;
 
 import lombok.*;

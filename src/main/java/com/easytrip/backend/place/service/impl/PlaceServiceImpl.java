@@ -372,32 +372,28 @@ public class PlaceServiceImpl implements PlaceService {
     try {
       JsonNode jsonNode = objectMapper.readTree(jsonString);
 
-      if (jsonNode != null && jsonNode.size() > 0) {
-        if (jsonNode.path("status").path("code").asInt() == 0) {
+      if (jsonNode.path("status").path("code").asInt() == 0) {
 
-          JsonNode resultsNode = jsonNode.path("results").get(0).path("region");
-          String area1 = resultsNode.path("area1").path("name").asText();
-          String area2 = resultsNode.path("area2").path("name").asText();
+        JsonNode resultsNode = jsonNode.path("results").get(0).path("region");
+        String area1 = resultsNode.path("area1").path("name").asText();
+        String area2 = resultsNode.path("area2").path("name").asText();
 
-          JsonNode resultsNode2 = jsonNode.path("results").get(0).path("land");
-          String road1 = resultsNode2.path("name").asText();
-          String road2 = resultsNode2.path("number1").asText();
-          String road3 = resultsNode2.path("number2").asText();
+        JsonNode resultsNode2 = jsonNode.path("results").get(0).path("land");
+        String road1 = resultsNode2.path("name").asText();
+        String road2 = resultsNode2.path("number1").asText();
+        String road3 = resultsNode2.path("number2").asText();
 
-          StringBuilder result = new StringBuilder();
-          result.append(area1).append(" ").append(area2).append(" ").append(road1).append(" ")
-              .append(road2).append(" ").append(road3);
+        StringBuilder result = new StringBuilder();
+        result.append(area1).append(" ").append(area2).append(" ").append(road1).append(" ")
+            .append(road2).append(" ").append(road3);
 
-          return result.toString();
-        } else {
-          String errorMessage = jsonNode.path("status").path("message").asText();
-          return errorMessage;
-        }
+        return result.toString();
+      } else {
+        String errorMessage = jsonNode.path("status").path("message").asText();
+        return errorMessage;
       }
     } catch (JsonProcessingException e) {
       throw new ParsingException();
     }
-    throw new ParsingException();
   }
-
 }

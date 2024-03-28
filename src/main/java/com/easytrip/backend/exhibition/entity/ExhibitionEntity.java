@@ -1,7 +1,9 @@
 package com.easytrip.backend.exhibition.entity;
 
+import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.type.ExStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,38 +12,46 @@ import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
-@Table(name = "Exhibitions")
+@Builder(toBuilder = true)
+@Table(name = "exhibitions")
 public class ExhibitionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long exId;
 
-    @Column
+
     private String title;
 
-    @Column
-    private String address;
 
-    @Column
+    private String address_ex;
+
+    private LocalDateTime regDate;
+
+
     private LocalDateTime start_date;
 
-    @Column
+
     private LocalDateTime end_date;
 
-    @Column
+
     private LocalDateTime update_date;
 
-    @Column
+    private LocalDateTime deleteDate;
+
+
+    private String exName;
+
+
     private String exLink;
 
-    @Column
+
     private String exInfo;
 
 
@@ -53,6 +63,11 @@ public class ExhibitionEntity {
     @ManyToOne
     @JoinColumn(name = "placeId")
     private PlaceEntity placdId;
+
+
+
+    @Enumerated(EnumType.STRING)
+    private ExStatus status;
 
 
 
