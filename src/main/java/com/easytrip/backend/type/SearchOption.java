@@ -5,5 +5,6 @@ public enum SearchOption {
     TITLE,
     CONTENT,
     TITLE_AND_CONTENT,
-    NICKNAME;
+    NICKNAME,
+    NAME;
 }

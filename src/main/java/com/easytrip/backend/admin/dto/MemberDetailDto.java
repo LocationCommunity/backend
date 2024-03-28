@@ -3,6 +3,8 @@ package com.easytrip.backend.admin.dto;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.type.MemberStatus;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +29,12 @@ public class MemberDetailDto {
   private MemberStatus status;
   private Boolean adminYn;
   private LocalDateTime regDate;
+
+  public static List<MemberDetailDto> listOf(List<MemberEntity> memberEntities) {
+    return memberEntities.stream()
+        .map(MemberDetailDto::of)
+        .collect(Collectors.toList());
+  }
 
   public static MemberDetailDto of(MemberEntity memberEntity) {
 

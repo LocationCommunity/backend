@@ -7,6 +7,7 @@ import com.easytrip.backend.board.repository.BoardRepository;
 import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.exception.impl.ImageSaveException;
+import com.easytrip.backend.exception.impl.InvalidSearchOptionException;
 import com.easytrip.backend.exception.impl.InvalidStatusException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
@@ -16,8 +17,10 @@ import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.MemberStatus;
+import com.easytrip.backend.type.SearchOption;
 import com.easytrip.backend.type.UseType;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -132,5 +135,32 @@ public class AdminManagementServiceImpl implements AdminManagementService {
     memberRepository.save(updateMember);
 
     return MemberDetailDto.of(updateMember);
+  }
+
+  @Override
+  public List<MemberDetailDto> searchMember(String accessToken, String keyword,
+      SearchOption searchOption) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    if (searchOption.equals(SearchOption.NAME)) {
+      List<MemberEntity> byName = memberRepository.findByName(keyword);
+      if (byName.isEmpty()) {
+        throw new NotFoundMemberException();
+      }
+
+      return MemberDetailDto.listOf(byName);
+    } else if (searchOption.equals(SearchOption.NICKNAME)) {
+      MemberEntity member = memberRepository.findByNickname(keyword)
+          .orElseThrow(() -> new NotFoundMemberException());
+
+      List<MemberDetailDto> list = new ArrayList<>();
+      list.add(MemberDetailDto.of(member));
+      return list;
+    }
+
+    throw new InvalidSearchOptionException();
   }
 }

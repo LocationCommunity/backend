@@ -5,6 +5,8 @@ import com.easytrip.backend.admin.service.AdminManagementService;
 import com.easytrip.backend.admin.service.AdminService;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.type.MemberStatus;
+import com.easytrip.backend.type.SearchOption;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,5 +34,11 @@ public class AdminServiceImpl implements AdminService {
   public MemberDetailDto updateMemberInfo(String accessToken, Long memberId,
       UpdateRequest updateRequest, MultipartFile file) {
     return adminManagementService.updateMemberInfo(accessToken, memberId, updateRequest, file);
+  }
+
+  @Override
+  public List<MemberDetailDto> searchMember(String accessToken, String keyword,
+      SearchOption searchOption) {
+    return adminManagementService.searchMember(accessToken, keyword, searchOption);
   }
 }
