@@ -25,7 +25,7 @@ public class ExhibitionController {
 
     //전시회 등록
     @PostMapping()
-    public void postExInfo(@RequestPart(value = "boardRequestDto")  ExhibitionDto exhibitionDto,
+    public void postExInfo(@RequestPart(value = "exhibitionDto")  ExhibitionDto exhibitionDto,
                                              @RequestPart(value = "files", required = false)List<MultipartFile> files
                                              , @RequestPart(value = "placeId") Long placeId)  {
 

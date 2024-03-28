@@ -45,10 +45,6 @@ public class BoardEntity {
     @JoinColumn(name = "placeId")
     private PlaceEntity placeId;
 
-    @OneToMany
-    @JoinColumn(name = "imageId")
-    private List<ImageEntity> imageId;
-
 
     private Integer likeCnt;
 

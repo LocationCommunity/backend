@@ -1,6 +1,7 @@
 package com.easytrip.backend.exhibition.dto;
 
 
+import com.easytrip.backend.type.UseType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +31,8 @@ public class ExhibitionDto {
 
     private String exInfo;
 
+    private UseType useType;
+
 
     private Long placeId;
 
@@ -42,6 +45,8 @@ public class ExhibitionDto {
     private Double y;
 
     private String placeLink;
+
+
 
 
 

@@ -1,5 +1,6 @@
 package com.easytrip.backend.exhibition.entity;
 
+import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.ExStatus;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -28,7 +30,7 @@ public class ExhibitionEntity {
     private String title;
 
 
-    private String address;
+    private String address_ex;
 
     private LocalDateTime regDate;
 
@@ -62,9 +64,7 @@ public class ExhibitionEntity {
     @JoinColumn(name = "placeId")
     private PlaceEntity placdId;
 
-    private String fileName;
 
-    private String filePath;
 
     @Enumerated(EnumType.STRING)
     private ExStatus status;

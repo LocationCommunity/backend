@@ -9,6 +9,7 @@ import com.easytrip.backend.board.repository.BoardRepository;
 
 import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
+import com.easytrip.backend.exception.UnsupportedImageTypeException;
 import com.easytrip.backend.exception.impl.*;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.repository.MemberRepository;
@@ -20,19 +21,18 @@ import com.easytrip.backend.type.UseType;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.io.File;
 
 @Slf4j
@@ -76,8 +76,10 @@ public class BoardServiceImpl implements BoardService {
 
 //        [     이미지    ]
 
+
         // 여러개의 파일 저장
         for (MultipartFile file : files) {
+
 
             // 저장 경로 설정 ~/boards
             String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
@@ -85,6 +87,25 @@ public class BoardServiceImpl implements BoardService {
 
             // 랜덤식별자_원래이름
             String fileName = uuid + "_" + file.getOriginalFilename();
+
+
+            // 파일 이름에서 확장자 추출
+            String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+
+            // 지원하는 이미지 파일 확장자 목록
+            List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+
+            // 확장자가 이미지 파일인지 확인
+            if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+
+            } else {
+                // 이미지 파일이 아닌 경우에 대한 처리
+                throw new UnsupportedImageTypeException();
+            }
+
+
 
             // 빈 껍데기 생성
             File saveFile = new File(projectPath, fileName);
@@ -97,6 +118,7 @@ public class BoardServiceImpl implements BoardService {
             ImageEntity image = ImageEntity.builder()
                     .fileName(fileName)
                     .filePath("/boards/" + fileName)
+                    .boardId(board)
                     .useType(UseType.BOARD)
                     .build();
 
@@ -170,12 +192,31 @@ public class BoardServiceImpl implements BoardService {
 
         for (MultipartFile file : files) {
 
+
+
             // 저장 경로 설정 ~/boards
             String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
             UUID uuid = UUID.randomUUID();
 
             // 랜덤식별자_원래이름
             String fileName = uuid + "_" + file.getOriginalFilename();
+
+
+            // 파일 이름에서 확장자 추출
+            String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+
+            // 지원하는 이미지 파일 확장자 목록
+            List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+
+            // 확장자가 이미지 파일인지 확인
+            if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+
+            } else {
+                // 이미지 파일이 아닌 경우에 대한 처리
+                throw new UnsupportedImageTypeException();
+            }
 
             // 빈 껍데기 생성
             File saveFile = new File(projectPath, fileName);
@@ -190,6 +231,8 @@ public class BoardServiceImpl implements BoardService {
             ImageEntity imageEntity = image.toBuilder()
                     .fileName(fileName)
                     .filePath("/boards/" + fileName)
+                    .boardId(board)
+                    .useType(UseType.BOARD)
                     .build();
 
             imageRepository.save(imageEntity);

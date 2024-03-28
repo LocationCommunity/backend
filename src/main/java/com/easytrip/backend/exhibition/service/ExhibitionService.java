@@ -28,7 +28,6 @@ public interface ExhibitionService {
     void updateEx(ExhibitionDto exhibitionDto, Long exId, List<MultipartFile> files);
 
 
-
     // 전시회 정보 삭제
     void deleteEx(Long exId);
 

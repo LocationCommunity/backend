@@ -4,6 +4,7 @@ import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.exception.NotfoundImageException;
 import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
+import com.easytrip.backend.exception.UnsupportedImageTypeException;
 import com.easytrip.backend.exception.impl.*;
 import com.easytrip.backend.exhibition.dto.ExListDto;
 import com.easytrip.backend.exhibition.dto.ExhibitionDto;
@@ -26,12 +27,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +56,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String email = null;
+        String email = authentication.getName();
 
 
         MemberEntity member = memberRepository.findByEmail(email)
@@ -78,7 +81,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .exName(exhibitionDto.getExName())
                 .memberId(member)
                 .placdId(place)
-                .address(exhibitionDto.getAddress())
+                .address_ex(exhibitionDto.getAddress())
                 .exInfo(exhibitionDto.getExInfo())
                 .exLink(exhibitionDto.getExLink())
                 .status(ExStatus.ACTIVE)
@@ -91,11 +94,27 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         for (MultipartFile file : files) {
 
             // 저장 경로 설정 ~/exhibitions
-            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\exhibitions\\boards";
+            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\exhibitions";
             UUID uuid = UUID.randomUUID();
 
 
             String fileName = uuid + "_" + file.getOriginalFilename();
+
+            // 파일 이름에서 확장자 추출
+            String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+
+            // 지원하는 이미지 파일 확장자 목록
+            List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+
+            // 확장자가 이미지 파일인지 확인
+            if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+
+            } else {
+                // 이미지 파일이 아닌 경우에 대한 처리
+                throw new UnsupportedImageTypeException();
+            }
 
 
             File saveFile = new File(projectPath, fileName);
@@ -111,7 +130,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             ImageEntity image = ImageEntity.builder()
                     .fileName(fileName)
                     .filePath("/exhibitions/" + fileName)
-                    .useType(UseType.EXHIBITION)
+                    .exId(exhibition)
+                    .useType(UseType.EXHIBI)
                     .build();
 
             imageRepository.save(image);
@@ -135,7 +155,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         ExhibitionDto exhibition = ExhibitionDto.builder()
                 .title(exhibitionEntity.getTitle())
-                .address(exhibitionEntity.getAddress())
+                .address(exhibitionEntity.getAddress_ex())
                 .start_date(LocalDateTime.now())
                 .end_date(LocalDateTime.now())
                 .exInfo(exhibitionEntity.getExInfo())
@@ -175,6 +195,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                     .title(exhibitionDto.getTitle())
                     .exName(exhibitionDto.getExName())
                     .exInfo(exhibitionDto.getExInfo())
+                    .exLink(exhibitionDto.getExLink())
+                    .address_ex(exhibitionDto.getAddress_ex())
                     .update_date(LocalDateTime.now())
                     .build();
             exhibitionRepository.save(exhibition);
@@ -187,6 +209,22 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
 
                 String fileName = uuid + "_" + file.getOriginalFilename();
+
+                // 파일 이름에서 확장자 추출
+                String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+
+                // 지원하는 이미지 파일 확장자 목록
+                List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+
+                // 확장자가 이미지 파일인지 확인
+                if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+
+                } else {
+                    // 이미지 파일이 아닌 경우에 대한 처리
+                    throw new UnsupportedImageTypeException();
+                }
 
 
                 File saveFile = new File(projectPath, fileName);
@@ -205,6 +243,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 ImageEntity imageEntity = image.toBuilder()
                         .fileName(fileName)
                         .filePath("/exhibitions/" + fileName)
+                        .useType(UseType.EXHIBI)
                         .build();
 
                 imageRepository.save(imageEntity);
