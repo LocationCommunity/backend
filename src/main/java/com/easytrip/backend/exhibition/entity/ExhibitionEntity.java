@@ -2,6 +2,7 @@ package com.easytrip.backend.exhibition.entity;
 
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.type.ExStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
+@Builder(toBuilder = true)
 @Table(name = "exhibitions")
 public class ExhibitionEntity {
 
@@ -29,6 +30,8 @@ public class ExhibitionEntity {
 
     private String address;
 
+    private LocalDateTime regDate;
+
 
     private LocalDateTime start_date;
 
@@ -37,6 +40,11 @@ public class ExhibitionEntity {
 
 
     private LocalDateTime update_date;
+
+    private LocalDateTime deleteDate;
+
+
+    private String exName;
 
 
     private String exLink;
@@ -53,6 +61,14 @@ public class ExhibitionEntity {
     @ManyToOne
     @JoinColumn(name = "placeId")
     private PlaceEntity placdId;
+
+    private String fileName;
+
+    private String filePath;
+
+
+    @Enumerated(EnumType.STRING)
+    private ExStatus status;
 
 
 

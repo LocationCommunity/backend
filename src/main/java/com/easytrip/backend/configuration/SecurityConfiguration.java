@@ -27,7 +27,7 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(
             requests -> requests
                 .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
-                    "/members/password", "/weather/**", ("/boards/**"), ("/exhibitions/**"), ("/place/**")).permitAll()
+                    "/members/password", "/weather/**",  ("/exhibitions/**")).permitAll()
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
                     "/members/reissue", "/members/bookmark", "/place/**").hasRole("USER"))
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(

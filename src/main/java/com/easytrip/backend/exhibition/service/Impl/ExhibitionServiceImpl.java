@@ -1,8 +1,14 @@
 package com.easytrip.backend.exhibition.service.Impl;
 
+import com.easytrip.backend.board.domain.BoardEntity;
+import com.easytrip.backend.board.exception.NotfoundImageException;
+import com.easytrip.backend.common.image.entity.ImageEntity;
+import com.easytrip.backend.common.image.repository.ImageRepository;
+import com.easytrip.backend.exception.impl.DeletePostException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundExhibition;
 import com.easytrip.backend.exception.impl.NotMatchAuthorityException;
+import com.easytrip.backend.exhibition.dto.ExListDto;
 import com.easytrip.backend.exhibition.dto.ExhibitionDto;
 import com.easytrip.backend.exhibition.entity.ExhibitionEntity;
 import com.easytrip.backend.exhibition.repository.ExhibitionRepository;
@@ -10,14 +16,24 @@ import com.easytrip.backend.exhibition.service.ExhibitionService;
 
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.repository.MemberRepository;
+import com.easytrip.backend.type.ExStatus;
+import com.easytrip.backend.type.UseType;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,39 +41,36 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     private final ExhibitionRepository exhibitionRepository;
     private final MemberRepository memberRepository;
-
-
-
+    private final ImageRepository imageRepository;
 
 
     // 전시회 등록
+    @Transactional
     @Override
-    public String postExInfo(ExhibitionDto exhibitionDto) {
+    public void postEx(ExhibitionDto exhibitionDto, List<MultipartFile> files, Long placeId) {
 
 
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = null;
+
+
+        MemberEntity member = memberRepository.findByEmail(email)
+                .orElseThrow(InvalidTokenException::new);
+
+        if (authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_MEMBER"))) {
+
+
+            throw new NotMatchAuthorityException();
 //
-//        String email = null;
-//
-//
-//        MemberEntity member = memberRepository.findByEmail(email)
-//                .orElseThrow(InvalidTokenException::new);
-//
-//        if (authentication.getAuthorities().stream()
-//                .map(GrantedAuthority::getAuthority)
-//                .anyMatch(role -> role.equals("ROLE_MEMBER") )) {
-//
-//
-//
-//
-//
-//            throw new NotMatchAuthorityException();
-//
-//        }
+        }
 //
 
         ExhibitionEntity exhibition = ExhibitionEntity.builder()
                 .title(exhibitionDto.getTitle())
+                .exName(exhibitionDto.getExName())
                 .address(exhibitionDto.getAddress())
                 .exInfo(exhibitionDto.getExInfo())
                 .exLink(exhibitionDto.getExLink())
@@ -66,13 +79,46 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .build();
         exhibitionRepository.save(exhibition);
 
+        for (MultipartFile file : files) {
 
-        return "전시회 정보를 저장 완료하였습니다.";
+            // 저장 경로 설정 ~/exhibitions
+            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\exhibitions\\boards";
+            UUID uuid = UUID.randomUUID();
+
+            // 랜덤식별자_원래이름
+            String fileName = uuid + "_" + file.getOriginalFilename();
+
+            // 빈 껍데기 생성
+            File saveFile = new File(projectPath, fileName);
+
+            // transferTo --> Exception 필요
+            try {
+                file.transferTo(saveFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
+            // 이미지 저장 Board
+            ImageEntity image = ImageEntity.builder()
+                    .fileName(fileName)
+                    .filePath("/exhibitions/" + fileName)
+                    .useType(UseType.BOARD)
+                    .build();
+
+            imageRepository.save(image);
+        }
+
+
+
+
+
+
     }
 
     // 전시회 정보 불러오기
     @Override
-    public ExhibitionDto getExInfo(Long exId) {
+    public ExhibitionDto getEx(Long exId) {
 
 
         ExhibitionEntity exhibitionEntity = exhibitionRepository.findByExId(exId)
@@ -90,6 +136,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
 
 
+
         return exhibition;
 
     }
@@ -97,47 +144,132 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     // 전시회 정보 수정
     @Override
-    public void updateEx(ExhibitionDto exhibitionDto, Long exId) {
+    public void updateEx(ExhibitionDto exhibitionDto, Long exId, List<MultipartFile> files) {
 
+        MemberEntity member = new MemberEntity();
+        ExhibitionEntity ex = new ExhibitionEntity();
+        ImageEntity image = new ImageEntity();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = null;
 
+        if(authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
 
-        MemberEntity member = memberRepository.findByEmail(email)
-                .orElseThrow(InvalidTokenException::new);
+
+
+
+            ex = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);
+
+            ExhibitionEntity exhibition = ex.toBuilder()
+                    .title(exhibitionDto.getTitle())
+                    .exName(exhibitionDto.getExName())
+                    .exInfo(exhibitionDto.getExInfo())
+                    .update_date(LocalDateTime.now())
+                    .build();
+            exhibitionRepository.save(exhibition);
+
+            for (MultipartFile file : files) {
+
+                // 저장 경로 설정 ~/exhibitions
+                String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\exhibitions";
+                UUID uuid = UUID.randomUUID();
+
+                // 랜덤식별자_원래이름
+                String fileName = uuid + "_" + file.getOriginalFilename();
+
+                // 빈 껍데기 생성
+                File saveFile = new File(projectPath, fileName);
+
+                // transferTo --> Exception 필요
+                try {
+                    file.transferTo(saveFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+                imageRepository.findById(exId).orElseThrow(NotfoundImageException::new);
+
+                // 이미지 저장 Board
+                ImageEntity imageEntity = image.toBuilder()
+                        .fileName(fileName)
+                        .filePath("/exhibitions/" + fileName)
+                        .build();
+
+                imageRepository.save(imageEntity);
+            }
+
+
+        }
+
+        if (ex.getStatus().equals(ExStatus.INACTIVE)) {
+             throw new NotFoundExhibition();
+
+        }
+
+
+        throw new NotMatchAuthorityException();
+
+
+
+        }
+    // 전시회 삭제
+    @Override
+    public void deleteEx(Long exId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        MemberEntity member = new MemberEntity();
+        ExhibitionEntity exhibition = new ExhibitionEntity();
+
+        String email = null;
 
         if (authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-            //exhibition exist
-            ExhibitionEntity exhibition = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);
+            //admin
 
-            exhibition.setTitle(exhibitionDto.getTitle());
-            exhibition.setAddress(exhibitionDto.getAddress());
-            exhibition.setStart_date(LocalDateTime.now());
-            exhibition.setEnd_date(LocalDateTime.now());
-            exhibition.setExLink(exhibitionDto.getExLink());
-            exhibition.setExInfo(exhibitionDto.getExInfo());
-            exhibition.setUpdate_date(LocalDateTime.now());
-            exhibitionRepository.save(exhibition);
+            email = authentication.getName();
+            exhibition = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);
 
+            ExhibitionEntity deleteEx = exhibition.toBuilder()
+                    .status(ExStatus.INACTIVE)
+                    .deleteDate(LocalDateTime.now())
+                    .build();
 
-        } else {
-            throw new NotMatchAuthorityException();
-
+            exhibitionRepository.save(deleteEx);
         }
+
+        throw new NotMatchAuthorityException();
+
+
+
     }
 
 
-
-    // 전시회 정보 삭제
+    // 전시회 리스트
     @Override
-    public String deleteEx(Long exId) {
-        return null;
+    public List<ExListDto> exList(Pageable pageable) {
+        List<ExhibitionEntity> exhibitions = null;
+
+
+
+
+
+
+        return  ExListDto.ListOf(exhibitions);
     }
-
-
 }
+
+
+
+
+
+
+
+
+
 

@@ -3,11 +3,13 @@ package com.easytrip.backend.board.service;
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.dto.*;
 
+import com.easytrip.backend.type.SearchOption;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public interface BoardService {
@@ -18,7 +20,7 @@ public interface BoardService {
 
     String deletePost(Long boardId);
 
-    List<BoardListDto> getList(Boolean sortByLikes);
+    List<BoardListDto> getList(boolean sortByLikes);
 
     BoardDetailDto getDetail(Long boardId, BoardDetailDto boardDetailDto);
 
@@ -26,6 +28,6 @@ public interface BoardService {
 
     void likes(Long boardId);
 
-    List<BoardListDto> search(String keyword, String searchOption);
+    List<BoardListDto> search(String keyword, SearchOption searchOption);
 
 }

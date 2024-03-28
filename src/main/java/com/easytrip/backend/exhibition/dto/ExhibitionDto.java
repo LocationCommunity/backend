@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,8 +24,20 @@ public class ExhibitionDto {
 
     private LocalDateTime end_date;
 
+    private String exName;
+
     private String exLink;
 
     private String exInfo;
 
-}
+
+
+
+
+
+
+    }
+
+
+
+
