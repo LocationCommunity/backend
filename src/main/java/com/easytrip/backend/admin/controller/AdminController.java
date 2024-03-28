@@ -4,6 +4,8 @@ import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.admin.service.AdminService;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
+import com.easytrip.backend.place.dto.PlaceDto;
+import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.SearchOption;
 import jakarta.servlet.http.HttpServletRequest;

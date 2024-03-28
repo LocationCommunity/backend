@@ -1,9 +1,9 @@
 package com.easytrip.backend.admin.service.impl;
 
 import com.easytrip.backend.admin.dto.MemberDetailDto;
-import com.easytrip.backend.admin.service.AdminManagementService;
 import com.easytrip.backend.admin.service.AdminService;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
+import com.easytrip.backend.member.service.ManagementService;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.SearchOption;
 import java.util.List;
@@ -16,29 +16,29 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
-  private final AdminManagementService adminManagementService;
+  private final ManagementService managementService;
 
   @Override
   @Transactional
   public void setMemberStatus(String accessToken, Long memberId, MemberStatus memberStatus) {
-    adminManagementService.setMemberStatus(accessToken, memberId, memberStatus);
+    managementService.setMemberStatus(accessToken, memberId, memberStatus);
   }
 
   @Override
   public MemberDetailDto getMemberInfo(String accessToken, Long memberId) {
-    return adminManagementService.getMemberInfo(accessToken, memberId);
+    return managementService.getMemberInfo(accessToken, memberId);
   }
 
   @Override
   @Transactional
   public MemberDetailDto updateMemberInfo(String accessToken, Long memberId,
       UpdateRequest updateRequest, MultipartFile file) {
-    return adminManagementService.updateMemberInfo(accessToken, memberId, updateRequest, file);
+    return managementService.updateMemberInfo(accessToken, memberId, updateRequest, file);
   }
 
   @Override
   public List<MemberDetailDto> searchMember(String accessToken, String keyword,
       SearchOption searchOption) {
-    return adminManagementService.searchMember(accessToken, keyword, searchOption);
+    return managementService.searchMember(accessToken, keyword, searchOption);
   }
 }
