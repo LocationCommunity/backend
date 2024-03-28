@@ -13,6 +13,8 @@ public interface PlaceService {
 
   void share(String accessToken, PlaceRequest placeRequest, List<MultipartFile> files);
 
+  List<PlaceDto> getMyShare(String accessToken);
+
   PlaceDto getInfo(String accessToken, Long placeId);
 
   List<MapDto> getMapData(String accessToken, Double x, Double y);

@@ -130,6 +130,46 @@ public class PlaceServiceImpl implements PlaceService {
   }
 
   @Override
+  public List<PlaceDto> getMyShare(String accessToken) {
+
+    // 토큰이 유효한지 검증
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    // 토큰을 통해 사용자 정보 받아오기
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    List<PlaceEntity> placeEntities = placeRepository.findAllByMemberId(member);
+
+    List<List<String>> imageUrl = new ArrayList<>();
+    List<Boolean> bookmarkYn = new ArrayList<>();
+    for (PlaceEntity place : placeEntities) {
+      Optional<BookmarkPlaceEntity> byMemberIdAndPlaceId = bookmarkPlaceRepository.findByMemberIdAndPlaceId(
+          member, place);
+      if (byMemberIdAndPlaceId.isPresent()) {
+        bookmarkYn.add(true);
+      } else {
+        bookmarkYn.add(false);
+      }
+
+      List<String> url = new ArrayList<>();
+      List<ImageEntity> images = imageRepository.findByPlaceId(place);
+      for (ImageEntity image : images) {
+        url.add(image.getFilePath());
+      }
+      imageUrl.add(url);
+    }
+
+    List<PlaceDto> result = PlaceDto.listOf(placeEntities, bookmarkYn, imageUrl);
+
+    return result;
+  }
+
+  @Override
   public PlaceDto getInfo(String accessToken, Long placeId) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
