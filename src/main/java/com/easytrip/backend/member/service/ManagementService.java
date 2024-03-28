@@ -13,11 +13,12 @@ import com.easytrip.backend.type.Platform;
 import com.easytrip.backend.type.SearchOption;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public interface ManagementService {
 
-  void signUp(SignUpRequest signUpRequest, Platform platForm);
+  void signUp(SignUpRequest signUpRequest, MultipartFile file, Platform platForm);
 
   void auth(String email, String code, Platform platform);
 
@@ -38,6 +39,7 @@ public interface ManagementService {
   MemberDto myInfo(String accessToken);
 
 
+
   MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file);
 
   void setMemberStatus(String accessToken, Long memberId, MemberStatus memberStatus);
@@ -48,5 +50,6 @@ public interface ManagementService {
       MultipartFile file);
 
   List<MemberDetailDto> searchMember(String accessToken, String keyword, SearchOption searchOption);
+
 
 }

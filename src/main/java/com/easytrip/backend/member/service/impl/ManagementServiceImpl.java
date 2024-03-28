@@ -5,6 +5,7 @@ import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.repository.BoardRepository;
 import com.easytrip.backend.common.image.domain.ImageEntity;
+
 import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.components.MailComponents;
 import com.easytrip.backend.exception.impl.AlreadyAuthenticatedException;
@@ -34,7 +35,9 @@ import com.easytrip.backend.member.service.ManagementService;
 import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.Platform;
+import com.easytrip.backend.type.UseType;
 import io.jsonwebtoken.Claims;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,6 +52,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
@@ -61,11 +65,13 @@ public class ManagementServiceImpl implements ManagementService {
   private final RedisTemplate redisTemplate;
   private final PasswordEncoder passwordEncoder;
   private final ImageRepository imageRepository;
+
   private final BoardRepository boardRepository;
 
 
+
   @Override
-  public void signUp(SignUpRequest signUpRequest, Platform platForm) {
+  public void signUp(SignUpRequest signUpRequest, MultipartFile file, Platform platForm) {
 
     // 올바르지 않은 이메일
     if (!isValidEmail(signUpRequest.getEmail())) {
@@ -107,7 +113,9 @@ public class ManagementServiceImpl implements ManagementService {
       try {
         file.transferTo(saveFile);
       } catch (Exception e) {
+
         throw new ImageSaveException();
+
       }
 
       ImageEntity image = ImageEntity.builder()
@@ -124,6 +132,7 @@ public class ManagementServiceImpl implements ManagementService {
           .build();
       imageRepository.save(imageEntity);
     }
+
 
 
     sendMail(signUpRequest, member);
@@ -314,7 +323,7 @@ public class ManagementServiceImpl implements ManagementService {
   }
 
   @Override
-  public MemberDto update(String accessToken, UpdateRequest updateRequest) {
+  public MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
       throw new InvalidTokenException();
@@ -344,7 +353,9 @@ public class ManagementServiceImpl implements ManagementService {
       try {
         file.transferTo(saveFile);
       } catch (Exception e) {
+
         throw new ImageSaveException();
+
       }
 
       ImageEntity image = ImageEntity.builder()
@@ -360,7 +371,7 @@ public class ManagementServiceImpl implements ManagementService {
 
     MemberEntity updateMember = member.toBuilder()
         .nickname(updateRequest.getNickname())
-        .imageUrl(updateRequest.getImageUrl())
+        .imageUrl(imageUrl)
         .introduction(updateRequest.getIntroduction())
         .build();
     memberRepository.save(updateMember);
