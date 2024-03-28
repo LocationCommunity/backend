@@ -1,5 +1,6 @@
 package com.easytrip.backend.admin.dto;
 
+import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.type.MemberStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -26,4 +27,20 @@ public class MemberDetailDto {
   private MemberStatus status;
   private Boolean adminYn;
   private LocalDateTime regDate;
+
+  public static MemberDetailDto of(MemberEntity memberEntity) {
+
+    return MemberDetailDto.builder()
+        .memberId(memberEntity.getMemberId())
+        .email(memberEntity.getEmail())
+        .password(memberEntity.getPassword())
+        .name(memberEntity.getPassword())
+        .nickname(memberEntity.getNickname())
+        .auth(memberEntity.getAuth())
+        .imageUrl(memberEntity.getImageUrl())
+        .status(memberEntity.getStatus())
+        .adminYn(memberEntity.getAdminYn())
+        .regDate(memberEntity.getRegDate())
+        .build();
+  }
 }
