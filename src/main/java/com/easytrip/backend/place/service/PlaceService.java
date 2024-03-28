@@ -25,4 +25,6 @@ public interface PlaceService {
 
   PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest,
       List<MultipartFile> files);
+
+  void deletePlace(String accessToken, Long placeId);
 }

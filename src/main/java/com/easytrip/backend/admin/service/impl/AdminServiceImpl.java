@@ -51,4 +51,9 @@ public class AdminServiceImpl implements AdminService {
       List<MultipartFile> files) {
     return placeService.updatePlace(accessToken, placeId, placeRequest, files);
   }
+
+  @Override
+  public void deletePlace(String accessToken, Long placeId) {
+    placeService.deletePlace(accessToken, placeId);
+  }
 }
