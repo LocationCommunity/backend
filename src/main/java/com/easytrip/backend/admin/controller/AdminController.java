@@ -5,7 +5,9 @@ import com.easytrip.backend.admin.service.AdminService;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.type.MemberStatus;
+import com.easytrip.backend.type.SearchOption;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +51,15 @@ public class AdminController {
     String accessToken = jwtTokenProvider.resolveToken(request);
     MemberDetailDto result = adminService.updateMemberInfo(accessToken, memberId,
         updateRequest, file);
+    return ResponseEntity.ok(result);
+  }
+
+  @GetMapping("/members")
+  public ResponseEntity<List<MemberDetailDto>> searchMember(HttpServletRequest request,
+      @RequestParam String keyword, @RequestParam SearchOption searchOption) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    List<MemberDetailDto> result = adminService.searchMember(accessToken, keyword,
+        searchOption);
     return ResponseEntity.ok(result);
   }
 }
