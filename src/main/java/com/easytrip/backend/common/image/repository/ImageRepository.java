@@ -1,7 +1,7 @@
 package com.easytrip.backend.common.image.repository;
 
 
-import com.easytrip.backend.common.image.domain.ImageEntity;
+import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

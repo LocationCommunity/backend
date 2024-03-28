@@ -4,10 +4,10 @@ package com.easytrip.backend.member.service.impl;
 import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.repository.BoardRepository;
-import com.easytrip.backend.common.image.domain.ImageEntity;
-
+import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.components.MailComponents;
+import com.easytrip.backend.exception.UnsupportedImageTypeException;
 import com.easytrip.backend.exception.impl.AlreadyAuthenticatedException;
 import com.easytrip.backend.exception.impl.DuplicateEmailException;
 import com.easytrip.backend.exception.impl.ExpiredException;
@@ -35,11 +35,13 @@ import com.easytrip.backend.member.service.ManagementService;
 import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.Platform;
+import com.easytrip.backend.type.SearchOption;
 import com.easytrip.backend.type.UseType;
 import io.jsonwebtoken.Claims;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +54,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -109,13 +112,24 @@ public class ManagementServiceImpl implements ManagementService {
       String uuid = UUID.randomUUID().toString();
       String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
       String fileName = uuid + "_" + file.getOriginalFilename();
-      File saveFile = new File(projectPath, fileName);
-      try {
-        file.transferTo(saveFile);
-      } catch (Exception e) {
 
-        throw new ImageSaveException();
+      // 파일 이름에서 확장자 추출
+      String fileExtension = StringUtils.getFilenameExtension(fileName);
 
+      // 지원하는 이미지 파일 확장자 목록
+      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+      // 확장자가 이미지 파일인지 확인
+      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+        File saveFile = new File(projectPath, fileName);
+        try {
+          file.transferTo(saveFile);
+        } catch (Exception e) {
+          throw new ImageSaveException();
+        }
+      } else {
+        // 이미지 파일이 아닌 경우에 대한 처리
+        throw new UnsupportedImageTypeException();
       }
 
       ImageEntity image = ImageEntity.builder()
@@ -339,7 +353,6 @@ public class ManagementServiceImpl implements ManagementService {
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
-
     String imageUrl;
 
     // 프로필 이미지 저장
@@ -349,13 +362,24 @@ public class ManagementServiceImpl implements ManagementService {
       String uuid = UUID.randomUUID().toString();
       String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
       String fileName = uuid + "_" + file.getOriginalFilename();
-      File saveFile = new File(projectPath, fileName);
-      try {
-        file.transferTo(saveFile);
-      } catch (Exception e) {
 
-        throw new ImageSaveException();
+      // 파일 이름에서 확장자 추출
+      String fileExtension = StringUtils.getFilenameExtension(fileName);
 
+      // 지원하는 이미지 파일 확장자 목록
+      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+      // 확장자가 이미지 파일인지 확인
+      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+        File saveFile = new File(projectPath, fileName);
+        try {
+          file.transferTo(saveFile);
+        } catch (Exception e) {
+          throw new ImageSaveException();
+        }
+      } else {
+        // 이미지 파일이 아닌 경우에 대한 처리
+        throw new UnsupportedImageTypeException();
       }
 
       ImageEntity image = ImageEntity.builder()
@@ -453,11 +477,24 @@ public class ManagementServiceImpl implements ManagementService {
       String uuid = UUID.randomUUID().toString();
       String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
       String fileName = uuid + "_" + file.getOriginalFilename();
-      File saveFile = new File(projectPath, fileName);
-      try {
-        file.transferTo(saveFile);
-      } catch (Exception e) {
-        throw new ImageSaveException();
+
+      // 파일 이름에서 확장자 추출
+      String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+      // 지원하는 이미지 파일 확장자 목록
+      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+      // 확장자가 이미지 파일인지 확인
+      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+        File saveFile = new File(projectPath, fileName);
+        try {
+          file.transferTo(saveFile);
+        } catch (Exception e) {
+          throw new ImageSaveException();
+        }
+      } else {
+        // 이미지 파일이 아닌 경우에 대한 처리
+        throw new UnsupportedImageTypeException();
       }
 
       ImageEntity image = ImageEntity.builder()
@@ -474,7 +511,6 @@ public class ManagementServiceImpl implements ManagementService {
           .introduction(updateRequest.getIntroduction())
           .build();
     }
-
     memberRepository.save(updateMember);
 
     return MemberDetailDto.of(updateMember);

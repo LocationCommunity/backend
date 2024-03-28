@@ -35,13 +35,9 @@ public class MemberServiceImpl implements MemberService {
   private final KakaoLoginServiceImpl kakaoLoginService;
 
   @Override
-
-
   @Transactional
   public void signUp(SignUpRequest signUpRequest, MultipartFile file, Platform platform) {
     managementService.signUp(signUpRequest, file, platform);
-
-
   }
 
   @Override
@@ -101,13 +97,9 @@ public class MemberServiceImpl implements MemberService {
   }
 
   @Override
-
-
   @Transactional
   public MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file) {
     MemberDto result = managementService.update(accessToken, updateRequest, file);
-
-
     return result;
   }
 
