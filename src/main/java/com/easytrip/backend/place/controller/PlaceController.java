@@ -38,6 +38,13 @@ public class PlaceController {
     placeService.share(accessToken, placeRequest, file);
   }
 
+  @GetMapping("/share")
+  public ResponseEntity<List<PlaceDto>> getMyShare(HttpServletRequest request) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    List<PlaceDto> result = placeService.getMyShare(accessToken);
+    return ResponseEntity.ok(result);
+  }
+
   @GetMapping("/info/{placeId}")
   public ResponseEntity<PlaceDto> getInfo(HttpServletRequest request,
       @PathVariable(value = "placeId") Long placeId) {
@@ -64,7 +71,6 @@ public class PlaceController {
   }
 
   @PostMapping("/info/{placeId}/report")
-
   public void placeReport(HttpServletRequest request,
       @PathVariable Long placeId) {
     String accessToken = jwtTokenProvider.resolveToken(request);
