@@ -1,7 +1,8 @@
 package com.easytrip.backend.place.service.impl;
 
-import com.easytrip.backend.common.image.domain.ImageEntity;
+import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
+import com.easytrip.backend.exception.UnsupportedImageTypeException;
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;
 import com.easytrip.backend.exception.impl.ImageSaveException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +41,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -95,11 +98,25 @@ public class PlaceServiceImpl implements PlaceService {
       String uuid = UUID.randomUUID().toString();
       String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\places";
       String fileName = uuid + "_" + file.getOriginalFilename();
-      File saveFile = new File(projectPath, fileName);
-      try {
-        file.transferTo(saveFile);
-      } catch (Exception e) {
-        throw new ImageSaveException();
+
+      // 파일 이름에서 확장자 추출
+      String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+      // 지원하는 이미지 파일 확장자 목록
+      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+      // 확장자가 이미지 파일인지 확인
+      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+        File saveFile = new File(projectPath, fileName);
+        try {
+          file.transferTo(saveFile);
+        } catch (Exception e) {
+          throw new ImageSaveException();
+        }
+
+      } else {
+        // 이미지 파일이 아닌 경우에 대한 처리
+        throw new UnsupportedImageTypeException();
       }
 
       ImageEntity image = ImageEntity.builder()
@@ -292,11 +309,24 @@ public class PlaceServiceImpl implements PlaceService {
         String uuid = UUID.randomUUID().toString();
         String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\places";
         String fileName = uuid + "_" + file.getOriginalFilename();
-        File saveFile = new File(projectPath, fileName);
-        try {
-          file.transferTo(saveFile);
-        } catch (Exception e) {
-          throw new ImageSaveException();
+
+        // 파일 이름에서 확장자 추출
+        String fileExtension = StringUtils.getFilenameExtension(fileName);
+
+        // 지원하는 이미지 파일 확장자 목록
+        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+
+        // 확장자가 이미지 파일인지 확인
+        if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
+          File saveFile = new File(projectPath, fileName);
+          try {
+            file.transferTo(saveFile);
+          } catch (Exception e) {
+            throw new ImageSaveException();
+          }
+        } else {
+          // 이미지 파일이 아닌 경우에 대한 처리
+          throw new UnsupportedImageTypeException();
         }
 
         ImageEntity image = ImageEntity.builder()

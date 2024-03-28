@@ -3,7 +3,6 @@ package com.easytrip.backend.member.controller;
 import static com.easytrip.backend.type.Platform.KAKAO;
 import static com.easytrip.backend.type.Platform.LOCAL;
 import static com.easytrip.backend.type.Platform.NAVER;
-
 import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
@@ -53,21 +52,18 @@ public class MemberController {
   @PostMapping("/login")
   public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginRequest loginRequest) {
     TokenDto response = memberService.login(loginRequest, LOCAL);
-
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/login/naver")
   public ResponseEntity<TokenDto> naverLogin(@RequestParam(name = "code") String code) {
     TokenDto response = memberService.naverLogin(code, NAVER);
-
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/login/kakao")
   public ResponseEntity<TokenDto> kakaoLogin(@RequestParam(name = "code") String code) {
     TokenDto response = memberService.kakaoLogin(code, KAKAO);
-
     return ResponseEntity.ok(response);
   }
 
@@ -99,7 +95,6 @@ public class MemberController {
   public ResponseEntity<MemberDto> myInfo(HttpServletRequest request) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     MemberDto response = memberService.myInfo(accessToken);
-
     return ResponseEntity.ok(response);
   }
 
@@ -108,7 +103,6 @@ public class MemberController {
       @Valid @RequestPart(name = "updateRequest") UpdateRequest updateRequest, @RequestPart(name = "file") MultipartFile file) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     MemberDto response = memberService.update(accessToken, updateRequest, file);
-
     return ResponseEntity.ok(response);
   }
 
@@ -116,7 +110,6 @@ public class MemberController {
   public ResponseEntity<String> reissue(HttpServletRequest request) {
     String refreshToken = jwtTokenProvider.resolveToken(request);
     String response = memberService.reissue(refreshToken);
-
     return ResponseEntity.ok(response);
   }
 
@@ -124,7 +117,6 @@ public class MemberController {
   public ResponseEntity<List<BookmarkDto>> myBookmark(HttpServletRequest request) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     List<BookmarkDto> response = memberService.myBookmark(accessToken);
-
     return ResponseEntity.ok(response);
   }
 

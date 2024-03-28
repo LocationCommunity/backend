@@ -13,8 +13,6 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
-
-    Optional<BoardEntity> findALlByMemberId(MemberEntity member);
     List<BoardEntity> findByStatusOrderByCreateDateDesc(BoardStatus status);
 
     List<BoardEntity> findByStatusOrderByLikeCntDesc(BoardStatus status);
@@ -31,14 +29,7 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
     List<BoardEntity> findByNicknameAndStatus(String nickname, BoardStatus status);
 
-    Optional<BoardEntity> findByBoardIdAndStatus(Long boardId, BoardStatus status);
-
-    List<BoardEntity> findByTitleContaining(String keyword);
-
-    List<BoardEntity> findByContentContaining(String keyword);
-
     List<BoardEntity> findByTitleContainingAndContentContainingAndStatus(String keyword, String keyword2, BoardStatus status);
 
-    List<BoardEntity> findByNickname(String keyword);
-
+    List<BoardEntity> findByMemberId(MemberEntity member);
 }

@@ -8,7 +8,6 @@ import com.easytrip.backend.place.service.PlaceService;
 import com.easytrip.backend.type.PlaceCategory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -17,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -33,15 +31,11 @@ public class PlaceController {
   private final JwtTokenProvider jwtTokenProvider;
 
   @PostMapping("/share")
-
-
   public void placeShare(HttpServletRequest request,
       @Valid @RequestPart(name = "placeRequest") PlaceRequest placeRequest,
       @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> file) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     placeService.share(accessToken, placeRequest, file);
-
-
   }
 
   @GetMapping("/info/{placeId}")
@@ -66,7 +60,6 @@ public class PlaceController {
       @Valid @NotNull(message = "장소의 카테고리는 없을 수 없습니다.") @RequestParam PlaceCategory category) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     List<PlaceDto> response = placeService.getList(accessToken, state, category);
-
     return ResponseEntity.ok(response);
   }
 
@@ -74,21 +67,15 @@ public class PlaceController {
 
   public void placeReport(HttpServletRequest request,
       @PathVariable Long placeId) {
-
-
     String accessToken = jwtTokenProvider.resolveToken(request);
     placeService.report(accessToken, placeId);
-
   }
 
   @PostMapping("/info/{placeId}/bookmark")
 
   public void placeBookmark(HttpServletRequest request,
       @PathVariable Long placeId) {
-
-
     String accessToken = jwtTokenProvider.resolveToken(request);
     placeService.bookmark(accessToken, placeId);
-
   }
 }
