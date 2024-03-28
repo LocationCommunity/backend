@@ -1,5 +1,6 @@
 package com.easytrip.backend.admin.service.impl;
 
+import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.admin.service.AdminManagementService;
 import com.easytrip.backend.admin.service.AdminService;
 import com.easytrip.backend.type.MemberStatus;
@@ -15,7 +16,12 @@ public class AdminServiceImpl implements AdminService {
 
   @Override
   @Transactional
-  public void setMemberStatus(String accessToken, String memberId, MemberStatus memberStatus) {
+  public void setMemberStatus(String accessToken, Long memberId, MemberStatus memberStatus) {
     adminManagementService.setMemberStatus(accessToken, memberId, memberStatus);
+  }
+
+  @Override
+  public MemberDetailDto getMemberInfo(String accessToken, Long memberId) {
+    return adminManagementService.getMemberInfo(accessToken, memberId);
   }
 }

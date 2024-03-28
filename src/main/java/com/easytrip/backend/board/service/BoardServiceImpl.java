@@ -5,8 +5,7 @@ import com.easytrip.backend.board.domain.BoardLikeEntity;
 import com.easytrip.backend.board.dto.*;
 import com.easytrip.backend.board.repository.BoardLikeRepository;
 import com.easytrip.backend.board.repository.BoardRepository;
-
-import com.easytrip.backend.common.image.entity.ImageEntity;
+import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.exception.impl.*;
 import com.easytrip.backend.member.domain.MemberEntity;
@@ -17,10 +16,8 @@ import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.SearchOption;
 import com.easytrip.backend.type.UseType;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
