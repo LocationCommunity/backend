@@ -1,8 +1,5 @@
 package com.easytrip.backend.board.domain;
 
-
-
-import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.BoardStatus;
@@ -11,11 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-
-
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Data

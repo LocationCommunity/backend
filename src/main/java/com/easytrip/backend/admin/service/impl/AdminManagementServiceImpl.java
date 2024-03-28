@@ -1,5 +1,6 @@
 package com.easytrip.backend.admin.service.impl;
 
+import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.admin.service.AdminManagementService;
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.repository.BoardRepository;
@@ -25,7 +26,7 @@ public class AdminManagementServiceImpl implements AdminManagementService {
   private final BoardRepository boardRepository;
 
   @Override
-  public void setMemberStatus(String accessToken, String memberId, MemberStatus memberStatus) {
+  public void setMemberStatus(String accessToken, Long memberId, MemberStatus memberStatus) {
 
     if (!jwtTokenProvider.validateToken(accessToken)) {
       throw new InvalidTokenException();
@@ -60,5 +61,32 @@ public class AdminManagementServiceImpl implements AdminManagementService {
           .build();
       memberRepository.save(memberEntity);
     }
+  }
+
+  @Override
+  public MemberDetailDto getMemberInfo(String accessToken, Long memberId) {
+
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    MemberEntity member = memberRepository.findByMemberId(memberId)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    MemberDetailDto memberDetailDto = MemberDetailDto.builder()
+        .memberId(member.getMemberId())
+        .email(member.getEmail())
+        .password(member.getPassword())
+        .name(member.getName())
+        .nickname(member.getNickname())
+        .auth(member.getAuth())
+        .imageUrl(member.getImageUrl())
+        .introduction(member.getIntroduction())
+        .status(member.getStatus())
+        .adminYn(member.getAdminYn())
+        .regDate(member.getRegDate())
+        .build();
+
+    return memberDetailDto;
   }
 }
