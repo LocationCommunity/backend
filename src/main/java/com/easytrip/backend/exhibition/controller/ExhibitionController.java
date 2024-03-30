@@ -4,6 +4,8 @@ package com.easytrip.backend.exhibition.controller;
 import com.easytrip.backend.exhibition.dto.ExListDto;
 import com.easytrip.backend.exhibition.dto.ExhibitionDto;
 import com.easytrip.backend.exhibition.service.ExhibitionService;
+import com.easytrip.backend.member.jwt.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,16 +22,20 @@ import java.util.List;
 public class ExhibitionController {
 
     private final ExhibitionService exhibitionService;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
 
     //전시회 등록
     @PostMapping()
-    public void postExInfo(@RequestPart(value = "exhibitionDto")  ExhibitionDto exhibitionDto,
-                                             @RequestPart(value = "files", required = false)List<MultipartFile> files
-                                             , @RequestPart(value = "placeId") Long placeId)  {
+    public void postExInfo(HttpServletRequest request,
+                           @RequestPart(value = "exhibitionDto")  ExhibitionDto exhibitionDto,
+                           @RequestPart(value = "files", required = false)List<MultipartFile> files,
+                           @RequestPart(value = "placeId", required = false) Long placeId)  {
 
-         exhibitionService.postEx(exhibitionDto, files, placeId);
+        String accessToken = jwtTokenProvider.resolveToken(request);
+
+         exhibitionService.postEx(accessToken, exhibitionDto, files, placeId);
 
 
     }
@@ -48,29 +54,36 @@ public class ExhibitionController {
 
 
     // 전시회 정보 수정
-    @PutMapping("/{exId}")
-    public void updateEx(@PathVariable ("exId") Long exId,
+    @PostMapping("/{exId}")
+    public void updateEx(HttpServletRequest request,
+                         @PathVariable ("exId") Long exId,
+                         @RequestPart(value = "placeId", required = false) Long placeId,
                          @RequestPart(value = "exhibitionDto") ExhibitionDto exhibitionDto,
                          @RequestPart(value = "files", required = false ) List<MultipartFile> files) {
 
-        exhibitionService.updateEx(exhibitionDto, exId, files);
+        String accessToken = jwtTokenProvider.resolveToken(request);
+
+        exhibitionService.updateEx(accessToken,exhibitionDto, exId, placeId, files);
 
 
     }
 
     // 전시회 정보 삭제
     @DeleteMapping("delete/{exId}")
-    public void deleteEx(@PathVariable("exId") Long exId) {
+    public void deleteEx(HttpServletRequest request, @PathVariable("exId") Long exId) {
 
-        exhibitionService.deleteEx(exId);
+        String accessToken = jwtTokenProvider.resolveToken(request);
+
+        exhibitionService.deleteEx(accessToken, exId);
     }
 
     // 전시회 리스트
     @GetMapping("/lists")
     public List<ExListDto> exList(
-            @PageableDefault(page = 0, size = 10, sort = "exId", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(page = 0, size = 5) Pageable pageable,
+            @RequestParam (value = "sort", required = false) String sort) {
 
-        return exhibitionService.exList(pageable);
+        return exhibitionService.exList(pageable, sort);
 
 
 

@@ -1,4 +1,4 @@
-package com.easytrip.backend.common.image.entity;
+package com.easytrip.backend.common.image.domain;
 
 
 

@@ -1,6 +1,6 @@
 package com.easytrip.backend.place.service.impl;
 
-import com.easytrip.backend.common.image.entity.ImageEntity;
+import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.exception.UnsupportedImageTypeException;
 import com.easytrip.backend.exception.impl.DuplicatePlaceException;

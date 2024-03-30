@@ -1,10 +1,11 @@
-
 package com.easytrip.backend.board.controller;
 
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.dto.*;
 import com.easytrip.backend.board.service.BoardService;
+import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.type.SearchOption;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -26,87 +27,98 @@ import java.util.Optional;
 public class BoardController {
 
     private final BoardService boardService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 게시물 작성
-    // 작동
     // 이미지 업로드 (MultiPartFile) Rest Api 구현 시 모든 값 RequestPart으로 맵핑 필수
    @PostMapping
-    public ResponseEntity<String> writePost(@RequestPart(value = "boardRequestDto") BoardRequestDto boardRequestDto
-                                            , @RequestPart(value = "files", required = false) List<MultipartFile> files
-                                            , @RequestPart(value = "placeId") Long placeId) throws Exception{
-        String response = boardService.writePost(boardRequestDto, files, placeId);
+    public void writePost(HttpServletRequest request,
+                          @Valid @RequestPart(value = "boardRequestDto") BoardRequestDto boardRequestDto,
+                          @RequestPart(value = "files", required = false) List<MultipartFile> files,
+                          @RequestPart(value = "placeId", required = false ) Long placeId) throws Exception{
 
-        return ResponseEntity.ok(response);
+       String accessToken = jwtTokenProvider.resolveToken(request);
+
+       boardService.writePost( accessToken, boardRequestDto, files, placeId);
+
+
     }
 
 
     // 게시물 수정
-    // 작동
     @PostMapping("/{boardId}")
-    public ResponseEntity<String> updatePost(@Valid @PathVariable("boardId") Long boardId,
-                                             @RequestPart(value = ("boardRequestDto")) BoardRequestDto boardRequestDto,
-                                             @RequestPart(value = ("files"), required = false) List<MultipartFile> files) throws Exception {
+    public void updatePost(HttpServletRequest request,
+                           @PathVariable("boardId") Long boardId,
+                           @RequestPart(value = "placeId", required = false) Long placeId,
+                           @RequestPart(value = ("boardRequestDto")) BoardRequestDto boardRequestDto,
+                           @RequestPart(value = ("files"), required = false) List<MultipartFile> files) throws Exception {
 
-        String response = boardService.updatePost(boardId, boardRequestDto, files);
+       String accessToken = jwtTokenProvider.resolveToken(request);
 
-        return ResponseEntity.ok(response);
+         boardService.updatePost(accessToken, boardId, placeId, boardRequestDto, files);
+
+
     }
 
     // 게시물 삭제 (INACTIVE)
-    // 작동
     @DeleteMapping("/delete/{boardId}")
-    public ResponseEntity<String> deletePost(@PathVariable(name = "boardId") Long boardId) {
-        String response = boardService.deletePost(boardId);
+    public void deletePost(HttpServletRequest request,
+                           @PathVariable(name = "boardId") Long boardId) {
 
-        return ResponseEntity.ok(response);
+       String accessToken = jwtTokenProvider.resolveToken(request);
+
+       boardService.deletePost(accessToken, boardId);
+
+
 
     }
 
     // 게시물 목록
-    // 작동
     @GetMapping("/lists")
-    public ResponseEntity<List<BoardListDto>> getList(@RequestParam(name = "sortByLikes", defaultValue = "false") Boolean sortByLikes) {
+    public List<BoardListDto> getList(@PageableDefault(page = 0, size = 5) Pageable pageable,
+                                      @RequestParam(value = "sort", required = false) String sort) {
 
-        List<BoardListDto> response = boardService.getList(sortByLikes );
+        return boardService.getList(pageable, sort );
 
-        return ResponseEntity.ok(response);
+
 
     }
 
     // 게시물 불러오기
-    // 작동
     @GetMapping("/{boardId}")
-    public ResponseEntity<BoardDetailDto> getDetail(@PathVariable(value = "boardId") Long boardId, BoardDetailDto boardDetailDto
+    public ResponseEntity<BoardDetailDto> getDetail(@PathVariable(value = "boardId") Long boardId
             ) {
 
-        BoardDetailDto response = boardService.getDetail(boardId, boardDetailDto);
+        BoardDetailDto response = boardService.getDetail(boardId);
 
         return ResponseEntity.ok(response);
 
     }
     // 나의 게시물
-    // 작동
     @GetMapping("/my-posts")
-    public ResponseEntity<List<BoardListDto>> getMyPost() {
-        List<BoardListDto> response = boardService.getMyPost();
+    public ResponseEntity<List<BoardListDto>> getMyPost(HttpServletRequest request) {
+
+       String accessToken = jwtTokenProvider.resolveToken(request);
+        List<BoardListDto> response = boardService.getMyPost(accessToken);
         return ResponseEntity.ok(response);
     }
+    // 게시물 좋아요
+    @PostMapping("/{boardId}/like")
+    public void postLike(HttpServletRequest request, @PathVariable(name = "boardId") Long boardId) {
 
-    @PostMapping("/{postId}/like")
-    public void postLike(@PathVariable(name = "boardId") Long boardId) {
+       String accessToken = jwtTokenProvider.resolveToken(request);
 
-        boardService.likes(boardId);
+        boardService.likes(boardId, accessToken);
     }
 
 
     // 게시글 검색
-    // 작동
-    // http://localhost:8080/boards/search  { "keyword" : " gogogo " , "searchOption" : " TITLE "  } param
+
     @GetMapping("/search")
     public ResponseEntity<List<BoardListDto>> search(
             @Valid @NotNull(message = "검색어를 입력해주세요.")
-            @RequestParam(value= "keyword") String keyword
-            , @RequestParam(value = "searchOption") SearchOption searchOption
+            @RequestParam(value= "keyword") String keyword,
+            @RequestParam(value = "searchOption") SearchOption searchOption
             ) {
 
         List<BoardListDto> response = boardService.search(keyword, searchOption);
@@ -115,4 +127,3 @@ public class BoardController {
     }
 
 }
-

@@ -4,6 +4,7 @@ import com.easytrip.backend.member.jwt.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -29,10 +30,9 @@ public class SecurityConfiguration {
                 .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
                     "/members/password", "/weather/**").permitAll()
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
-
-                    "/members/reissue", "/members/bookmark", "/place/**", "/boards/**", "/exhibitions/**").hasRole("USER"))
-//                    .requestMatchers("/exhibitions/**").hasRole("ADMIN"))
-
+                    "/members/reissue", "/members/bookmark", "/place/**", "/boards/**").hasRole("USER")
+                .requestMatchers(HttpMethod.GET,"/exhibitions/**").hasRole("USER")
+                .requestMatchers("admin/**", "/exhibitions/**").hasRole("ADMIN"))
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();

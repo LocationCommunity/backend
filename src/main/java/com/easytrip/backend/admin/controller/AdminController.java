@@ -9,6 +9,8 @@ import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.SearchOption;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -69,7 +71,7 @@ public class AdminController {
   @PutMapping("/place/{placeId}")
   public ResponseEntity<PlaceDto> updatePlace(HttpServletRequest request,
       @PathVariable Long placeId, @RequestPart(name = "placeRequest") PlaceRequest placeRequest,
-      @RequestPart(name = "file") List<MultipartFile> files) {
+      @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> files) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     PlaceDto result = adminService.updatePlace(accessToken, placeId, placeRequest, files);
     return ResponseEntity.ok(result);

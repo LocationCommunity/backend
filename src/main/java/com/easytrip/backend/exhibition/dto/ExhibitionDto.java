@@ -19,17 +19,13 @@ public class ExhibitionDto {
 
     private String title;
 
-    private String Address_ex;
+    private String content;
 
     private LocalDateTime start_date;
 
     private LocalDateTime end_date;
 
-    private String exName;
-
-    private String exLink;
-
-    private String exInfo;
+    private LocalDateTime modDate;
 
     private UseType useType;
 
