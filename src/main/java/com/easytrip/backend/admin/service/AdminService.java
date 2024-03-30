@@ -1,0 +1,39 @@
+package com.easytrip.backend.admin.service;
+
+import com.easytrip.backend.admin.dto.MemberDetailDto;
+import com.easytrip.backend.board.dto.BoardListDto;
+import com.easytrip.backend.board.dto.BoardRequestDto;
+import com.easytrip.backend.member.dto.request.UpdateRequest;
+import com.easytrip.backend.place.dto.PlaceDto;
+import com.easytrip.backend.place.dto.request.PlaceRequest;
+import com.easytrip.backend.type.MemberStatus;
+import com.easytrip.backend.type.SearchOption;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+@Service
+public interface AdminService {
+
+  void setMemberStatus(String accessToken, Long memberId, MemberStatus memberStatus);
+
+  MemberDetailDto getMemberInfo(String accessToken, Long memberId);
+
+  MemberDetailDto updateMemberInfo(String accessToken, Long memberId, UpdateRequest updateRequest,
+      MultipartFile file);
+
+  List<MemberDetailDto> searchMember(String accessToken, String keyword, SearchOption searchOption);
+
+  PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest, List<MultipartFile> file);
+
+  void deletePlace(String accessToken, Long placeId);
+
+
+    void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files);
+
+    void deleteBoard(String accessToken, Long boardId);
+
+    List<BoardListDto> searchBoard(String accessToken, String keyword, String SearchOption);
+
+
+}
