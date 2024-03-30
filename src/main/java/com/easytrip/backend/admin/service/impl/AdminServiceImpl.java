@@ -61,21 +61,24 @@ public class AdminServiceImpl implements AdminService {
     placeService.deletePlace(accessToken, placeId);
   }
 
-  @Override
-  public void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files) {
-    boardService.updateBoard(accessToken, boardId, placeId, boardRequestDto, files);
 
-  }
 
-  @Override
-  public void deleteBoard(String accessToken, Long boardId) {
-    boardService.deleteBoard(accessToken, boardId);
-
-  }
 
   @Override
   public List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption) {
     boardService.searchBoard( accessToken, keyword, searchOption);
-    return null;
+    return boardService.searchBoard(accessToken, keyword, searchOption);
+  }
+
+  public void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files) {
+
+    boardService.updatePost(accessToken, boardId,  placeId, boardRequestDto, files);
+  }
+
+  public void deleteBoard(String accessToken, Long boardId) {
+
+    boardService.deletePost(accessToken, boardId);
   }
 }
+
+

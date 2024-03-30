@@ -19,34 +19,32 @@ import lombok.Setter;
 @Builder
 public class PlaceDto {
 
+  private Long placeId;
   private String nickName;
   private String placeName;
   private String address;
-  private String placeImage;
+  private List<String> placeImage;
   private String placeInfo;
   private PlaceCategory category;
   private Integer reportCnt;
   private Long bookmarkCnt;
   private Boolean bookmarkYn;
 
-  public static List<PlaceDto> listOf(List<PlaceEntity> placeEntities, List<Boolean> bookmarkYnList) {
+  public static List<PlaceDto> listOf(List<PlaceEntity> placeEntities, List<Boolean> bookmarkYnList, List<List<String>> imageUrl) {
 
     return IntStream.range(0, placeEntities.size())
-        .mapToObj(i -> of(placeEntities.get(i), bookmarkYnList.get(i)))
+        .mapToObj(i -> of(placeEntities.get(i), bookmarkYnList.get(i), imageUrl.get(i)))
         .collect(Collectors.toList());
-
-//    return placeEntities.stream()
-//        .map(PlaceDto::of)
-//        .collect(Collectors.toList());
   }
 
-  public static PlaceDto of(PlaceEntity placeEntity, Boolean bookmarkYn) {
+  public static PlaceDto of(PlaceEntity placeEntity, Boolean bookmarkYn, List<String> imageUrl) {
 
     return PlaceDto.builder()
+        .placeId(placeEntity.getPlaceId())
         .nickName(placeEntity.getMemberId().getNickname())
         .placeName(placeEntity.getPlaceName())
         .address(placeEntity.getAddress())
-        .placeImage(placeEntity.getPlaceImage())
+        .placeImage(imageUrl)
         .placeInfo(placeEntity.getPlaceInfo())
         .category(placeEntity.getCategory())
         .reportCnt(placeEntity.getReportCnt())

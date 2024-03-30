@@ -29,11 +29,10 @@ public interface AdminService {
   void deletePlace(String accessToken, Long placeId);
 
 
-    void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files);
-
-    void deleteBoard(String accessToken, Long boardId);
-
-    List<BoardListDto> searchBoard(String accessToken, String keyword, String SearchOption);
+  List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption);
 
 
+  void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files);
+
+  void deleteBoard(String accessToken, Long boardId);
 }

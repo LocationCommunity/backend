@@ -1,5 +1,6 @@
 package com.easytrip.backend.place.repository;
 
+import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.PlaceCategory;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -24,4 +25,6 @@ public interface PlaceRepository extends JpaRepository<PlaceEntity, Long> {
   List<PlaceEntity> findBySql(@Param("x") Double x, @Param("y") Double y);
 
   List<PlaceEntity> findByAddressContainingAndCategory(String state, PlaceCategory category);
+
+  List<PlaceEntity> findAllByMemberId(MemberEntity member);
 }

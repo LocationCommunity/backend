@@ -163,7 +163,7 @@ public class BoardServiceImpl implements BoardService {
     // 게시물 수정
     @Transactional
     @Override
-    public void updatePost(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files) throws Exception {
+    public void updatePost(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files)  {
 
         if (!jwtTokenProvider.validateToken(accessToken)) {
             throw new InvalidTokenException();
@@ -259,7 +259,11 @@ public class BoardServiceImpl implements BoardService {
                 File saveFile = new File(projectPath, fileName);
 
                 // transferTo --> Exception 필요
-                file.transferTo(saveFile);
+                try {
+                    file.transferTo(saveFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
             } else {
                 // 이미지 파일이 아닌 경우에 대한 처리
@@ -518,111 +522,8 @@ return boardDetailDto;
     }
 
     // <<어드민 기능>>
-    // admin update board
-    @Transactional
-    public void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files) {
-
-        if (!jwtTokenProvider.validateToken(accessToken)) {
-            throw new InvalidTokenException();
-        }
 
 
-        BoardEntity board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
-
-        PlaceEntity place = placeRepository.findByPlaceId(placeId).orElseThrow(NotFoundPlaceException::new);
-        BoardEntity updateBoard = board.toBuilder()
-                .title(boardRequestDto.getTitle())
-                .content(boardRequestDto.getContent())
-                .placeId(place)
-                .build();
-        boardRepository.save(updateBoard);
-
-
-        if (!files.isEmpty() || files != null) {
-            // 기존의 이미지를 삭제하고 새로운 이미지로 대체
-            List<ImageEntity> images = imageRepository.findByBoardId(board);
-            imageRepository.deleteAll(images);
-        }
-
-
-        for (MultipartFile file : files) {
-
-
-            // 저장 경로 설정 ~/boards
-            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
-            UUID uuid = UUID.randomUUID();
-
-            // 랜덤식별자_원래이름
-            String fileName = uuid + "_" + file.getOriginalFilename();
-
-
-            // 파일 이름에서 확장자 추출
-            String fileExtension = StringUtils.getFilenameExtension(fileName);
-
-
-            // 지원하는 이미지 파일 확장자 목록
-            List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
-
-            // 확장자가 이미지 파일인지 확인
-            if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
-
-                // 빈 껍데기 생성
-                File saveFile = new File(projectPath, fileName);
-
-                // transferTo --> Exception 필요
-                try {
-                    file.transferTo(saveFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-            } else {
-                // 이미지 파일이 아닌 경우에 대한 처리
-                throw new UnsupportedImageTypeException();
-            }
-
-
-            ImageEntity image = imageRepository.findById(boardId).orElseThrow(NotfoundImageException::new);
-
-            // 이미지 저장 Board
-            ImageEntity imageEntity = image.toBuilder()
-                    .fileName(fileName)
-                    .filePath("/boards/" + fileName)
-                    .boardId(board)
-                    .useType(UseType.BOARD)
-                    .build();
-
-            imageRepository.save(imageEntity);
-        }
-
-
-    }
-
-    // admin delete board
-
-    public void deleteBoard(String accessToken, Long boardId) {
-
-        if (!jwtTokenProvider.validateToken(accessToken)) {
-            throw new InvalidTokenException();
-        }
-
-
-
-        BoardEntity board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
-        BoardEntity deletePost = board.toBuilder()
-                .status(BoardStatus.INACTIVE)
-                .deleteDate(LocalDateTime.now())
-                .build();
-        boardRepository.save(deletePost);
-
-        // 좋아요 삭제 처리
-        List<BoardLikeEntity> deletePostLikes = boardLikeRepository.findByBoardId(board);
-        boardLikeRepository.deleteAll(deletePostLikes);
-
-        List<ImageEntity> images = imageRepository.findByBoardId(board);
-        imageRepository.deleteAll(images);
-    }
 
 
     // admin search board
