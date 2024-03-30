@@ -9,6 +9,8 @@ import com.easytrip.backend.place.dto.request.PlaceRequest;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.SearchOption;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

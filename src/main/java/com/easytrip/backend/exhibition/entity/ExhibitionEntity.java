@@ -1,6 +1,5 @@
 package com.easytrip.backend.exhibition.entity;
 
-import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.ExStatus;
@@ -12,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -29,8 +27,9 @@ public class ExhibitionEntity {
 
     private String title;
 
+    private String content;
 
-    private String address_ex;
+
 
     private LocalDateTime regDate;
 
@@ -40,19 +39,9 @@ public class ExhibitionEntity {
 
     private LocalDateTime end_date;
 
-
-    private LocalDateTime update_date;
-
     private LocalDateTime deleteDate;
 
-
-    private String exName;
-
-
-    private String exLink;
-
-
-    private String exInfo;
+    private LocalDateTime modDate;
 
 
     @ManyToOne

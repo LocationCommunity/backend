@@ -95,7 +95,6 @@ public class PlaceController {
   }
 
   @PostMapping("/info/{placeId}/bookmark")
-
   public void placeBookmark(HttpServletRequest request,
       @PathVariable Long placeId) {
     String accessToken = jwtTokenProvider.resolveToken(request);

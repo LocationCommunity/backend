@@ -4,7 +4,7 @@ package com.easytrip.backend.member.service.impl;
 import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.repository.BoardRepository;
-import com.easytrip.backend.common.image.entity.ImageEntity;
+import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.components.MailComponents;
 import com.easytrip.backend.exception.UnsupportedImageTypeException;

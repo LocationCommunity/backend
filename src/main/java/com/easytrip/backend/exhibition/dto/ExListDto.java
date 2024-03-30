@@ -36,7 +36,6 @@ public class ExListDto {
 
                return ExListDto.builder()
                        .title(exhibitionEntity.getTitle())
-                       .exName(exhibitionEntity.getExName())
                        .regDate(LocalDateTime.now())
                        .build();
 

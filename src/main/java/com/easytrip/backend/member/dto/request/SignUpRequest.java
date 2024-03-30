@@ -1,7 +1,7 @@
 package com.easytrip.backend.member.dto.request;
 
 
-import com.easytrip.backend.common.image.entity.ImageEntity;
+import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.Platform;
