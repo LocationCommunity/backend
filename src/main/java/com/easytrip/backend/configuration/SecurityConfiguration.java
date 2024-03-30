@@ -27,10 +27,14 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(
             requests -> requests
                 .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
-                    "/members/password", "/weather/**").permitAll()
+                    "/members/password", "/weather/**" ).permitAll()
+
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
-                    "/members/reissue", "/members/bookmark", "/place/**", "/boards/**", "/exhibitions/**").hasRole("USER"))
+                    "/members/reissue", "/members/bookmark", "/place/**", "/boards/**", "/exhibitions/").hasRole("USER"))
+
 //                    .requestMatchers("/exhibitions/**").hasRole("ADMIN"))
+
+
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();

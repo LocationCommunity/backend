@@ -10,8 +10,6 @@ import lombok.*;
 public class BoardPlaceDto {
 
 
-
-
     private String placeName;
 
     private String address;

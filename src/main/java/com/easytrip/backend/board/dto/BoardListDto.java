@@ -17,9 +17,11 @@ public class BoardListDto {
 
     private Long boardId;
     private String title;
+    private String content;
     private String nickname;
     private LocalDateTime createDate;
     private Integer likeCnt;
+    private Integer viewCnt;
 
 
     //entity to dto
@@ -34,9 +36,11 @@ public class BoardListDto {
         return BoardListDto.builder()
                 .boardId(boardEntity.getBoardId())
                 .title(boardEntity.getTitle())
+                .content(boardEntity.getContent())
                 .nickname(boardEntity.getNickname())
                 .createDate(boardEntity.getCreateDate())
                 .likeCnt(boardEntity.getLikeCnt())
+                .viewCnt(boardEntity.getViewCnt())
                 .build();
     }
 

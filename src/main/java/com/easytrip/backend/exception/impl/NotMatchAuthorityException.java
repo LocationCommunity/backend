@@ -17,6 +17,6 @@ public class NotMatchAuthorityException extends AbstractException {
 
     @Override
     public String getMessage() {
-        return "관리자만 등록할 수 있습니다.";
+        return "관리자의 권한입니다.";
     }
 }

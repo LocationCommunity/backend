@@ -2,7 +2,6 @@ package com.easytrip.backend.board.domain;
 
 
 
-import com.easytrip.backend.common.image.entity.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.BoardStatus;
@@ -15,7 +14,6 @@ import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Data
@@ -47,6 +45,7 @@ public class BoardEntity {
 
 
     private Integer likeCnt;
+    private Integer viewCnt;
 
     private LocalDateTime createDate;
 

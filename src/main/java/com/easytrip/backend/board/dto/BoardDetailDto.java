@@ -3,6 +3,7 @@ package com.easytrip.backend.board.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,8 +15,11 @@ public class BoardDetailDto {
     private Long boardId;
     private String title;
     private String content;
+
+    private List<String> images;
     private String nickname;
     private Integer likeCnt;
+    private Integer viewCnt;
 
     private LocalDateTime createDate;
 

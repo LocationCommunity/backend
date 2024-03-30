@@ -1,7 +1,7 @@
 package com.easytrip.backend.member.service.impl;
 
 
-import com.easytrip.backend.common.image.entity.ImageEntity;
+import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.common.image.repository.ImageRepository;
 import com.easytrip.backend.components.MailComponents;
 import com.easytrip.backend.exception.impl.AlreadyAuthenticatedException;

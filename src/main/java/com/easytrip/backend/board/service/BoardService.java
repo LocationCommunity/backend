@@ -14,20 +14,28 @@ import java.util.List;
 @Service
 public interface BoardService {
 
-    String writePost(BoardRequestDto boardRequestDto, List<MultipartFile> files, Long placeId) throws Exception;
+    void writePost(String accessToken ,BoardRequestDto boardRequestDto, List<MultipartFile> files, Long placeId) throws Exception;
 
-    String updatePost(Long boardId, BoardRequestDto boardRequestDto, List<MultipartFile> files) throws Exception;
+    void updatePost(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files) throws Exception;
 
-    String deletePost(Long boardId);
+    void deletePost(String accessToken, Long boardId);
 
-    List<BoardListDto> getList(boolean sortByLikes);
+    List<BoardListDto> getList( Pageable pageable, String sort);
 
-    BoardDetailDto getDetail(Long boardId, BoardDetailDto boardDetailDto);
+    BoardDetailDto getDetail( Long boardId);
 
-    List<BoardListDto> getMyPost();
+    List<BoardListDto> getMyPost(String accessToken);
 
-    void likes(Long boardId);
+    void likes(Long boardId, String accessToken);
 
     List<BoardListDto> search(String keyword, SearchOption searchOption);
+
+
+    void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files);
+
+    void deleteBoard(String accessToken, Long boardId);
+
+    List<BoardListDto> searchBoard(String accessToken, String keyword, String SearchOption);
+
 
 }
