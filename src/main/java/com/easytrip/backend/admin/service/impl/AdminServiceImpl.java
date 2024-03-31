@@ -2,6 +2,9 @@ package com.easytrip.backend.admin.service.impl;
 
 import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.admin.service.AdminService;
+import com.easytrip.backend.board.dto.BoardListDto;
+import com.easytrip.backend.board.dto.BoardRequestDto;
+import com.easytrip.backend.board.service.BoardService;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.service.ManagementService;
 import com.easytrip.backend.place.dto.PlaceDto;
@@ -21,6 +24,7 @@ public class AdminServiceImpl implements AdminService {
 
   private final ManagementService managementService;
   private final PlaceService placeService;
+  private final BoardService boardService;
 
   @Override
   @Transactional
@@ -56,4 +60,25 @@ public class AdminServiceImpl implements AdminService {
   public void deletePlace(String accessToken, Long placeId) {
     placeService.deletePlace(accessToken, placeId);
   }
+
+
+
+
+  @Override
+  public List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption) {
+    boardService.searchBoard( accessToken, keyword, searchOption);
+    return boardService.searchBoard(accessToken, keyword, searchOption);
+  }
+
+  public void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files) {
+
+    boardService.updatePost(accessToken, boardId,  placeId, boardRequestDto, files);
+  }
+
+  public void deleteBoard(String accessToken, Long boardId) {
+
+    boardService.deletePost(accessToken, boardId);
+  }
 }
+
+

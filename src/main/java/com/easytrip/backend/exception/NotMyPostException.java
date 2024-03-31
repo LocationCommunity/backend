@@ -1,10 +1,8 @@
-package com.easytrip.backend.exception.impl;
+package com.easytrip.backend.exception;
 
-import com.easytrip.backend.exception.AbstractException;
 import org.springframework.http.HttpStatus;
 
-public class NotMatchAuthorityException extends AbstractException {
-
+public class NotMyPostException extends AbstractException{
     @Override
     public HttpStatus getHttpStatus() {
         return HttpStatus.BAD_REQUEST;
@@ -12,11 +10,11 @@ public class NotMatchAuthorityException extends AbstractException {
 
     @Override
     public String getErrorCode() {
-        return "NOT_MATCH_AUTHORITY";
+        return "NOT_MY_POST";
     }
 
     @Override
     public String getMessage() {
-        return "관리자의 권한입니다.";
+        return "나의 게시물이 아닙니다.";
     }
 }
