@@ -2,6 +2,8 @@ package com.easytrip.backend.admin.controller;
 
 import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.admin.service.AdminService;
+import com.easytrip.backend.board.dto.BoardListDto;
+import com.easytrip.backend.board.dto.BoardRequestDto;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.place.dto.PlaceDto;
@@ -14,6 +16,7 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -81,5 +84,39 @@ public class AdminController {
   public void deletePlace(HttpServletRequest request, @PathVariable Long placeId) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     adminService.deletePlace(accessToken, placeId);
+  }
+
+  @GetMapping("/board/search")
+  public List<BoardListDto> searchBoard(HttpServletRequest request,
+                                        @RequestParam(value = "keyword") String keyword,
+                                        @RequestParam(value = "seachOption") String searchOption) {
+
+    String accessToken = jwtTokenProvider.resolveToken(request);
+
+
+    return adminService.searchBoard(accessToken, keyword, searchOption);
+
+
+
+  }
+
+  @PostMapping("/board/{boardId}")
+  public void updateBoard(HttpServletRequest request,
+                          @PathVariable Long boardId,
+                          @RequestPart(value = "placeId") Long placeId,
+                          @RequestPart BoardRequestDto boardRequestDto,
+                          @RequestPart List<MultipartFile> files) {
+
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    adminService.updateBoard(accessToken, boardId, placeId, boardRequestDto, files);
+
+  }
+
+  @DeleteMapping("/board/{boardId}")
+  public void deleteBoard(HttpServletRequest request, @PathVariable(name = "boardId") Long boardId) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
+
+    adminService.deleteBoard(accessToken, boardId);
+
   }
 }

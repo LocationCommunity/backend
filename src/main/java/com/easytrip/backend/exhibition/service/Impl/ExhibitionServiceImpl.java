@@ -9,6 +9,7 @@ import com.easytrip.backend.exhibition.dto.ExhibitionDto;
 import com.easytrip.backend.exhibition.entity.ExhibitionEntity;
 import com.easytrip.backend.exhibition.repository.ExhibitionRepository;
 import com.easytrip.backend.exhibition.service.ExhibitionService;
+
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
@@ -17,6 +18,7 @@ import com.easytrip.backend.place.repository.PlaceRepository;
 import com.easytrip.backend.type.ExStatus;
 import com.easytrip.backend.type.UseType;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;

@@ -16,7 +16,7 @@ public interface BoardService {
 
     void writePost(String accessToken ,BoardRequestDto boardRequestDto, List<MultipartFile> files, Long placeId) throws Exception;
 
-    void updatePost(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files) throws Exception;
+    void updatePost(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files);
 
     void deletePost(String accessToken, Long boardId);
 
@@ -30,12 +30,7 @@ public interface BoardService {
 
     List<BoardListDto> search(String keyword, SearchOption searchOption);
 
-    /*
-    void updateBoard(String accessToken, Long boardId, BoardRequestDto boardRequestDto, List<MultipartFile> files);
+    List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption);
 
-    void deleteBoard(String accessToken, Long boardId);
 
-    List<BoardListDto> searchBoard(String accessToken, String keyword, String SearchOption);
-
-     */
 }
