@@ -1,6 +1,7 @@
 package com.easytrip.backend.admin.service;
 
 import com.easytrip.backend.admin.dto.MemberDetailDto;
+import com.easytrip.backend.board.dto.BoardRequestDto;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.dto.request.PlaceRequest;
@@ -22,7 +23,11 @@ public interface AdminService {
 
   List<MemberDetailDto> searchMember(String accessToken, String keyword, SearchOption searchOption);
 
-  PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest, List<MultipartFile> file);
+  PlaceDto updatePlace(String accessToken, Long placeId, PlaceRequest placeRequest,
+      List<MultipartFile> file);
 
   void deletePlace(String accessToken, Long placeId);
+
+  void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto,
+      List<MultipartFile> files);
 }

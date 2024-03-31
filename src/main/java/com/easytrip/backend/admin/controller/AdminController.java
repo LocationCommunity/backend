@@ -2,6 +2,7 @@ package com.easytrip.backend.admin.controller;
 
 import com.easytrip.backend.admin.dto.MemberDetailDto;
 import com.easytrip.backend.admin.service.AdminService;
+import com.easytrip.backend.board.dto.BoardRequestDto;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.place.dto.PlaceDto;
@@ -81,5 +82,14 @@ public class AdminController {
   public void deletePlace(HttpServletRequest request, @PathVariable Long placeId) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     adminService.deletePlace(accessToken, placeId);
+  }
+
+  @PutMapping("/board/{boardId}")
+  public void updateBoard(HttpServletRequest request, @PathVariable Long boardId,
+      @RequestPart(name = "placeId") Long placeId,
+      @RequestPart(name = "boardRequestDto") BoardRequestDto boardRequestDto,
+      @RequestPart(name = "files") List<MultipartFile> files) {
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    adminService.updateBoard(accessToken, boardId, placeId, boardRequestDto, files);
   }
 }

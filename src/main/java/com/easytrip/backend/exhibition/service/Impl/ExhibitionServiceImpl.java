@@ -55,11 +55,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             throw new InvalidTokenException();
         }
 
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
-
 
         MemberEntity member = memberRepository.findByEmail(email)
                 .orElseThrow(InvalidTokenException::new);
@@ -71,13 +69,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_MEMBER"))) {
 
-
             throw new NotMatchAuthorityException();
-//
         }
 
-        //admin
-//
         ExhibitionEntity exhibition = ExhibitionEntity.builder()
                 .title(exhibitionDto.getTitle())
                 .content(exhibitionDto.getContent())
@@ -96,16 +90,13 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\exhibitions";
             UUID uuid = UUID.randomUUID();
 
-
             String fileName = uuid + "_" + file.getOriginalFilename();
 
             // 파일 이름에서 확장자 추출
             String fileExtension = StringUtils.getFilenameExtension(fileName);
 
-
             // 지원하는 이미지 파일 확장자 목록
             List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
 
             // 확장자가 이미지 파일인지 확인
             if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
@@ -125,33 +116,22 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 throw new UnsupportedImageTypeException();
             }
 
-
             File saveFile = new File(projectPath, fileName);
-
-
 
             ImageEntity image = ImageEntity.builder()
                     .fileName(fileName)
-                    .filePath("/exhibitions/" + fileName)
+                    .filePath(projectPath + "\\" + fileName)
                     .exId(exhibition)
                     .useType(UseType.EXHIBI)
                     .build();
 
             imageRepository.save(image);
         }
-
-
-
-
-
-
     }
 
     // 전시회 정보 불러오기
     @Override
     public ExhibitionDto getEx(Long exId) {
-
-
 
         ExhibitionEntity ex = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);
         PlaceEntity place = placeRepository.findByPlaceId(ex.getPlacdId().getPlaceId()).orElseThrow(NotFoundPlaceException::new);
@@ -161,7 +141,6 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         for (ImageEntity image : images) {
 
             imageUrls.add(image.getFilePath());
-
         }
 
         ExhibitionDto exhibitionDto = ExhibitionDto.builder()
@@ -176,10 +155,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .end_date(ex.getEnd_date())
                 .build();
 
-
-
         return exhibitionDto;
-
     }
 
 
@@ -190,15 +166,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             throw new InvalidTokenException();
         }
 
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         ExhibitionEntity ex = new ExhibitionEntity();
         ImageEntity image = new ImageEntity();
-
-
-
-
 
         if (authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -206,13 +177,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             // admin
 
             ex = exhibitionRepository.findByExId(exId).orElseThrow(SelectPlaceException::new);
-
-
         } else {
             throw new NotMatchAuthorityException();
         }
-
-
 
 //        have benn deleted post
         if (ex.getStatus().equals(ExStatus.INACTIVE)) {
@@ -225,9 +192,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             imageRepository.deleteAll(images);
         }
 
-
         for (MultipartFile file : files) {
-
 
             // 저장 경로 설정 ~/boards
             String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\exhibitions";
@@ -236,14 +201,11 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             // 랜덤식별자_원래이름
             String fileName = uuid + "_" + file.getOriginalFilename();
 
-
             // 파일 이름에서 확장자 추출
             String fileExtension = StringUtils.getFilenameExtension(fileName);
 
-
             // 지원하는 이미지 파일 확장자 목록
             List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
 
             // 확장자가 이미지 파일인지 확인
             if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
@@ -264,19 +226,15 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             }
 
 
-
-
             // 이미지 저장 Board
             ImageEntity imageEntity = image.toBuilder()
                     .fileName(fileName)
-                    .filePath("/exhibitions/" + fileName)
+                    .filePath(projectPath + "\\" + fileName)
                     .exId(ex)
                     .useType(UseType.EXHIBI)
                     .build();
-
             imageRepository.save(imageEntity);
         }
-
 
         PlaceEntity place = placeRepository.findByPlaceId(placeId).orElseThrow(NotFoundPlaceException::new);
         ExhibitionEntity exhibitionEntity = ex.toBuilder()
@@ -286,12 +244,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .modDate(LocalDateTime.now())
                 .build();
         exhibitionRepository.save(exhibitionEntity);
-
-
-
-
-
         }
+
     // 전시회 삭제
     @Override
     public void deleteEx(String accessToken, Long exId) {
@@ -305,41 +259,26 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         MemberEntity member = new MemberEntity();
         ExhibitionEntity exhibition = new ExhibitionEntity();
 
-
-
         if (authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-
-
 
             exhibition = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);
 
             if (exhibition.getStatus().equals(ExStatus.INACTIVE)) {
                 throw new NotFoundExhibition();
-
             }
             ExhibitionEntity deleteEx = exhibition.toBuilder()
                     .status(ExStatus.INACTIVE)
                     .deleteDate(LocalDateTime.now())
                     .build();
-
             exhibitionRepository.save(deleteEx);
         }
-
-
-
-
-
     }
-
 
     // 전시회 리스트
     @Override
     public List<ExListDto> exList(Pageable pageable, String sort) {
-
-
-//
 
         Sort.Direction direction = Sort.Direction.DESC;
         String sortBy = sort.equals("id") ? "exId" : sort.equals("likes") ? "likeCnt" : null;
@@ -351,8 +290,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         List<ExhibitionEntity> exhibitions = exhibitionRepository.findAll(pageable).getContent();
         return ExListDto.ListOf(exhibitions);
     }
-
-    }
+}
 
 
 

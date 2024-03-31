@@ -27,4 +27,12 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
     List<BoardEntity> findByTitleContainingAndContentContainingAndStatus(String keyword, String keyword2, BoardStatus status);
     List<BoardEntity> findByMemberId(MemberEntity member);
+
+    List<BoardEntity> findByTitleContaining(String keyword);
+
+    List<BoardEntity> findByContentContaining(String keyword);
+
+    List<BoardEntity> findByTitleContainingAndContentContaining(String keyword, String keyword1);
+
+    List<BoardEntity> findByNickname(String keyword);
 }
