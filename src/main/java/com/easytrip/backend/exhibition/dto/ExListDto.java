@@ -22,6 +22,11 @@ public class ExListDto {
 
     private String exName;
 
+    private LocalDateTime start_date;
+
+    private LocalDateTime end_date;
+
+
     private LocalDateTime regDate;
 
 
@@ -36,6 +41,8 @@ public class ExListDto {
 
                return ExListDto.builder()
                        .title(exhibitionEntity.getTitle())
+                       .start_date(exhibitionEntity.getStart_date())
+                       .end_date(exhibitionEntity.getEnd_date())
                        .regDate(LocalDateTime.now())
                        .build();
 

@@ -62,6 +62,14 @@ public class BoardServiceImpl implements BoardService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
+        /*
+        if ( placeId == null) {
+
+            throw new SelectPlaceException();
+
+        }
+
+         */
 
         // 장소
         PlaceEntity place = placeRepository.findByPlaceId(placeId).orElseThrow(SelectPlaceException::new);
