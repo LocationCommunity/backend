@@ -43,7 +43,7 @@ public class MemberController {
     memberService.signUp(signUpRequest, file, LOCAL);
   }
 
-  @GetMapping("/auth")
+  @PostMapping("/auth")
   public void auth(@RequestParam(name = "email") String email,
       @RequestParam(name = "code") String code) {
     memberService.auth(email, code, LOCAL);
@@ -84,7 +84,7 @@ public class MemberController {
     memberService.resetPassword(resetRequest, LOCAL);
   }
 
-  @GetMapping("/password")
+  @PostMapping("/password")
   public void passwordAuth(@RequestParam(name = "email") String email,
       @RequestParam(name = "code") String code,
       @RequestParam(name = "resetPassword") String resetPassword) {
