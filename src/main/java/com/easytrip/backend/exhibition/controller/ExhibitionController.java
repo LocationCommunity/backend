@@ -54,7 +54,7 @@ public class ExhibitionController {
 
 
     // 전시회 정보 수정
-    @PostMapping("/{exId}")
+    @PutMapping("/{exId}")
     public void updateEx(HttpServletRequest request,
                          @PathVariable ("exId") Long exId,
                          @RequestPart(value = "placeId", required = false) Long placeId,

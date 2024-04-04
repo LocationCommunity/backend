@@ -46,7 +46,7 @@ public class BoardController {
 
 
     // 게시물 수정
-    @PostMapping("/{boardId}")
+    @PutMapping("/{boardId}")
     public void updatePost(HttpServletRequest request,
                            @PathVariable("boardId") Long boardId,
                            @RequestPart(value = "placeId", required = false) Long placeId,

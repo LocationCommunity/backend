@@ -285,6 +285,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         ExhibitionEntity exhibitionEntity = ex.toBuilder()
                 .title(exhibitionDto.getTitle())
                 .content(exhibitionDto.getContent())
+                .start_date(exhibitionDto.getStart_date())
+                .end_date(exhibitionDto.getEnd_date())
                 .placdId(place)
                 .modDate(LocalDateTime.now())
                 .build();
