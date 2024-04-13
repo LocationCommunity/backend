@@ -7,6 +7,7 @@ import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
+import com.easytrip.backend.type.Interest;
 import com.easytrip.backend.type.Platform;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -42,4 +43,6 @@ public interface MemberService {
   List<BookmarkDto> myBookmark(String accessToken);
 
   void bookmarkCancel(String accessToken, Long bookmarkId);
+
+  void setInterest(String accessToken, List<Interest> interestList);
 }
