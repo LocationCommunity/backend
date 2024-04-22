@@ -147,4 +147,20 @@ public class MemberController {
     String accessToken = jwtTokenProvider.resolveToken(request);
     memberService.setInterest(accessToken, interestList);
   }
+
+  @PutMapping("/interest")
+  public void changeInterest(HttpServletRequest request, @RequestBody List<Interest> interestList) {
+    if (interestList.size() != 3) {
+      throw new InterestValidationException();
+    }
+
+    for (Interest interest : interestList) {
+      if (!Arrays.asList(Interest.values()).contains(interest)) {
+        throw new InterestValidationException();
+      }
+    }
+
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    memberService.changeInterest(accessToken, interestList);
+  }
 }

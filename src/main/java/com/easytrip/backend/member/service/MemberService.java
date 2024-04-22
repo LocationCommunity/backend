@@ -45,4 +45,6 @@ public interface MemberService {
   void bookmarkCancel(String accessToken, Long bookmarkId);
 
   void setInterest(String accessToken, List<Interest> interestList);
+
+  void changeInterest(String accessToken, List<Interest> interestList);
 }

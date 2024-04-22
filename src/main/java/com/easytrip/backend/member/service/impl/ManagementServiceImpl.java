@@ -554,6 +554,33 @@ public class ManagementServiceImpl implements ManagementService {
     }
   }
 
+  @Override
+  public void changeInterest(String accessToken, List<Interest> interestList) {
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+
+    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+    String email = authentication.getName();
+
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    interestRepository.deleteAllByMemberId(member);
+
+    for (Interest interest : interestList) {
+      MemberInterestEntity memberInterest = MemberInterestEntity.builder()
+          .memberId(member)
+          .interest(interest)
+          .build();
+      interestRepository.save(memberInterest);
+    }
+  }
+
   private TokenCreateDto snsLogin(MemberEntity snsMember, Platform platForm) {
     Optional<MemberEntity> byEmail = memberRepository.findByEmailAndPlatform(snsMember.getEmail(),
         platForm);
