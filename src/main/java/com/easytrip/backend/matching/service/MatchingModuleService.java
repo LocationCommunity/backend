@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface MatchingService {
+public interface MatchingModuleService {
 
-  List<MatchingMemberDto> matching(String accessToken);
+  List<MatchingMemberDto> getMatchingList(String accessToken);
 
-  void accept(String accessToken, Long memberId);
+  void acceptMatching(String accessToken, Long memberId);
 }
