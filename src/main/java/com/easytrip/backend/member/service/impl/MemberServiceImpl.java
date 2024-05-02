@@ -15,6 +15,7 @@ import com.easytrip.backend.member.service.MemberService;
 import com.easytrip.backend.member.service.TokenService;
 import com.easytrip.backend.member.service.sns.impl.KakaoLoginServiceImpl;
 import com.easytrip.backend.member.service.sns.impl.NaverLoginServiceImpl;
+import com.easytrip.backend.type.Interest;
 import com.easytrip.backend.type.Platform;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -118,5 +119,10 @@ public class MemberServiceImpl implements MemberService {
   @Override
   public void bookmarkCancel(String accessToken, Long bookmarkId) {
     bookmarkService.bookmarkCancel(accessToken, bookmarkId);
+  }
+
+  @Override
+  public void setInterest(String accessToken, List<Interest> interestList) {
+    managementService.setInterest(accessToken, interestList);
   }
 }
