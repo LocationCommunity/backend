@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface InterestRepository extends JpaRepository<MemberInterestEntity, Long> {
 
   List<MemberInterestEntity> findAllByMemberId(MemberEntity member);
+
+  void deleteAllByMemberId(MemberEntity member);
 }

@@ -125,4 +125,9 @@ public class MemberServiceImpl implements MemberService {
   public void setInterest(String accessToken, List<Interest> interestList) {
     managementService.setInterest(accessToken, interestList);
   }
+
+  @Override
+  public void changeInterest(String accessToken, List<Interest> interestList) {
+    managementService.changeInterest(accessToken, interestList);
+  }
 }

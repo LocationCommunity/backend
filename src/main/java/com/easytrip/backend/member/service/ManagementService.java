@@ -51,4 +51,6 @@ public interface ManagementService {
   List<MemberDetailDto> searchMember(String accessToken, String keyword, SearchOption searchOption);
 
   void setInterest(String accessToken, List<Interest> interestList);
+
+  void changeInterest(String accessToken, List<Interest> interestList);
 }
