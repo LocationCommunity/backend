@@ -3,6 +3,8 @@ package com.easytrip.backend.member.controller;
 import static com.easytrip.backend.type.Platform.KAKAO;
 import static com.easytrip.backend.type.Platform.LOCAL;
 import static com.easytrip.backend.type.Platform.NAVER;
+
+import com.easytrip.backend.exception.impl.InterestValidationException;
 import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
@@ -12,8 +14,10 @@ import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.service.MemberService;
+import com.easytrip.backend.type.Interest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +47,7 @@ public class MemberController {
     memberService.signUp(signUpRequest, file, LOCAL);
   }
 
-  @GetMapping("/auth")
+  @PostMapping("/auth")
   public void auth(@RequestParam(name = "email") String email,
       @RequestParam(name = "code") String code) {
     memberService.auth(email, code, LOCAL);
@@ -84,7 +88,7 @@ public class MemberController {
     memberService.resetPassword(resetRequest, LOCAL);
   }
 
-  @GetMapping("/password")
+  @PostMapping("/password")
   public void passwordAuth(@RequestParam(name = "email") String email,
       @RequestParam(name = "code") String code,
       @RequestParam(name = "resetPassword") String resetPassword) {
@@ -125,5 +129,38 @@ public class MemberController {
       @PathVariable Long bookmarkId) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     memberService.bookmarkCancel(accessToken, bookmarkId);
+  }
+
+  @PostMapping("/interest")
+  public void setInterest(HttpServletRequest request, @RequestBody List<Interest> interestList) {
+    // interestList 검증 코드
+    if (interestList.size() != 3) {
+      throw new InterestValidationException();
+    }
+
+    for (Interest interest : interestList) {
+      if (!Arrays.asList(Interest.values()).contains(interest)) {
+        throw new InterestValidationException();
+      }
+    }
+
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    memberService.setInterest(accessToken, interestList);
+  }
+
+  @PutMapping("/interest")
+  public void changeInterest(HttpServletRequest request, @RequestBody List<Interest> interestList) {
+    if (interestList.size() != 3) {
+      throw new InterestValidationException();
+    }
+
+    for (Interest interest : interestList) {
+      if (!Arrays.asList(Interest.values()).contains(interest)) {
+        throw new InterestValidationException();
+      }
+    }
+
+    String accessToken = jwtTokenProvider.resolveToken(request);
+    memberService.changeInterest(accessToken, interestList);
   }
 }

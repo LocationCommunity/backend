@@ -8,6 +8,7 @@ import com.easytrip.backend.member.dto.request.LoginRequest;
 import com.easytrip.backend.member.dto.request.ResetRequest;
 import com.easytrip.backend.member.dto.request.SignUpRequest;
 import com.easytrip.backend.member.dto.request.UpdateRequest;
+import com.easytrip.backend.type.Interest;
 import com.easytrip.backend.type.MemberStatus;
 import com.easytrip.backend.type.Platform;
 import com.easytrip.backend.type.SearchOption;
@@ -38,8 +39,6 @@ public interface ManagementService {
 
   MemberDto myInfo(String accessToken);
 
-
-
   MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file);
 
   void setMemberStatus(String accessToken, Long memberId, MemberStatus memberStatus);
@@ -51,5 +50,7 @@ public interface ManagementService {
 
   List<MemberDetailDto> searchMember(String accessToken, String keyword, SearchOption searchOption);
 
+  void setInterest(String accessToken, List<Interest> interestList);
 
+  void changeInterest(String accessToken, List<Interest> interestList);
 }
