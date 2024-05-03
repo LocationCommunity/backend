@@ -124,6 +124,8 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
       return;
     }
 
+    // 1 : 1 채팅방이 있는지 확인
+
     // 없을 때 매칭정보 저장
     AcceptMemberEntity acceptMember = AcceptMemberEntity.builder()
         .acceptingMemberId(acceptingMember)
