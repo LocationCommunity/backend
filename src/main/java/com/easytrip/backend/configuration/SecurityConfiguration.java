@@ -33,7 +33,7 @@ public class SecurityConfiguration {
 
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
                     "/members/reissue", "/members/bookmark", "/members/interest", "/place/**",
-                    "/boards/**").hasRole("USER")
+                    "/boards/**", "/matching/**").hasRole("USER")
                 .requestMatchers(HttpMethod.GET, "/exhibitions/**").hasRole("USER")
                 .requestMatchers("/admin/**", "/exhibitions/**").hasRole("ADMIN"))
 
