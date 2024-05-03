@@ -27,8 +27,10 @@ public class SecurityConfiguration {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             requests -> requests
-                .requestMatchers("/members/sign-up", "/members/auth", "/members/login/**",
-                    "/members/password", "/weather/**").permitAll()
+
+                .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
+                    "/members/password", "/weather/**", "/chat/**", "/home/**", "/stomp/**", "/boards/**" ).permitAll()
+
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
                     "/members/reissue", "/members/bookmark", "/members/interest", "/place/**",
                     "/boards/**").hasRole("USER")
