@@ -152,4 +152,10 @@ public class JwtTokenProvider {
     Date expirationDate = claims.getExpiration();
     return expirationDate.getTime();
   }
+
+  public Platform getPlatform(String accessToken) {
+    Claims claimsFromToken = getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    return Platform.valueOf(platformString);
+  }
 }

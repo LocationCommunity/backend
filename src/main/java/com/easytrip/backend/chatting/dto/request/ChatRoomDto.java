@@ -7,12 +7,12 @@ import lombok.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 public class ChatRoomDto {
 
 
 
     @Getter
+    @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Request {
