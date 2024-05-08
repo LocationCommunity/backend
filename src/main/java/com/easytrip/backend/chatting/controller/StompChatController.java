@@ -7,6 +7,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDateTime;
+
 
 @Log4j2
 @Controller
@@ -21,7 +23,7 @@ public class StompChatController {
     @MessageMapping("/chat")
     public void Message(ChatMessageDto.Send message) {
 
-
+        message.setSendTime(LocalDateTime.now());
         chatMessageService.talk(message);
 
         log.info(message.getMessage()  + message.getReceiverId() + message.getSenderId() + " - 메시지 전송완료");

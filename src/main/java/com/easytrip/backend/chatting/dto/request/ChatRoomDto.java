@@ -13,6 +13,7 @@ public class ChatRoomDto {
 
 
     @Getter
+    @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Request {
@@ -45,6 +46,7 @@ public class ChatRoomDto {
 
         public static Response of(ChatRoom chatRoom) {
             MemberDto.Response matchedMember1 = null, matchedMember2 = null;
+
 
             if (chatRoom.getMatchedMember1() != null)
                 matchedMember1 = MemberDto.Response.of(chatRoom.getMatchedMember1());

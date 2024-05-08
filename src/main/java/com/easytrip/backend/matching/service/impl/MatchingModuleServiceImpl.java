@@ -1,5 +1,10 @@
 package com.easytrip.backend.matching.service.impl;
 
+import com.easytrip.backend.chatting.dto.request.ChatRoomDto;
+import com.easytrip.backend.chatting.entity.ChatRoom;
+import com.easytrip.backend.chatting.repository.ChatRoomRepository;
+import com.easytrip.backend.chatting.service.ChatRoomService;
+import com.easytrip.backend.exception.RoomExistException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.matching.domain.AcceptMemberEntity;
@@ -14,7 +19,7 @@ import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.type.Interest;
 import com.easytrip.backend.type.Platform;
 import io.jsonwebtoken.Claims;
-import java.util.ArrayList;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +37,8 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
   private final MemberRepository memberRepository;
   private final InterestRepository interestRepository;
   private final AcceptMemberRepository acceptMemberRepository;
+  private final ChatRoomService chatRoomService;
+  private final ChatRoomRepository chatRoomRepository;
 
   @Override
   public List<MatchingMemberDto> getMatchingList(String accessToken) {
@@ -116,21 +123,41 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
         acceptingMember, likedMember);
     if (byAcceptingMemberIdAndLikedMemberId.isPresent()) {
       // 1 : 1 채팅방으로 연결
+//      ChatRoomDto.Request request = new ChatRoomDto.Request();
+//      request.setMatchedMember1(acceptingMember.getMemberId());
+//      request.setMatchedMember2(likedMember.getMemberId());
+//      chatRoomService.joinChatRoom(request);
+//
+//      // DB에 저장되어있던 매칭정보 삭제
+//      AcceptMemberEntity acceptMember = byAcceptingMemberIdAndLikedMemberId.get();
+//      acceptMemberRepository.delete(acceptMember);
 
-      // DB에 저장되어있던 매칭정보 삭제
-      AcceptMemberEntity acceptMember = byAcceptingMemberIdAndLikedMemberId.get();
-      acceptMemberRepository.delete(acceptMember);
+      // 매칭 정보가 이미 존재하는 경우 채팅방을 생성하고 매칭 정보를 삭제하지 않고 반환합니다.
+      ChatRoomDto.Request request = new ChatRoomDto.Request();
+      request.setMatchedMember1(acceptingMember.getMemberId());
+      request.setMatchedMember2(likedMember.getMemberId());
+      chatRoomService.joinChatRoom(request);
+
+      // 반환 전에 매칭 정보를 삭제하지 않음
+
 
       return;
     }
 
     // 1 : 1 채팅방이 있는지 확인
+//    Optional<ChatRoom> byMember = chatRoomRepository.findByMember(acceptingMember.getMemberId(), likedMember.getMemberId());
+//    if(byMember.isPresent()) {
+//
+//      throw new RoomExistException();
+//
+//    }
 
-    // 없을 때 매칭정보 저장
-    AcceptMemberEntity acceptMember = AcceptMemberEntity.builder()
-        .acceptingMemberId(acceptingMember)
-        .likedMemberId(likedMember)
-        .build();
-    acceptMemberRepository.save(acceptMember);
+      // 없을 때 매칭정보 저장
+      AcceptMemberEntity acceptMember = AcceptMemberEntity.builder()
+              .acceptingMemberId(acceptingMember)
+              .likedMemberId(likedMember)
+              .build();
+      acceptMemberRepository.save(acceptMember);
+
   }
 }

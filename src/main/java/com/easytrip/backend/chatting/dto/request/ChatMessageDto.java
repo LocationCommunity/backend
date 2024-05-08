@@ -1,10 +1,10 @@
 package com.easytrip.backend.chatting.dto.request;
 
 import com.easytrip.backend.chatting.entity.ChatMessage;
+import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.MemberDto;
 import lombok.*;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
@@ -27,10 +27,12 @@ public class ChatMessageDto {
         private LocalDateTime sendTime;
 
 
+
         public ChatMessage toChatMessage() {
             return ChatMessage.builder()
                     .message(message)
                     .sender(MemberEntity.builder().memberId(senderId).build())
+                    .chatRoom(ChatRoom.builder().id(roomId).build())
                     .receiver(MemberEntity.builder().memberId(receiverId).build())
                     .sendTime(LocalDateTime.now())
                     .build();
