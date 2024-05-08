@@ -9,6 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AcceptMemberRepository extends JpaRepository<AcceptMemberEntity, Long> {
 
-  Optional<AcceptMemberEntity> findByAcceptingMemberIdAndLikedMemberId(MemberEntity acceptingMember,
-      MemberEntity likedMember);
+  Optional<AcceptMemberEntity> findByAcceptingMemberIdAndLikedMemberId(MemberEntity acceptingMember, MemberEntity likedMember);
 }

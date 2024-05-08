@@ -154,44 +154,11 @@ public class JwtTokenProvider {
     return expirationDate.getTime();
   }
 
-//  public Platform getPlatform(String token) {
-//
-//    Claims claims = getClaimsFromToken(token);
-//
-//    return claims.get("Platform", Platform.class);
-//
-//  }
-public Platform getPlatform(String token) {
-  try {
-    // 토큰을 파싱하고 클레임 추출
-    Claims claims = getClaimsFromToken(token);
 
-    // 클레임에 "platform" 클레임이 포함되어 있는지 확인
-    if (claims != null && claims.containsKey("platform")) {
-      // "platform" 클레임의 값을 가져옴
-      String platformValue = claims.get("platform", String.class);
-      // 문자열 변환 후 대문자 변환
-      // 값을 Platform 열거형으로 변환
-      return Platform.valueOf(platformValue.toUpperCase());
-    } else {
-      // "platform" 클레임이 없는 경우
-      return null;
-    }
-  } catch (Exception e) {
-    // 토큰 파싱 또는 변환 중 오류 발생
-    e.printStackTrace(); // 디버깅을 위해 오류 로깅
-    return null;
+  public Platform getPlatform(String accessToken) {
+    Claims claimsFromToken = getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    return Platform.valueOf(platformString);
   }
-}
-
-//  // 인증 객체 생성
-//  public Authentication createAuthentication(String email) {
-//    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-//    return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-//  }
-
-
-
-
 
 }
