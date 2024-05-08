@@ -92,7 +92,14 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
 
         // 두 개 이상의 관심사가 동일한 경우에만 추가
         if (otherMemberInterests.size() >= 2) {
-          matchingMembers.add(otherMember);
+          // 이미 매칭 수락을 한 상대일 경우, 1 대 1 채팅방이 만들어진 상태일 때 제외
+          Optional<AcceptMemberEntity> acceptMember = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
+              member, otherMember);
+          Optional<ChatRoom> chatRoom = chatRoomRepository.findByMatchedMembers(member.getMemberId(),
+              otherMember.getMemberId());
+          if (acceptMember.isEmpty() && chatRoom.isEmpty()) {
+            matchingMembers.add(otherMember);
+          }
         }
       }
     }
@@ -117,11 +124,23 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     MemberEntity acceptingMember = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
+    // 매칭 상대가 자기 자신일 경우 exception
+    if (acceptingMember.getMemberId().equals(memberId)) {
+      throw new InvalidMatchingException();
+    }
+
     MemberEntity likedMember = memberRepository.findByMemberId(memberId)
         .orElseThrow(() -> new NotFoundMemberException());
 
-    Optional<AcceptMemberEntity> byAcceptingMembers = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberIdOrAcceptingMemberIdAndLikedMemberId(
-        acceptingMember, likedMember, likedMember, acceptingMember);
+    Optional<AcceptMemberEntity> byAcceptingMembers = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
+        likedMember, acceptingMember);
+
+    // 동일한 회원가 중복매칭 시 exception
+    Optional<AcceptMemberEntity> byAcceptingMemberIdAndLikedMemberId = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
+        acceptingMember, likedMember);
+    if (byAcceptingMemberIdAndLikedMemberId.isPresent()) {
+      throw new InvalidMatchingException();
+    }
 
     if (byAcceptingMembers.isPresent()) {
       // 1 : 1 채팅방으로 연결
@@ -138,7 +157,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     }
 
     // 1 : 1 채팅방이 있는지 확인
-    Optional<ChatRoom> byMember = chatRoomRepository.findByMember(acceptingMember.getMemberId(),
+    Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMembers(acceptingMember.getMemberId(),
         likedMember.getMemberId());
 
     if (byMember.isPresent()) {
