@@ -49,12 +49,16 @@ public class ChatMessageDto {
 
         private MemberDto.Response sender;
 
+        private String nickname;
+
         private LocalDateTime sendTime;
 
 
         public static Response of(ChatMessage chatMessage) {
+
             return Response.builder().message(chatMessage.getMessage())
                     .sender(MemberDto.Response.of(chatMessage.getSender()))
+                    .nickname(chatMessage.getSender().getNickname())
                     .sendTime(chatMessage.getSendTime())
                     .build();
         }

@@ -23,15 +23,12 @@ public class ChatRoomController {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-
-
-
     //채팅방 생성, 참여
     @PostMapping("/chat/room")
-    public ResponseEntity<BasicResponse> JoinChatRoom(@RequestBody ChatRoomDto.Request join) {
-
+    public ResponseEntity<BasicResponse> JoinChatRoom(HttpServletRequest request, @RequestBody ChatRoomDto.Request join) {
+        String accessToken = jwtTokenProvider.resolveToken(request);
         try {
-            Long roomId = chatRoomService.joinChatRoom(join);
+            Long roomId = chatRoomService.joinChatRoom(accessToken, join);
             return ResponseEntity.status(HttpStatus.CREATED).body(new Result<>(roomId));
 
         } catch (IllegalStateException e) {
@@ -42,16 +39,18 @@ public class ChatRoomController {
 
     //채팅방 목록
     @GetMapping("/chat/room")
-    public ResponseEntity<BasicResponse> getChatRoomList(@RequestParam(value = "id") Long memberId) {
-        return ResponseEntity.ok(new Result<>(chatRoomService.getRoomList(memberId)));
+    public ResponseEntity<BasicResponse> getChatRoomList(HttpServletRequest request, @RequestParam(value = "id") Long memberId) {
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        return ResponseEntity.ok(new Result<>(chatRoomService.getRoomList(accessToken, memberId)));
 
     }
 
     //채팅방 디테일
     @GetMapping("/chat/room/{roomId}")
-    public ResponseEntity<BasicResponse> getChatRoomDetail(@PathVariable(value = "roomId") Long roomId) {
+    public ResponseEntity<BasicResponse> getChatRoomDetail(HttpServletRequest request, @PathVariable(value = "roomId") Long roomId) {
 
-        return ResponseEntity.ok(new Result<>(chatRoomService.getRoomDetail(roomId)));
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        return ResponseEntity.ok(new Result<>(chatRoomService.getRoomDetail(accessToken, roomId)));
 
 
     }
