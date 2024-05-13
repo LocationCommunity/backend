@@ -199,9 +199,7 @@ public class ManagementServiceImpl implements ManagementService {
 
     // 토큰을 통해 사용자 정보 받아오기
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     // Redis에 해당 유저의 email로 저장된 refreshToken이 있는지 확인 후 있으면 삭제
     if (redisTemplate.opsForValue()
@@ -226,10 +224,7 @@ public class ManagementServiceImpl implements ManagementService {
 
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
-
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -302,10 +297,7 @@ public class ManagementServiceImpl implements ManagementService {
 
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
-
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -322,10 +314,7 @@ public class ManagementServiceImpl implements ManagementService {
 
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
-
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -532,9 +521,7 @@ public class ManagementServiceImpl implements ManagementService {
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -563,9 +550,7 @@ public class ManagementServiceImpl implements ManagementService {
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());

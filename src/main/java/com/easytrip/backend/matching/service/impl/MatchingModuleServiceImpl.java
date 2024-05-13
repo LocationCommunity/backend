@@ -20,6 +20,7 @@ import com.easytrip.backend.type.Interest;
 import com.easytrip.backend.type.Platform;
 import io.jsonwebtoken.Claims;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -51,9 +52,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -61,7 +60,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     // 찾아온 회원의 관심사 찾아오기
     List<MemberInterestEntity> interestEntities = interestRepository.findAllByMemberId(member);
 
-    // 현재 회원의 관심사들을 담을 Set 생성
+    // 현재 회원의 관심사들을 담을 Set생성
     Set<Interest> interests = interestEntities.stream()
         .map(MemberInterestEntity::getInterest)
         .collect(Collectors.toSet());
@@ -117,9 +116,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity acceptingMember = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());

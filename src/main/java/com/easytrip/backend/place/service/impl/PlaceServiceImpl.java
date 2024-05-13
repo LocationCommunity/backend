@@ -74,9 +74,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -151,9 +149,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -197,9 +193,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -270,9 +264,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -305,9 +297,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -359,9 +349,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -430,9 +418,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
