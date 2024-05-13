@@ -123,34 +123,26 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
         acceptingMember, likedMember);
     if (byAcceptingMemberIdAndLikedMemberId.isPresent()) {
       // 1 : 1 채팅방으로 연결
-//      ChatRoomDto.Request request = new ChatRoomDto.Request();
-//      request.setMatchedMember1(acceptingMember.getMemberId());
-//      request.setMatchedMember2(likedMember.getMemberId());
-//      chatRoomService.joinChatRoom(request);
-//
-//      // DB에 저장되어있던 매칭정보 삭제
-//      AcceptMemberEntity acceptMember = byAcceptingMemberIdAndLikedMemberId.get();
-//      acceptMemberRepository.delete(acceptMember);
-
-      // 매칭 정보가 이미 존재하는 경우 채팅방을 생성하고 매칭 정보를 삭제하지 않고 반환합니다.
       ChatRoomDto.Request request = new ChatRoomDto.Request();
       request.setMatchedMember1(acceptingMember.getMemberId());
       request.setMatchedMember2(likedMember.getMemberId());
       chatRoomService.joinChatRoom(request);
 
-      // 반환 전에 매칭 정보를 삭제하지 않음
+      // DB에 저장되어있던 매칭정보 삭제
+      AcceptMemberEntity acceptMember = byAcceptingMemberIdAndLikedMemberId.get();
+      acceptMemberRepository.delete(acceptMember);
 
 
       return;
     }
 
     // 1 : 1 채팅방이 있는지 확인
-//    Optional<ChatRoom> byMember = chatRoomRepository.findByMember(acceptingMember.getMemberId(), likedMember.getMemberId());
-//    if(byMember.isPresent()) {
+    Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMember1AndMatchedMember2OrMatchedMember1AndMatchedMember2(acceptingMember, likedMember, likedMember, acceptingMember);
+    if(byMember.isPresent()) {
 //
-//      throw new RoomExistException();
+      throw new RoomExistException();
 //
-//    }
+    }
 
       // 없을 때 매칭정보 저장
       AcceptMemberEntity acceptMember = AcceptMemberEntity.builder()

@@ -3,7 +3,9 @@ package com.easytrip.backend.chatting.service;
 import com.easytrip.backend.chatting.dto.request.ChatRoomDto;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.chatting.repository.ChatRoomRepository;
+import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
+import com.easytrip.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ public class ChatRoomService {
 
 
     private final ChatRoomRepository chatRoomRepository;
+    private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
 
@@ -29,19 +32,27 @@ public class ChatRoomService {
             throw new IllegalStateException("자신과 채팅방을 개설할 수 없습니다.");
         }
 
-        Optional<ChatRoom> chatRoom = chatRoomRepository.findByMember(join.getMatchedMember1(), join.getMatchedMember2());
+        MemberEntity member1 = memberRepository.findByMemberId(join.getMatchedMember1()).orElseThrow();
+        MemberEntity member2 = memberRepository.findByMemberId(join.getMatchedMember2()).orElseThrow();
+
+
+        Optional<ChatRoom> chatRoom = chatRoomRepository.findByMatchedMember1AndMatchedMember2(member1, member2);
         if(chatRoom.isPresent()) {
             return chatRoom.get().getId();
         } else {
-            return chatRoomRepository.save(join.toChatRoom());
+            return chatRoomRepository.save(join.toChatRoom()).getId();
         }
 
     }
 
+
+
     // 채팅방 리스트
     @Transactional(readOnly = true)
     public List<ChatRoomDto.Response> getRoomList(Long memberId) {
-        return chatRoomRepository.findListByMemberId(memberId).stream().map(ChatRoomDto.Response::of).collect(Collectors.toList());
+        MemberEntity member1 = memberRepository.findAllByMemberId(memberId).orElseThrow();
+
+        return chatRoomRepository.findByMatchedMember1OrMatchedMember2(member1, member1).stream().map(ChatRoomDto.Response::of).collect(Collectors.toList());
 
 
     }
