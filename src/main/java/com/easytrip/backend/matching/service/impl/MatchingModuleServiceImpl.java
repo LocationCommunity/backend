@@ -4,7 +4,8 @@ import com.easytrip.backend.chatting.dto.request.ChatRoomDto;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.chatting.repository.ChatRoomRepository;
 import com.easytrip.backend.chatting.service.ChatRoomService;
-import com.easytrip.backend.exception.RoomExistException;
+
+import com.easytrip.backend.exception.impl.InvalidMatchingException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.matching.domain.AcceptMemberEntity;
@@ -70,7 +71,8 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     Set<MemberEntity> matchingMembers = new HashSet<>();
     for (Interest interest : interests) {
       // 현재 관심사에 해당하는 회원의 관심사 목록을 가져옴
-      List<MemberInterestEntity> membersInterestEntities = interestRepository.findAllByInterest(interest);
+      List<MemberInterestEntity> membersInterestEntities = interestRepository.findAllByInterest(
+          interest);
 
       // 현재 관심사에 해당하는 회원들을 추출하고, 현재 회원을 제외함
       List<MemberEntity> membersWithSameInterest = membersInterestEntities.stream()
@@ -91,7 +93,14 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
 
         // 두 개 이상의 관심사가 동일한 경우에만 추가
         if (otherMemberInterests.size() >= 2) {
-          matchingMembers.add(otherMember);
+          // 이미 매칭 수락을 한 상대일 경우, 1 대 1 채팅방이 만들어진 상태일 때 제외
+          Optional<AcceptMemberEntity> acceptMember = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
+              member, otherMember);
+          Optional<ChatRoom> chatRoom = chatRoomRepository.findByMatchedMembers(member.getMemberId(),
+              otherMember.getMemberId());
+          if (acceptMember.isEmpty() && chatRoom.isEmpty()) {
+            matchingMembers.add(otherMember);
+          }
         }
       }
     }
@@ -116,12 +125,25 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     MemberEntity acceptingMember = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
+    // 매칭 상대가 자기 자신일 경우 exception
+    if (acceptingMember.getMemberId().equals(memberId)) {
+      throw new InvalidMatchingException();
+    }
+
     MemberEntity likedMember = memberRepository.findByMemberId(memberId)
         .orElseThrow(() -> new NotFoundMemberException());
 
+    Optional<AcceptMemberEntity> byAcceptingMembers = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
+        likedMember, acceptingMember);
+
+    // 동일한 회원가 중복매칭 시 exception
     Optional<AcceptMemberEntity> byAcceptingMemberIdAndLikedMemberId = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
         acceptingMember, likedMember);
     if (byAcceptingMemberIdAndLikedMemberId.isPresent()) {
+      throw new InvalidMatchingException();
+    }
+
+    if (byAcceptingMembers.isPresent()) {
       // 1 : 1 채팅방으로 연결
       ChatRoomDto.Request request = new ChatRoomDto.Request();
       request.setMatchedMember1(acceptingMember.getMemberId());
@@ -129,7 +151,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
       chatRoomService.joinChatRoom(request);
 
       // DB에 저장되어있던 매칭정보 삭제
-      AcceptMemberEntity acceptMember = byAcceptingMemberIdAndLikedMemberId.get();
+      AcceptMemberEntity acceptMember = byAcceptingMembers.get();
       acceptMemberRepository.delete(acceptMember);
 
 
@@ -137,10 +159,11 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     }
 
     // 1 : 1 채팅방이 있는지 확인
+
     Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMember1AndMatchedMember2OrMatchedMember1AndMatchedMember2(acceptingMember, likedMember, likedMember, acceptingMember);
     if(byMember.isPresent()) {
 //
-      throw new RoomExistException();
+      throw new InvalidMatchingException();
 //
     }
 
@@ -150,6 +173,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
               .likedMemberId(likedMember)
               .build();
       acceptMemberRepository.save(acceptMember);
+
 
   }
 }
