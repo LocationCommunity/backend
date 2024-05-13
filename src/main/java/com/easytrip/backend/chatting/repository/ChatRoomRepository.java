@@ -36,6 +36,10 @@ public class ChatRoomRepository {
                 .getResultList();
     }
 
+    
+
+
+
     public Optional<ChatRoom> findByMatchedMembers(Long matchedMember1, Long matchedMember2) {
         return em.createQuery(
                 "SELECT r FROM ChatRoom r WHERE (r.matchedMember1.id = :matchedMember1 AND r.matchedMember2.id = :matchedMember2) OR (r.matchedMember1.id = :matchedMember2 AND r.matchedMember2.id = :matchedMember1)",
@@ -46,5 +50,7 @@ public class ChatRoomRepository {
             .stream()
             .findFirst();
     }
+
 }
+
 

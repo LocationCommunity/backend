@@ -4,6 +4,8 @@ import com.easytrip.backend.chatting.dto.request.ChatRoomDto;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.chatting.repository.ChatRoomRepository;
 import com.easytrip.backend.chatting.service.ChatRoomService;
+
+
 import com.easytrip.backend.exception.impl.InvalidMatchingException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
@@ -141,19 +143,24 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
 
     if (byAcceptingMembers.isPresent()) {
       // 1 : 1 채팅방으로 연결
+
+      
       ChatRoomDto.Request request = new ChatRoomDto.Request();
       request.setMatchedMember1(acceptingMember.getMemberId());
       request.setMatchedMember2(likedMember.getMemberId());
       chatRoomService.joinChatRoom(request);
 
+
       // DB에 저장되어있던 매칭정보 삭제
       AcceptMemberEntity acceptMember = byAcceptingMembers.get();
       acceptMemberRepository.delete(acceptMember);
+
 
       return;
     }
 
     // 1 : 1 채팅방이 있는지 확인
+
     Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMembers(acceptingMember.getMemberId(),
         likedMember.getMemberId());
 
@@ -169,5 +176,6 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
           .build();
       acceptMemberRepository.save(acceptMember);
     }
+
   }
 }
