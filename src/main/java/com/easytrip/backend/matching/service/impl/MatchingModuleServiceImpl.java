@@ -4,7 +4,6 @@ import com.easytrip.backend.chatting.dto.request.ChatRoomDto;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.chatting.repository.ChatRoomRepository;
 import com.easytrip.backend.chatting.service.ChatRoomService;
-
 import com.easytrip.backend.exception.impl.InvalidMatchingException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
@@ -20,7 +19,8 @@ import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.type.Interest;
 import com.easytrip.backend.type.Platform;
 import io.jsonwebtoken.Claims;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -52,9 +52,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -62,7 +60,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     // 찾아온 회원의 관심사 찾아오기
     List<MemberInterestEntity> interestEntities = interestRepository.findAllByMemberId(member);
 
-    // 현재 회원의 관심사들을 담을 Set 생성
+    // 현재 회원의 관심사들을 담을 Set생성
     Set<Interest> interests = interestEntities.stream()
         .map(MemberInterestEntity::getInterest)
         .collect(Collectors.toSet());
@@ -118,9 +116,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity acceptingMember = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -145,10 +141,13 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
 
     if (byAcceptingMembers.isPresent()) {
       // 1 : 1 채팅방으로 연결
+
+      
       ChatRoomDto.Request request = new ChatRoomDto.Request();
       request.setMatchedMember1(acceptingMember.getMemberId());
       request.setMatchedMember2(likedMember.getMemberId());
       chatRoomService.joinChatRoom(request);
+
 
       // DB에 저장되어있던 매칭정보 삭제
       AcceptMemberEntity acceptMember = byAcceptingMembers.get();
@@ -159,12 +158,10 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     }
 
     // 1 : 1 채팅방이 있는지 확인
-
     Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMember1AndMatchedMember2OrMatchedMember1AndMatchedMember2(acceptingMember, likedMember, likedMember, acceptingMember);
+    
     if(byMember.isPresent()) {
-//
       throw new InvalidMatchingException();
-//
     }
 
       // 없을 때 매칭정보 저장
@@ -173,7 +170,5 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
               .likedMemberId(likedMember)
               .build();
       acceptMemberRepository.save(acceptMember);
-
-
   }
 }

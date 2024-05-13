@@ -55,8 +55,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 //    }
 
     Optional<ChatRoom> findByMatchedMember1AndMatchedMember2OrMatchedMember1AndMatchedMember2 (MemberEntity matchedMember1, MemberEntity matchedMember2, MemberEntity matchedMember3, MemberEntity matchedMember4);
-
-
 }
 
 
