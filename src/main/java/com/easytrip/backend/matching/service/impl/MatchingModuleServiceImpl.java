@@ -157,6 +157,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     // 1 : 1 채팅방이 있는지 확인
     Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMember1AndMatchedMember2OrMatchedMember1AndMatchedMember2(
         acceptingMember, likedMember, likedMember, acceptingMember);
+
     if (byMember.isPresent()) {
       throw new InvalidMatchingException();
     }
