@@ -1,5 +1,6 @@
 package com.easytrip.backend.member.jwt;
 
+
 import com.easytrip.backend.member.dto.TokenDto;
 import com.easytrip.backend.type.Platform;
 import io.jsonwebtoken.Claims;
@@ -153,9 +154,11 @@ public class JwtTokenProvider {
     return expirationDate.getTime();
   }
 
+
   public Platform getPlatform(String accessToken) {
     Claims claimsFromToken = getClaimsFromToken(accessToken);
     String platformString = claimsFromToken.get("platform", String.class);
     return Platform.valueOf(platformString);
   }
+
 }
