@@ -20,4 +20,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
   List<MemberEntity> findByName(String keyword);
 
   Optional<MemberEntity> findByNickname(String keyword);
+
+
+  Optional<MemberEntity> findAllByMemberId(Long memberId);
 }

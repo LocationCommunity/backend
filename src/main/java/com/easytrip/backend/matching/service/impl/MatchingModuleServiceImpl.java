@@ -4,8 +4,6 @@ import com.easytrip.backend.chatting.dto.request.ChatRoomDto;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.chatting.repository.ChatRoomRepository;
 import com.easytrip.backend.chatting.service.ChatRoomService;
-
-
 import com.easytrip.backend.exception.impl.InvalidMatchingException;
 import com.easytrip.backend.exception.impl.InvalidTokenException;
 import com.easytrip.backend.exception.impl.NotFoundMemberException;
@@ -160,22 +158,17 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     }
 
     // 1 : 1 채팅방이 있는지 확인
-
-    Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMembers(acceptingMember.getMemberId(),
-        likedMember.getMemberId());
-
-    if (byMember.isPresent()) {
-      // 있으면 exception
+    Optional<ChatRoom> byMember = chatRoomRepository.findByMatchedMember1AndMatchedMember2OrMatchedMember1AndMatchedMember2(acceptingMember, likedMember, likedMember, acceptingMember);
+    
+    if(byMember.isPresent()) {
       throw new InvalidMatchingException();
     }
-    {
+
       // 없을 때 매칭정보 저장
       AcceptMemberEntity acceptMember = AcceptMemberEntity.builder()
-          .acceptingMemberId(acceptingMember)
-          .likedMemberId(likedMember)
-          .build();
+              .acceptingMemberId(acceptingMember)
+              .likedMemberId(likedMember)
+              .build();
       acceptMemberRepository.save(acceptMember);
-    }
-
   }
 }
