@@ -68,5 +68,4 @@ public class StompChatHandler implements ChannelInterceptor {
         return message;
     }
 
-//
 }

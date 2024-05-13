@@ -94,8 +94,10 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
           // 이미 매칭 수락을 한 상대일 경우, 1 대 1 채팅방이 만들어진 상태일 때 제외
           Optional<AcceptMemberEntity> acceptMember = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
               member, otherMember);
+
           Optional<ChatRoom> chatRoom = chatRoomRepository.findByMatchedMember1AndMatchedMember2OrMatchedMember1AndMatchedMember2(
               member, otherMember, otherMember, member);
+
           if (acceptMember.isEmpty() && chatRoom.isEmpty()) {
             matchingMembers.add(otherMember);
           }
@@ -145,7 +147,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
       ChatRoomDto.Request request = new ChatRoomDto.Request();
       request.setMatchedMember1(acceptingMember.getMemberId());
       request.setMatchedMember2(likedMember.getMemberId());
-      chatRoomService.joinChatRoom(request);
+      chatRoomService.joinChatRoom(accessToken, request);
 
       // DB에 저장되어있던 매칭정보 삭제
       AcceptMemberEntity acceptMember = byAcceptingMembers.get();
