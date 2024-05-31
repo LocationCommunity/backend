@@ -34,11 +34,13 @@ public class JwtTokenProvider {
     this.key = Keys.hmacShaKeyFor(keyBytes);
   }
 
-  public TokenDto createTokens(String email, Boolean isAdmin, Platform platForm) {
+  public TokenDto createTokens(String email, Boolean isAdmin, Platform platForm, String nickname, Long memberId) {
 
     // AccessToken 클레임 설정
     Claims accessTokenClaims  = Jwts.claims().setSubject(email);
     accessTokenClaims .put("platform", platForm);
+    accessTokenClaims.put("nickname", nickname);
+    accessTokenClaims.put("memberId", memberId);
 
     if (isAdmin != null && isAdmin) {
       accessTokenClaims .put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
@@ -84,11 +86,10 @@ public class JwtTokenProvider {
     return tokens;
   }
 
-  public String reissue(String email, Boolean isAdmin) {
+  public String reissue(String email, Boolean isAdmin, Platform platform) {
 
     Claims claims = Jwts.claims().setSubject(email);
-    claims.put("userId", email);
-//    claims .put("platform", platForm);
+    claims .put("platform", platform);
 
     if (isAdmin != null && isAdmin) {
       claims.put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
@@ -148,15 +149,15 @@ public class JwtTokenProvider {
     return claims.get("roles", List.class);
   }
 
-  public Long getExpiration(String accessToken) {
-    Claims claims = getClaimsFromToken(accessToken);
+  public Long getExpiration(String token) {
+    Claims claims = getClaimsFromToken(token);
     Date expirationDate = claims.getExpiration();
     return expirationDate.getTime();
   }
 
 
-  public Platform getPlatform(String accessToken) {
-    Claims claimsFromToken = getClaimsFromToken(accessToken);
+  public Platform getPlatform(String token) {
+    Claims claimsFromToken = getClaimsFromToken(token);
     String platformString = claimsFromToken.get("platform", String.class);
     return Platform.valueOf(platformString);
   }
