@@ -1,4 +1,4 @@
-// src/components/Footer.js
+
 import React from 'react';
 import './Footer.css';
 import { FaMap } from "react-icons/fa";

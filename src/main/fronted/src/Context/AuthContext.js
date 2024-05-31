@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         // 토큰 디코딩 및 이메일 추출
         if (accessToken) {
             const decodedToken = jwtDecode(accessToken);
-            const userEmail = decodedToken.sub; // 주제(subject) 클레임에서 이메일 추출
+            const userEmail = decodedToken.sub; // (subject) 클레임에서 이메일 추출
             const memberId = decodedToken.memberId; // 토큰에서 memberId 추출
         const nickname = decodedToken.nickname; // 토큰에서 nickname 추출
         

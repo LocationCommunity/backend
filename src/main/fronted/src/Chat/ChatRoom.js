@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Client } from '@stomp/stompjs';
-// import axios from 'axios';
 import './chatroom.css';
 import { AuthContext } from '../Context/AuthContext';
 
@@ -51,7 +50,7 @@ function ChatRoom({ roomId, accessToken, initialMessages }) {
     const message = {
       message: messageInput,
       senderId: memberId, // 현재 사용자의 ID
-      receiverId: 2, // 수신자 ID (필요에 따라 변경)
+      receiverId: {matchedMember2}, // 수신자 ID (필요에 따라 변경)
       roomId: 20, // 채팅방 ID
       sendTime: new Date().toISOString().split('.')[0] // 현재 시간을 ISO 형식으로 저장
       

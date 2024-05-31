@@ -1,65 +1,9 @@
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import { useLocation } from "react-router-dom";
 
-// function BoardsList() {
-//     const [boardsList, setBoardsList] = useState([]);
-//     const [currentPage, setCurrentPage] = useState(1);
-//     const location = useLocation();
-//     const pageNumber = new URLSearchParams(location.search).get('page');
-
-//     useEffect(() => {
-//         if (pageNumber && !isNaN(pageNumber)) {
-//             setCurrentPage(parseInt(pageNumber));
-//         }
-//     }, [pageNumber]);
-
-//     useEffect(() => {
-//         axios.get(`http://localhost:8080/boards/lists?page=${currentPage}`)
-//         .then((res) => {
-//             setBoardsList(res.data);
-//         })
-//         .catch((error) => {
-//             console.error('Error fetching data:', error);
-//         });
-//     }, [currentPage]);
-
-//     const goToPreviousPage = () => {
-//         if (currentPage > 1) {
-//             setCurrentPage(currentPage - 1);
-//         }
-//     };
-
-//     const goToNextPage = () => {
-//         if (currentPage < boardsList.totalPages) {
-//             setCurrentPage(currentPage + 1);
-//         }
-//     };
-
-//     return (
-//         <div>
-//             <h1>게시판 목록</h1>
-//             <ul>
-//                 {boardsList.map((board) => (
-//                     <li key={board.boardId}>
-//                         <h2>{board.title}</h2>
-//                     </li>
-//                 ))}
-//             </ul>
-//             <div>
-//                 <button onClick={goToPreviousPage} disabled={currentPage === 1}>이전 페이지</button>
-//                 <button onClick={goToNextPage} disabled={currentPage === boardsList.totalPages}>다음 페이지</button>
-//             </div>
-//         </div>
-//     );
-// }
-
-// export default BoardsList;
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import {  Link } from "react-router-dom";
 import "./BoardsLists.css"; // CSS 파일 import
-import LoadingSpinner from './LoadingSpinner'; // 로딩 스피너 컴포넌트 import
+import LoadingSpinner from './LoadingSpinner'; 
 
 function BoardsList() {
     const [boardsList, setBoardsList] = useState([]);
