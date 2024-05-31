@@ -1,0 +1,133 @@
+.place-list-container {
+    
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    font-family: "Jua", sans-serif;
+  }
+
+  
+
+  .custom-select {
+    font-family: "Jua", sans-serif;
+    /* 다른 스타일들을 여기에 추가할 수 있습니다 */
+  }
+  
+  .custom-option {
+    font-family: "Jua", sans-serif;
+    /* 다른 스타일들을 여기에 추가할 수 있습니다 */
+  }
+  
+  .place-list-container h1 {
+    
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .place-list-container form {
+    margin-bottom: 20px;
+  }
+  
+  .place-list-container label {
+    
+    margin-right: 10px;
+    color: #555;
+  }
+  
+  .place-list-container input[type="text"],
+  .place-list-container select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .place-list-container button {
+    font-family: "Jua", sans-serif;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .place-list-container button:hover {
+    background-color: #0056b3;
+  }
+  
+  .place-list {
+    
+    list-style: none;
+    padding: 0;
+  }
+  
+  .place-list li {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+  }
+  
+  .place-list li:last-child {
+    margin-bottom: 0;
+  }
+  
+  .place-list li h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .place-list li p {
+    margin-bottom: 10px;
+    color: #666;
+  }
+  
+  .place-image-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+  
+  .place-image-list li {
+    display: inline-block;
+    margin-right: 10px;
+  }
+  
+  .place-image-list img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  @media (max-width: 600px) {
+    .place-list-container {
+      max-width: 90%;
+    }
+  
+    .place-list li {
+      padding: 10px;
+    }
+  
+    .place-image-list img {
+      width: 80px;
+      height: 80px;
+    }
+  }
+
+  .place-image-list li img {
+    transition: transform 0.3s ease; /* 변환에 대한 애니메이션 효과를 부드럽게 적용 */
+  }
+  
+  .place-image-list li img:hover {
+    transform: scale(1.5); /* 호버(hover) 상태일 때 이미지 크기를 1.1배로 확대 */
+  }
+  
+  

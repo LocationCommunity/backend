@@ -1,0 +1,64 @@
+/* 전체적인 레이아웃을 위한 스타일 */
+.container {
+  width: 400px;
+  padding: 10px;
+  background-color: #fff; 
+  border-radius: 8px;   /* 모서리 둥글게 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 제목 스타일 */
+.container h2 {
+  
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* 일반 텍스트 스타일 */
+.container p {
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+/* 이미지 컨테이너 스타일 */
+.image-container {
+  
+  object-fit: none;
+  width: 500px;
+  max-width: auto;
+  max-height: auto;
+  height: 200px;
+  overflow: hidden;
+  
+  
+  justify-content: center;
+}
+
+/* 이미지 스타일 */
+.image-container img {
+  
+  object-fit: none;
+  position: relative;
+  
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 로딩 메시지 스타일 */
+.loading {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+}
+
+/* 지도 스타일 */
+.map-container {
+  width: 100%;
+  height: 200px;
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}

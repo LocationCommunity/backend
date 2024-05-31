@@ -1,0 +1,86 @@
+/* 전체 로그인 페이지 스타일 */
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: small;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+/* 활성화된 버튼 스타일 */
+button.active {
+  background-color: #3a4adb; /* 예시로 초록색 배경을 사용합니다. */
+  color: white; /* 텍스트를 흰색으로 설정합니다. */
+}
+
+/* 비활성화된 버튼 스타일 */
+button:disabled {
+  background-color: #CCCCCC; /* 비활성화된 버튼은 회색 배경을 사용합니다. */
+  color: #999999; /* 텍스트를 회색으로 설정합니다. */
+  cursor: not-allowed; /* 비활성화된 상태에서는 마우스 커서를 바꿉니다. */
+}
+
+/* 네이버 로그인 버튼 스타일 */
+#naverIdLogin {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+}
+
+#naverIdLogin img {
+  width: 150px; /* 원하는 너비로 조정하세요 */
+  height: auto; /* 비율을 유지하도록 설정 */
+}
+
+.logo {
+  width: 200px; /* 로고의 너비를 원하는 크기로 조정하세요 */
+  height: auto; /* 로고의 비율을 유지하도록 설정 */
+  margin-bottom: 10px; /* 로고와 로그인 폼 사이의 간격 설정 */
+}
+
+.back-button {
+  size: 5px;
+  
+  background-color: #ffffff;
+  position: static;
+  color: #000000;
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+

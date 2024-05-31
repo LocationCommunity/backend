@@ -1,0 +1,69 @@
+/* src/components/MatchingList.css */
+.matching-list-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+  
+  .matching-list-container h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  .matching-list-container ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .matching-list-container li {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease; /* 애니메이션 효과 추가 */
+  }
+  
+  .matching-list-container li p {
+
+    font-family: "Jua", sans-serif;
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+  }
+  
+  .matching-list-container li p strong {
+    color: #000;
+  }
+  
+  .loading,
+  .error {
+    text-align: center;
+    color: #ff0000;
+    font-weight: bold;
+  }
+  
+  .back-button, .accept-button {
+
+    font-family: "Jua", sans-serif;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease; /* 애니메이션 효과 추가 */
+  }
+  
+  .back-button:hover, .accept-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .accept-button {
+    padding: 8px 16px; /* 작은 크기로 변경 */
+  }
+  
