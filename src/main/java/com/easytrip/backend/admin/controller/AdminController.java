@@ -89,15 +89,10 @@ public class AdminController {
   @GetMapping("/board/search")
   public List<BoardListDto> searchBoard(HttpServletRequest request,
                                         @RequestParam(value = "keyword") String keyword,
-                                        @RequestParam(value = "seachOption") String searchOption) {
+                                        @RequestParam(value = "seachOption") SearchOption searchOption) {
 
     String accessToken = jwtTokenProvider.resolveToken(request);
-
-
     return adminService.searchBoard(accessToken, keyword, searchOption);
-
-
-
   }
 
   @PostMapping("/board/{boardId}")

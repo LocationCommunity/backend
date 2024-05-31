@@ -75,13 +75,9 @@ public class BoardController {
 
     // 게시물 목록
     @GetMapping("/lists")
-    public List<BoardListDto> getList(@PageableDefault(page = 0, size = 5) Pageable pageable,
-                                      @RequestParam(value = "sort", required = false) String sort) {
+    public List<BoardListDto> getList(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
 
-        return boardService.getList(pageable, sort );
-
-
-
+      return boardService.getList(page, size);
     }
 
     // 게시물 불러오기

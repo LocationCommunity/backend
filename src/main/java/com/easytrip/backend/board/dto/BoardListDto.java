@@ -2,6 +2,7 @@ package com.easytrip.backend.board.dto;
 
 
 import com.easytrip.backend.board.domain.BoardEntity;
+import java.util.stream.IntStream;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,17 +23,17 @@ public class BoardListDto {
     private LocalDateTime createDate;
     private Integer likeCnt;
     private Integer viewCnt;
+    private List<String> boardImage;
 
 
     //entity to dto
-    public static List<BoardListDto> listOf(List<BoardEntity> boardEntities) {
-        return boardEntities.stream()
-                .map(BoardListDto::of)
-                .collect(Collectors.toList());
-
+    public static List<BoardListDto> listOf(List<BoardEntity> boardEntities, List<List<String>> imageUrl) {
+        return IntStream.range(0, boardEntities.size())
+            .mapToObj(i -> of(boardEntities.get(i), imageUrl.get(i)))
+            .collect(Collectors.toList());
     }
 
-    public static BoardListDto of(BoardEntity boardEntity) {
+    public static BoardListDto of(BoardEntity boardEntity, List<String> imageUrl) {
         return BoardListDto.builder()
                 .boardId(boardEntity.getBoardId())
                 .title(boardEntity.getTitle())
@@ -41,6 +42,7 @@ public class BoardListDto {
                 .createDate(boardEntity.getCreateDate())
                 .likeCnt(boardEntity.getLikeCnt())
                 .viewCnt(boardEntity.getViewCnt())
+                .boardImage(imageUrl)
                 .build();
     }
 
