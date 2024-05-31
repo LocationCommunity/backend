@@ -29,6 +29,8 @@ public class PlaceDto {
   private Integer reportCnt;
   private Long bookmarkCnt;
   private Boolean bookmarkYn;
+  private Double x;
+  private Double y;
 
   public static List<PlaceDto> listOf(List<PlaceEntity> placeEntities, List<Boolean> bookmarkYnList, List<List<String>> imageUrl) {
 
@@ -40,16 +42,18 @@ public class PlaceDto {
   public static PlaceDto of(PlaceEntity placeEntity, Boolean bookmarkYn, List<String> imageUrl) {
 
     return PlaceDto.builder()
-        .placeId(placeEntity.getPlaceId())
-        .nickName(placeEntity.getMemberId().getNickname())
-        .placeName(placeEntity.getPlaceName())
-        .address(placeEntity.getAddress())
-        .placeImage(imageUrl)
-        .placeInfo(placeEntity.getPlaceInfo())
-        .category(placeEntity.getCategory())
-        .reportCnt(placeEntity.getReportCnt())
-        .bookmarkCnt(placeEntity.getBookmarkCnt())
-        .bookmarkYn(bookmarkYn)
-        .build();
+            .placeId(placeEntity.getPlaceId())
+            .nickName(placeEntity.getMemberId().getNickname())
+            .placeName(placeEntity.getPlaceName())
+            .address(placeEntity.getAddress())
+            .x(placeEntity.getX())
+            .y(placeEntity.getY())
+            .placeImage(imageUrl)
+            .placeInfo(placeEntity.getPlaceInfo())
+            .category(placeEntity.getCategory())
+            .reportCnt(placeEntity.getReportCnt())
+            .bookmarkCnt(placeEntity.getBookmarkCnt())
+            .bookmarkYn(bookmarkYn)
+            .build();
   }
 }

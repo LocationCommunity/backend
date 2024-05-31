@@ -33,6 +33,7 @@ public class ChatRoom {
     private MemberEntity matchedMember2;
 
 
+
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     @OrderBy("sendTime DESC")
     private List<ChatMessage> chatMessageList = new ArrayList<>();

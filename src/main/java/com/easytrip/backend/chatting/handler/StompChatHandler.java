@@ -61,7 +61,7 @@ public class StompChatHandler implements ChannelInterceptor {
                 log.info("유저타입은 {} 입니다.", roles);
                 log.info("로그인 경로는 {}입니다.", platform);
             } else {
-                log.error("유효하지 않은 토큰입니다.");
+               log.error("유효하지 않은 토큰입니다.");
                 throw new RuntimeException();
             }
         }

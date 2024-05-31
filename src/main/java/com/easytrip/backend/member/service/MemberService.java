@@ -1,5 +1,6 @@
 package com.easytrip.backend.member.service;
 
+import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
@@ -47,4 +48,5 @@ public interface MemberService {
   void setInterest(String accessToken, List<Interest> interestList);
 
   void changeInterest(String accessToken, List<Interest> interestList);
+
 }

@@ -14,7 +14,9 @@ import com.easytrip.backend.exception.impl.*;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.repository.MemberRepository;
+import com.easytrip.backend.place.domain.BookmarkPlaceEntity;
 import com.easytrip.backend.place.domain.PlaceEntity;
+import com.easytrip.backend.place.dto.PlaceDto;
 import com.easytrip.backend.place.repository.PlaceRepository;
 import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.Platform;
@@ -24,6 +26,7 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -39,6 +42,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.io.File;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -151,12 +155,6 @@ public class BoardServiceImpl implements BoardService {
             imageRepository.save(image);
 
 
-            //    [     장소    ]
-            // placeLink 구현해야함
-
-//            PlaceEntity byPlaceId = placeRepository.findByPlaceId(placeId).orElseThrow(NotFoundPostException::new);
-//
-//            boardRepository.save(byPlaceId);
 
 
         }
@@ -367,33 +365,44 @@ public class BoardServiceImpl implements BoardService {
 
     }
 
-    // 게시판 상세
-    @Override
-    public List<BoardListDto> getList(Pageable pageable, String sort) {
 
-        // 추천순, 작성일순
-        Sort.Direction direction = Sort.Direction.DESC;
-        String sortBy =  "boardId";
+    public List<BoardListDto> getList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "boardId"));
+        Page<BoardEntity> boardPage = boardRepository.findByStatus(BoardStatus.ACTIVE, pageable);
 
-//
-        // 만약 sort가 id나 likes로 지정된 경우에는 해당 값에 따라 정렬 방식을 변경합니다.
-        if (sort != null && (sort.equals("like") || sort.equals("view"))) {
-            sortBy = sort.equals("like") ? "likeCnt" : "viewCnt";
+
+
+
+
+
+        List<BoardEntity> boardEntities = boardPage.getContent();
+        List<List<String>> imageUrls = new ArrayList<>();
+
+        for (BoardEntity boardEntity : boardEntities) {
+            List<String> url = new ArrayList<>();
+            List<ImageEntity> images = imageRepository.findByBoardId(boardEntity);
+            for (ImageEntity image : images) {
+                url.add(image.getFileName());
+            }
+            imageUrls.add(url);
         }
 
-        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(direction, sortBy));
-
-        List<BoardEntity> boardEntities = boardRepository.findAll(pageable).getContent();
-
-
-
-        return BoardListDto.listOf(boardEntities);
+        return BoardListDto.listOf(boardEntities, imageUrls);
     }
 
-    @Override
-    public BoardDetailDto getDetail(Long boardId) {
 
-        // 이미지 불러와야됌
+
+
+
+
+    @Override
+    public BoardDetailDto getDetail(Long boardId, String accessToken) {
+
+        if (!jwtTokenProvider.validateToken(accessToken)) {
+            throw new InvalidTokenException();
+        }
+
+
 
         BoardEntity board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
         List<ImageEntity> images = imageRepository.findAllByBoardId(board);
@@ -402,7 +411,7 @@ public class BoardServiceImpl implements BoardService {
 
         for (ImageEntity image : images) {
 
-            imageUrls.add(image.getFilePath());
+            imageUrls.add(image.getFileName());
 
         }
 
@@ -421,8 +430,10 @@ public class BoardServiceImpl implements BoardService {
                 .title(board.getTitle())
                 .content(board.getContent())
                 .images(imageUrls)
+                .nickname(board.getNickname())
+                .placeId(board.getPlaceId().getPlaceId())
                 .placeName(place.getPlaceName())
-                .placeLink("http://localhost:8080/place/info" + place.getPlaceId())
+                .placeLink("http://localhost:8080/place/info/" + place.getPlaceId())
                 .x(place.getX())
                 .y(place.getY())
                 .viewCnt(board.getViewCnt())
@@ -451,9 +462,20 @@ return boardDetailDto;
 
         List<BoardEntity> boards = boardRepository.findByMemberIdAndStatus(member, BoardStatus.ACTIVE);
 
+        List<List<String>> imageUrls = new ArrayList<>();
+
+        for (BoardEntity boardEntity : boards) {
+            List<String> url = new ArrayList<>();
+            List<ImageEntity> images = imageRepository.findByBoardId(boardEntity);
+            for (ImageEntity image : images) {
+                url.add(image.getFileName());
+            }
+            imageUrls.add(url);
+        }
 
 
-        return BoardListDto.listOf(boards);
+
+        return BoardListDto.listOf(boards, imageUrls);
     }
 
     // 게시물 좋아요
@@ -523,10 +545,22 @@ return boardDetailDto;
         } else {
             throw new InvalidSearchOptionException();
 
-
-
         }
-        return BoardListDto.listOf(boards);
+
+        List<List<String>> imageUrls = new ArrayList<>();
+
+        for (BoardEntity boardEntity : boards) {
+            List<String> url = new ArrayList<>();
+            List<ImageEntity> images = imageRepository.findByBoardId(boardEntity);
+            for (ImageEntity image : images) {
+                url.add(image.getFileName());
+            }
+            imageUrls.add(url);
+        }
+
+
+
+        return BoardListDto.listOf(boards, imageUrls);
     }
 
     // <<어드민 기능>>
@@ -558,7 +592,20 @@ return boardDetailDto;
 
 
         }
-        return BoardListDto.listOf(boards);
+
+        List<List<String>> imageUrls = new ArrayList<>();
+
+        for (BoardEntity boardEntity : boards) {
+            List<String> url = new ArrayList<>();
+            List<ImageEntity> images = imageRepository.findByBoardId(boardEntity);
+            for (ImageEntity image : images) {
+                url.add(image.getFileName());
+            }
+            imageUrls.add(url);
+        }
+
+
+        return BoardListDto.listOf(boards, imageUrls);
 
 
     }

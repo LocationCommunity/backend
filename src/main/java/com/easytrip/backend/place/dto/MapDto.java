@@ -3,6 +3,8 @@ package com.easytrip.backend.place.dto;
 import com.easytrip.backend.place.domain.PlaceEntity;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.easytrip.backend.type.PlaceCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +21,11 @@ public class MapDto {
   private Long placeId;
   private Double x;
   private Double y;
+  private String placeName;
+  private String address;
+  private PlaceCategory category;
+  private String placeImage;
+  private Long bookMarkCnt;
 
   public static List<MapDto> listOf(List<PlaceEntity> placeEntities) {
 
@@ -31,6 +38,12 @@ public class MapDto {
 
     return MapDto.builder()
         .placeId(placeEntity.getPlaceId())
+            .placeName(placeEntity.getPlaceName())
+            .address(placeEntity.getAddress())
+            .category(placeEntity.getCategory())
+            .bookMarkCnt(placeEntity.getBookmarkCnt())
+
+
         .x(placeEntity.getX())
         .y(placeEntity.getY())
         .build();

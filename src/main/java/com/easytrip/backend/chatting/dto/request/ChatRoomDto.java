@@ -70,6 +70,7 @@ public class ChatRoomDto {
             private Long id;
             private MemberDto.Response matchedMember1;
             private MemberDto.Response matchedMember2;
+            private MemberDto.Response nickname;
             private List<ChatMessageDto.Response> messages;
 
             public static Detail of(ChatRoom chatRoom) {
