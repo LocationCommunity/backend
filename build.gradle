@@ -37,6 +37,10 @@ dependencies {
     // EmailValidator
     implementation 'commons-validator:commons-validator:1.7'
 
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
