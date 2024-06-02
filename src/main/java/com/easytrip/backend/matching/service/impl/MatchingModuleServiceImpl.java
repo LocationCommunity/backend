@@ -134,7 +134,7 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
     Optional<AcceptMemberEntity> byAcceptingMembers = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
         likedMember, acceptingMember);
 
-    // 동일한 회원가 중복매칭 시 exception
+    // 동일한 회원과 중복매칭 시 exception
     Optional<AcceptMemberEntity> byAcceptingMemberIdAndLikedMemberId = acceptMemberRepository.findByAcceptingMemberIdAndLikedMemberId(
         acceptingMember, likedMember);
     if (byAcceptingMemberIdAndLikedMemberId.isPresent()) {
@@ -143,7 +143,6 @@ public class MatchingModuleServiceImpl implements MatchingModuleService {
 
     if (byAcceptingMembers.isPresent()) {
       // 1 : 1 채팅방으로 연결
-
       ChatRoomDto.Request request = new ChatRoomDto.Request();
       request.setMatchedMember1(acceptingMember.getMemberId());
       request.setMatchedMember2(likedMember.getMemberId());
