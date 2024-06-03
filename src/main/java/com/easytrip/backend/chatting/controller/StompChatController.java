@@ -2,7 +2,7 @@ package com.easytrip.backend.chatting.controller;
 
 import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.chatting.dto.request.ChatMessageDto;
-import com.easytrip.backend.chatting.dto.request.NotificationDto;
+
 import com.easytrip.backend.chatting.service.ChatMessageService;
 
 import lombok.RequiredArgsConstructor;
@@ -51,14 +51,6 @@ public class StompChatController {
 
     }
 
-    @MessageMapping("/sendNotification/{memberId}")
-    public void sendNotification(@DestinationVariable(value = "memberId") Long memberId, NotificationDto notification) {
 
-        notification.setTitle("New Notification");
-        notification.setContent("You have a new message!");
-        notification.setMemberId(memberId);
-        // 여기서 userId에 해당하는 클라이언트에게 알림을 전송
-        rabbitTemplate.convertAndSend("chat.exchange" + memberId, notification);
-    }
 
 }
