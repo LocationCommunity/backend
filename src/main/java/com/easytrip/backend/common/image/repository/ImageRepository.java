@@ -20,8 +20,6 @@ public interface ImageRepository extends JpaRepository<com.easytrip.backend.comm
 
 
 
-
-
     List<ImageEntity> findAllByExId(ExhibitionEntity ex);
 
 
@@ -30,4 +28,6 @@ public interface ImageRepository extends JpaRepository<com.easytrip.backend.comm
 
 
     List<ImageEntity> findByPlaceId(PlaceEntity place);
+
+
 }

@@ -44,11 +44,12 @@ public class MemberDto {
 
 
 
+
     public static Response of(MemberEntity memberEntity) {
       return Response.builder()
               .id(memberEntity.getMemberId())
-              .email(memberEntity.getEmail())
               .nickname(memberEntity.getNickname())
+              .email(memberEntity.getEmail())
               .build();
 
 

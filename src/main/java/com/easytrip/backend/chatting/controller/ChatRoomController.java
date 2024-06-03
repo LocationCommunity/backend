@@ -23,6 +23,9 @@ public class ChatRoomController {
     private final JwtTokenProvider jwtTokenProvider;
 
 
+
+
+
     //채팅방 생성, 참여
     @PostMapping("/chat/room")
     public ResponseEntity<BasicResponse> JoinChatRoom(HttpServletRequest request, @RequestBody ChatRoomDto.Request join) {
@@ -38,8 +41,8 @@ public class ChatRoomController {
     }
 
     //채팅방 목록
-    @GetMapping("/chat/room")
-    public ResponseEntity<BasicResponse> getChatRoomList(HttpServletRequest request, @RequestParam(value = "id") Long memberId) {
+    @GetMapping("/chat/room/list")
+    public ResponseEntity<BasicResponse> getChatRoomList(HttpServletRequest request, @RequestParam(value = "memberId") Long memberId) {
         String accessToken = jwtTokenProvider.resolveToken(request);
         return ResponseEntity.ok(new Result<>(chatRoomService.getRoomList(accessToken, memberId)));
 

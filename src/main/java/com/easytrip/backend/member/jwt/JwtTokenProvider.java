@@ -2,6 +2,7 @@ package com.easytrip.backend.member.jwt;
 
 
 import com.easytrip.backend.member.dto.TokenDto;
+import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.type.Platform;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -39,8 +40,11 @@ public class JwtTokenProvider {
     // AccessToken 클레임 설정
     Claims accessTokenClaims  = Jwts.claims().setSubject(email);
     accessTokenClaims .put("platform", platForm);
-    accessTokenClaims.put("nickname", nickname);
-    accessTokenClaims.put("memberId", memberId);
+
+    accessTokenClaims .put("nickname", nickname);
+    accessTokenClaims .put("memberId", memberId);
+
+
 
     if (isAdmin != null && isAdmin) {
       accessTokenClaims .put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));
@@ -89,7 +93,9 @@ public class JwtTokenProvider {
   public String reissue(String email, Boolean isAdmin, Platform platform) {
 
     Claims claims = Jwts.claims().setSubject(email);
-    claims .put("platform", platform);
+
+    claims.put("platform", platform);
+
 
     if (isAdmin != null && isAdmin) {
       claims.put("roles", Arrays.asList("ROLE_USER", "ROLE_ADMIN"));

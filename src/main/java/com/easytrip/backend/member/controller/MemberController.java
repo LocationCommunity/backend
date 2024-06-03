@@ -5,6 +5,7 @@ import static com.easytrip.backend.type.Platform.LOCAL;
 import static com.easytrip.backend.type.Platform.NAVER;
 
 import com.easytrip.backend.exception.impl.InterestValidationException;
+import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
@@ -15,24 +16,19 @@ import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.service.MemberService;
 import com.easytrip.backend.type.Interest;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
@@ -53,15 +49,59 @@ public class MemberController {
     memberService.auth(email, code, LOCAL);
   }
 
+//  @PostMapping("/login")
+//  public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginRequest loginRequest) {
+//    TokenDto response = memberService.login(loginRequest, LOCAL);
+//    return ResponseEntity.ok(response);
+//  }
+
+
+  //쿠키 정보로 로그인 유지
   @PostMapping("/login")
-  public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginRequest loginRequest) {
-    TokenDto response = memberService.login(loginRequest, LOCAL);
-    return ResponseEntity.ok(response);
+  public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    TokenDto tokenDto = memberService.login(loginRequest, LOCAL);
+
+
+
+
+    // 토큰을 쿠키에 담아서 클라이언트에게 전달
+    Cookie cookie = new Cookie("accessToken", tokenDto.getAccessToken());
+    cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
+    // 쿠키를 전송할 도메인 설정 (예: localhost:3000)
+    cookie.setDomain("localhost");
+    // 쿠키의 유효 시간 설정 (초 단위, 예: 1시간)
+    cookie.setMaxAge(3600);
+    // 쿠키를 HTTPS 프로토콜로만 전송되도록 설정 (보안을 강화)
+    cookie.setSecure(false);
+    // 쿠키를 루트 경로에 저장 (모든 경로에서 접근 가능)
+    cookie.setPath("/");
+    // 응답 헤더에 쿠키 추가
+    response.addCookie(cookie);
+
+    log.info("cookie :" + cookie);
+
+
+    return ResponseEntity.ok(tokenDto);
   }
 
   @GetMapping("/login/naver")
-  public ResponseEntity<TokenDto> naverLogin(@RequestParam(name = "code") String code) {
+  public ResponseEntity<TokenDto> naverLogin(@RequestParam(value = "code") String code, HttpServletResponse responser) {
     TokenDto response = memberService.naverLogin(code, NAVER);
+    // 토큰을 쿠키에 담아서 클라이언트에게 전달
+    Cookie cookie = new Cookie("accessToken", response.getAccessToken());
+    cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
+    // 쿠키를 전송할 도메인 설정 (예: localhost:3000)
+    cookie.setDomain("localhost");
+    // 쿠키의 유효 시간 설정 (초 단위, 예: 1시간)
+    cookie.setMaxAge(3600);
+    // 쿠키를 HTTPS 프로토콜로만 전송되도록 설정 (보안을 강화)
+    cookie.setSecure(false);
+    // 쿠키를 루트 경로에 저장 (모든 경로에서 접근 가능)
+    cookie.setPath("/");
+    // 응답 헤더에 쿠키 추가
+    responser.addCookie(cookie);
+
+    log.info("cookie :" + cookie);
     return ResponseEntity.ok(response);
   }
 
@@ -70,11 +110,21 @@ public class MemberController {
     TokenDto response = memberService.kakaoLogin(code, KAKAO);
     return ResponseEntity.ok(response);
   }
+  @CrossOrigin
+  @PostMapping("/logout")
+  public void logout(HttpServletRequest request, HttpServletResponse response) {
 
-  @DeleteMapping("/logout")
-  public void logout(HttpServletRequest request) {
+    Cookie cookie = new Cookie("accessToken", null);
+    cookie.setHttpOnly(false);
+    cookie.setDomain("localhost");
+    cookie.setMaxAge(0);
+    cookie.setPath("/");
+    response.addCookie(cookie);
     String accessToken = jwtTokenProvider.resolveToken(request);
     memberService.logout(accessToken);
+    log.info(accessToken);
+    log.info("로그아웃 성공");
+
   }
 
   @DeleteMapping("/withdrawal")
@@ -104,7 +154,7 @@ public class MemberController {
 
   @PutMapping("/my-info")
   public ResponseEntity<MemberDto> update(HttpServletRequest request,
-      @Valid @RequestPart(name = "updateRequest") UpdateRequest updateRequest, @RequestPart(name = "file") MultipartFile file) {
+      @Valid @ModelAttribute UpdateRequest updateRequest, @RequestPart(name = "file") MultipartFile file) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     MemberDto response = memberService.update(accessToken, updateRequest, file);
     return ResponseEntity.ok(response);

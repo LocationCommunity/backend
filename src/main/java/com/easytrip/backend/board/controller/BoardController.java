@@ -1,6 +1,5 @@
 package com.easytrip.backend.board.controller;
 
-import com.easytrip.backend.board.domain.BoardEntity;
 import com.easytrip.backend.board.dto.*;
 import com.easytrip.backend.board.service.BoardService;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
@@ -10,39 +9,39 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/boards")
+
 public class BoardController {
 
     private final BoardService boardService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // 게시물 작성
-    // 이미지 업로드 (MultiPartFile) Rest Api 구현 시 모든 값 RequestPart으로 맵핑 필수
-   @PostMapping
+
+    @PostMapping("/write")
     public void writePost(HttpServletRequest request,
-                          @Valid @RequestPart(value = "boardRequestDto") BoardRequestDto boardRequestDto,
-                          @RequestPart(value = "files", required = false) List<MultipartFile> files,
-                          @RequestPart(value = "placeId", required = false ) Long placeId) throws Exception{
-
-       String accessToken = jwtTokenProvider.resolveToken(request);
-
-       boardService.writePost( accessToken, boardRequestDto, files, placeId);
-
-
+                          @ModelAttribute BoardRequestDto boardRequestDto,
+                          @RequestParam(value = "files") List<MultipartFile> files,
+                          @RequestParam(value = "placeId", required = false) Long placeId) throws Exception {
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        boardService.writePost(accessToken, boardRequestDto, files, placeId);
     }
+
 
 
     // 게시물 수정
@@ -73,23 +72,34 @@ public class BoardController {
 
     }
 
-    // 게시물 목록
+//     게시물 목록
+    @CrossOrigin
     @GetMapping("/lists")
     public List<BoardListDto> getList(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
 
+
       return boardService.getList(page, size);
+
     }
 
-    // 게시물 불러오기
+
+
+
+//     게시물 불러오기
+    @CrossOrigin
     @GetMapping("/{boardId}")
     public ResponseEntity<BoardDetailDto> getDetail(@PathVariable(value = "boardId") Long boardId
-            ) {
+            , HttpServletRequest request) {
 
-        BoardDetailDto response = boardService.getDetail(boardId);
+        String accessToken = jwtTokenProvider.resolveToken(request);
+
+        BoardDetailDto response = boardService.getDetail(boardId, accessToken);
 
         return ResponseEntity.ok(response);
 
     }
+
+
     // 나의 게시물
     @GetMapping("/my-posts")
     public ResponseEntity<List<BoardListDto>> getMyPost(HttpServletRequest request) {

@@ -357,7 +357,7 @@ public class ManagementServiceImpl implements ManagementService {
           .build();
       imageRepository.save(image);
 
-      imageUrl = image.getFilePath();
+      imageUrl = image.getFileName();
     }
 
     MemberEntity updateMember = member.toBuilder()

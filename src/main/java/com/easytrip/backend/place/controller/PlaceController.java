@@ -14,15 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -36,7 +28,7 @@ public class PlaceController {
   @PostMapping("/share")
   public void placeShare(HttpServletRequest request,
       @Valid @RequestPart(name = "placeRequest") PlaceRequest placeRequest,
-      @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "file") List<MultipartFile> files) {
+      @Valid @NotEmpty(message = "장소의 이미지를 올려주세요.") @RequestPart(name = "files") List<MultipartFile> files) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     placeService.share(accessToken, placeRequest, files);
   }
@@ -62,6 +54,7 @@ public class PlaceController {
     placeService.myShareDelete(accessToken, placeId);
   }
 
+  @CrossOrigin
   @GetMapping("/info/{placeId}")
   public ResponseEntity<PlaceDto> getInfo(HttpServletRequest request,
       @PathVariable(value = "placeId") Long placeId) {
@@ -69,19 +62,19 @@ public class PlaceController {
     PlaceDto response = placeService.getInfo(accessToken, placeId);
     return ResponseEntity.ok(response);
   }
-
+  @CrossOrigin
   @GetMapping("/map")
-  public ResponseEntity<List<MapDto>> getMapData(HttpServletRequest request, @RequestParam Double x,
-      @RequestParam Double y) {
+  public ResponseEntity<List<MapDto>> getMapData(HttpServletRequest request, @RequestParam("x") Double x,
+      @RequestParam("y") Double y) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     List<MapDto> response = placeService.getMapData(accessToken, x, y);
     return ResponseEntity.ok(response);
   }
-
+  @CrossOrigin
   @GetMapping("/list")
   public ResponseEntity<List<PlaceDto>> placeList(HttpServletRequest request,
-      @RequestParam String state,
-      @Valid @NotNull(message = "장소의 카테고리는 없을 수 없습니다.") @RequestParam PlaceCategory category) {
+      @RequestParam(value = "state") String state,
+      @Valid @NotNull(message = "장소의 카테고리는 없을 수 없습니다.") @RequestParam (value = "PlaceCategory") PlaceCategory category) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     List<PlaceDto> response = placeService.getList(accessToken, state, category);
     return ResponseEntity.ok(response);
