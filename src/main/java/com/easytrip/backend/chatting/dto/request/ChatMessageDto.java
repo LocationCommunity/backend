@@ -7,7 +7,8 @@ import com.easytrip.backend.member.dto.MemberDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
-
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 
 public class ChatMessageDto {
@@ -22,9 +23,11 @@ public class ChatMessageDto {
 
         private Long receiverId;
 
+        private String userNickname;
+
         private Long roomId;
 
-        private LocalDateTime sendTime;
+        private String sendTime;
 
 
 
@@ -38,6 +41,8 @@ public class ChatMessageDto {
                     .build();
 
         }
+
+
     }
 
     @Getter

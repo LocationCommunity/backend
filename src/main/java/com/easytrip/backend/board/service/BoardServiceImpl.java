@@ -107,8 +107,10 @@ public class BoardServiceImpl implements BoardService {
         for (MultipartFile file : files) {
 
             // 저장 경로 설정 ~/boards
-            String projectPath =
-                System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
+
+            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
+//             String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
+
             UUID uuid = UUID.randomUUID();
 
             // 랜덤식별자_원래이름

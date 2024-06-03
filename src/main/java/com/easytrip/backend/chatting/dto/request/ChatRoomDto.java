@@ -1,5 +1,6 @@
 package com.easytrip.backend.chatting.dto.request;
 
+import com.easytrip.backend.chatting.entity.ChatMessage;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.MemberDto;
