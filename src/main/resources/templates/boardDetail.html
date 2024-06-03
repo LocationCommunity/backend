@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시글 상세 정보</title>
+</head>
+<body>
+<h1 th:text="${title}">게시글 제목</h1>
+<p th:text="${content}">게시글 내용</p>
+<h1>게시물 상세 정보</h1>
+<div th:each="image : ${images}">
+    <img th:src="@{|${boardId}/${images}|}" alt="게시물 이미지">
+</div>
+
+</div>
+</body>
+</html>

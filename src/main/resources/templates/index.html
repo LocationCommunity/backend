@@ -4,7 +4,101 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
+<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 <body>
+    <h1>Board</h1>
+    <table style="border:1px solid black; border-collapse:collapse">
+        <thead>
+            <tr>
+                <td>Id</td>
+                <td>Title</td>
+                <td>Content</td>
+            </tr>
+        </thead>
+        <tbody id="lists"></tbody>
+    </table>
+    <div id="pagination"></div>
+    <script>
+        // request first page
+        $.ajax({
+            type: "GET",
+            url: "/boards/lists?page=1&size=5",
+            success: function(res) { // 서버에서 받은 결과
+                console.log(res);
+                const lists = res;
+                for (let i = 0; i < lists.length; i++) {
+                    $("#lists").append(`
+                        <tr>
+                            <td>${lists[i].boardId}</td>
+                            <td>${lists[i].title}</td>
+                            <td>${lists[i].content}</td>
+                        </tr>
+                    `);
+                }
+            }
+        });
 
+        // request total page
+        $.ajax({
+            type: "GET",
+            url: "/boards/lists/total",
+            success: function(res) { // 서버에서 받은 결과
+                console.log(res);
+                const totalPage = res;
+                for (let pageNumber = 1; pageNumber <= totalPage; pageNumber++) {
+                    $("#pagination").append(`
+                        <span id="page${pageNumber}" style="cursor:auto; margin-right:3px;">${pageNumber}</span>
+                    `);
+                    $(`#page${pageNumber}`).click(function () {
+                        $("#lists").empty();
+                        $.ajax({
+                            type: "GET",
+                            url: `/boards/lists?page=${pageNumber}&size=5`,
+                            success: function(res) { // 서버에서 받은 결과
+                                console.log(res);
+                                const lists = res;
+                                for (let i = 0; i < lists.length; i++) {
+                                    $("#lists").append(`
+                                <tr>
+                                    <td>${lists[i].boardId}</td>
+                                    <td>${lists[i].title}</td>
+                                    <td>${lists[i].content}</td>
+                                </tr>
+                            `);
+                                }
+                            }
+                        });
+                    })
+                }
+            }
+        });
+
+        // const totalPage = 4; // API request
+        // for (let pageNumber = 1; pageNumber <= totalPage; pageNumber++) {
+        //     $("#pagination").append(`
+        //         <span id="page${pageNumber}" style="cursor:auto; margin-right:3px;">${pageNumber}</span>
+        //     `);
+        //     $(`#page${pageNumber}`).click(function () {
+        //         $("#lists").empty();
+        //         $.ajax({
+        //             type: "GET",
+        //             url: `/boards/lists?page=${pageNumber}&size=5`,
+        //             success: function(res) { // 서버에서 받은 결과
+        //                 console.log(res);
+        //                 const lists = res;
+        //                 for (let i = 0; i < lists.length; i++) {
+        //                     $("#lists").append(`
+        //                         <tr>
+        //                             <td>${lists[i].boardId}</td>
+        //                             <td>${lists[i].title}</td>
+        //                             <td>${lists[i].content}</td>
+        //                         </tr>
+        //                     `);
+        //                 }
+        //             }
+        //         });
+        //     })
+        // }
+    </script>
 </body>
 </html>

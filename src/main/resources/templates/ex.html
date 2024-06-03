@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Message</title>
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>-->
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <h1>Message</h1>
+    <button id="connect">Connect</button>
+    <button id="disconnect">Disconnect</button>
+
+    <div id="chat-container">
+        <div id="chat-messages"></div>
+        <input type="text" id="chat-input" placeholder="Type a message...">
+        <button id="send-message" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        document.getElementById('connect').addEventListener('click', connect);
+        document.getElementById('disconnect').addEventListener('click', disconnect);
+
+        let stompClient = null;
+        const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5b3VuX3RpcEBqci5uYXZlci5jb20iLCJwbGF0Zm9ybSI6Ik5BVkVSIiwicm9sZXMiOlsiUk9MRV9VU0VSIiwiUk9MRV9BRE1JTiJdLCJpYXQiOjE3MTYxOTg2NjYsImV4cCI6MTcxNjIwNTg2Nn0.EGYYkF6KZxXoWDql7fd40UR0sxT-nBW_Po0KM4P8gTQ';
+
+        function connect() {
+            const socket = new WebSocket('ws://localhost:8080/stomp/chat');
+            stompClient = Stomp.over(socket);
+
+            const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5b3VuX3RpcEBqci5uYXZlci5jb20iLCJwbGF0Zm9ybSI6Ik5BVkVSIiwicm9sZXMiOlsiUk9MRV9VU0VSIiwiUk9MRV9BRE1JTiJdLCJpYXQiOjE3MTYxOTg2NjYsImV4cCI6MTcxNjIwNTg2Nn0.EGYYkF6KZxXoWDql7fd40UR0sxT-nBW_Po0KM4P8gTQ';
+
+
+            stompClient.connect({'Authorization': 'Bearer ' + token}, function (frame) {
+                console.log('Connected: ' + frame);
+
+                function getEmailFromToken(token) {
+                    const tokenParts = token.split('.');
+                    const payload = JSON.parse(atob(tokenParts[1]));
+                    return payload.sub; // 이메일 클레임(sub)에 해당하는 값 반환
+                }
+
+                const userEmail = getEmailFromToken(token);
+                console.log('User Email:', userEmail);
+
+
+
+
+
+
+// 사용 예시
+
+
+
+// 토큰의 두
+
+
+
+
+
+                // 구독할 큐 설정
+                stompClient.subscribe('/exchange/chat.exchange/room.19', function (message) {
+                    const messageObject = JSON.parse(message.body);
+                    showMessage(messageObject.message);
+                });
+            }, function (error) {
+                console.log('Error: ' + error);
+            });
+            // stompClient.connect({}, function (frame) {
+
+            //     console.log('Connected: ' + frame);
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect(function () {
+                    console.log("Disconnected");
+                });
+            }
+        }
+
+        function showMessage(message) {
+
+            function getEmailFromToken(token) {
+                const tokenParts = token.split('.');
+                const payload = JSON.parse(atob(tokenParts[1]));
+                return payload.sub; // 이메일 클레임(sub)에 해당하는 값 반환
+            }
+
+            const userEmail = getEmailFromToken(token);
+            console.log('User Email:', userEmail);
+
+            console.log("Received message: " + message + userEmail);
+            $("#chat-messages").append(`
+                <div class="message">${message} : ${userEmail} </div>
+
+            `)
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('chat-input');
+            const message = messageInput.value;
+            const messageObject = {
+                "message" : message,
+                "senderId" : "1",
+                "receiverId" : "2",
+                "roomId" : "19"
+            }
+
+            if (messageObject && stompClient) {
+                console.log("Sent message: " + message);
+                stompClient.send('/pub/chat.talk.19', {}, JSON.stringify(messageObject));
+                messageInput.value = '';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Get User Nickname</title>
+  <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+</head>
+<body>
+<h1>User Information</h1>
+<button id="get-user-info">Get User Info</button>
+<div id="user-info"></div>
+
+<script>
+  $(document).ready(function() {
+    $('#get-user-info').on('click', function() {
+      const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5b3VuX3RpcEBqci5uYXZlci5jb20iLCJwbGF0Zm9ybSI6Ik5BVkVSIiwicm9sZXMiOlsiUk9MRV9VU0VSIiwiUk9MRV9BRE1JTiJdLCJpYXQiOjE3MTYxMzQ1NTQsImV4cCI6MTcxNjE0MTc1NH0.jgi2YBMI8Ab5J1zTL7A26GiYN0UH81FUw9iNVIrxtrM'; // 실제 JWT 토큰을 사용
+
+      $.ajax({
+        url: 'http://localhost:8080/members/my-info',
+        type: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        success: function(data) {
+          // 서버에서 받은 데이터를 로그로 출력
+          console.log("Email:", data.email);
+          console.log("Nickname:", data.nickname);
+
+          $('#user-info').html(`
+                            <p>Email: ${data.email}</p>
+                            <p>Nickname: ${data.nickname}</p>
+                        `);
+        },
+        error: function(err) {
+          console.error('Error fetching user info:', err);
+          $('#user-info').html('<p>Error fetching user info.</p>');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

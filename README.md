@@ -1,2 +1,4 @@
-# backend
-EasyTrip의 백엔드
+
+# frontend
+EasyTrip의 프론트엔드
+
