@@ -77,14 +77,9 @@ public class BoardController {
     @GetMapping("/lists")
     public List<BoardListDto> getList(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
 
-        return boardService.getList(page, size);
-    }
 
+      return boardService.getList(page, size);
 
-    @GetMapping("/lists/total")
-    public int getListSize(Pageable pageable) {
-
-        return pageable.getPageSize();
     }
 
 

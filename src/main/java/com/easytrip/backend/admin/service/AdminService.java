@@ -28,9 +28,7 @@ public interface AdminService {
 
   void deletePlace(String accessToken, Long placeId);
 
-
-  List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption);
-
+  List<BoardListDto> searchBoard(String accessToken, String keyword, SearchOption searchOption);
 
   void updateBoard(String accessToken, Long boardId, Long placeId, BoardRequestDto boardRequestDto, List<MultipartFile> files);
 
