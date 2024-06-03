@@ -65,7 +65,7 @@ public class AdminServiceImpl implements AdminService {
 
 
   @Override
-  public List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption) {
+  public List<BoardListDto> searchBoard(String accessToken, String keyword, SearchOption searchOption) {
     boardService.searchBoard( accessToken, keyword, searchOption);
     return boardService.searchBoard(accessToken, keyword, searchOption);
   }

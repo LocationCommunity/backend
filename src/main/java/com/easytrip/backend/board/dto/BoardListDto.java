@@ -7,6 +7,8 @@ import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.exception.impl.NotFoundPlaceException;
 import com.easytrip.backend.exception.impl.NotFoundPostException;
 import com.easytrip.backend.place.domain.PlaceEntity;
+import java.util.stream.IntStream;
+
 import lombok.*;
 import org.springframework.data.domain.Page;
 
@@ -36,6 +38,7 @@ public class BoardListDto {
 
 
     //entity to dto
+
     public static List<BoardListDto> listOf(List<BoardEntity> boardEntities, List<List< String >> imageUrls) {
 
 //        return boardEntities.stream()
@@ -52,6 +55,7 @@ public class BoardListDto {
 
 
     public static BoardListDto of(BoardEntity boardEntity, List<String>  imageUrl) {
+
         return BoardListDto.builder()
                 .boardId(boardEntity.getBoardId())
                 .title(boardEntity.getTitle())
@@ -61,6 +65,7 @@ public class BoardListDto {
                 .createDate(boardEntity.getCreateDate())
                 .likeCnt(boardEntity.getLikeCnt())
                 .viewCnt(boardEntity.getViewCnt())
+                .boardImage(imageUrl)
                 .build();
 
     }
