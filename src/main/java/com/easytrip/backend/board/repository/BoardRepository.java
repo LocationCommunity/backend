@@ -7,7 +7,6 @@ import com.easytrip.backend.type.BoardStatus;
 import com.easytrip.backend.type.Platform;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
+
 
 
 
@@ -45,8 +45,5 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
     List<BoardEntity> findByMemberId(MemberEntity member);
 
     Page<BoardEntity> findByStatus(BoardStatus status, Pageable pageable);
-
-
-
 
 }

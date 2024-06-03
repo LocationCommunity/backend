@@ -31,7 +31,7 @@ public interface BoardService {
 
     List<BoardListDto> search(String keyword, SearchOption searchOption);
 
-    List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption);
+    List<BoardListDto> searchBoard(String accessToken, String keyword, SearchOption searchOption);
 
 
 }
