@@ -1,5 +1,6 @@
 package com.easytrip.backend.chatting.dto.request;
 
+import com.easytrip.backend.chatting.entity.ChatMessage;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.MemberDto;
@@ -46,6 +47,7 @@ public class ChatRoomDto {
         public static Response of(ChatRoom chatRoom) {
             MemberDto.Response matchedMember1 = null, matchedMember2 = null;
 
+
             if (chatRoom.getMatchedMember1() != null)
                 matchedMember1 = MemberDto.Response.of(chatRoom.getMatchedMember1());
             if (chatRoom.getMatchedMember2() != null)
@@ -69,6 +71,7 @@ public class ChatRoomDto {
             private Long id;
             private MemberDto.Response matchedMember1;
             private MemberDto.Response matchedMember2;
+            private MemberDto.Response nickname;
             private List<ChatMessageDto.Response> messages;
 
             public static Detail of(ChatRoom chatRoom) {

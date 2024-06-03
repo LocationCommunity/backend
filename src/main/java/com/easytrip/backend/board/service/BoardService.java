@@ -20,9 +20,10 @@ public interface BoardService {
 
     void deletePost(String accessToken, Long boardId);
 
-    List<BoardListDto> getList( Pageable pageable, String sort);
+    List<BoardListDto> getList(int page, int size);
 
-    BoardDetailDto getDetail( Long boardId);
+
+    BoardDetailDto getDetail( Long boardId, String accessToken);
 
     List<BoardListDto> getMyPost(String accessToken);
 
@@ -30,7 +31,7 @@ public interface BoardService {
 
     List<BoardListDto> search(String keyword, SearchOption searchOption);
 
-    List<BoardListDto> searchBoard(String accessToken, String keyword, String searchOption);
+    List<BoardListDto> searchBoard(String accessToken, String keyword, SearchOption searchOption);
 
 
 }

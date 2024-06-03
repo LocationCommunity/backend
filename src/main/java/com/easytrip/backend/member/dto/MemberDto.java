@@ -1,6 +1,7 @@
 package com.easytrip.backend.member.dto;
 
 import com.easytrip.backend.chatting.dto.request.ChatMessageDto;
+import com.easytrip.backend.chatting.dto.request.ChatRoomDto;
 import com.easytrip.backend.member.domain.MemberEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,20 +40,16 @@ public class MemberDto {
     private Long id;
     private String email;
     private String nickname;
-    private Long sender;
-    private Long MatchedMember1;
-    private Long MatchedMember2;
+
+
 
 
 
     public static Response of(MemberEntity memberEntity) {
       return Response.builder()
               .id(memberEntity.getMemberId())
-              .email(memberEntity.getEmail())
-              .sender(memberEntity.getMemberId())
               .nickname(memberEntity.getNickname())
-              .MatchedMember1(memberEntity.getMemberId())
-              .MatchedMember2(memberEntity.getMemberId())
+              .email(memberEntity.getEmail())
               .build();
 
 

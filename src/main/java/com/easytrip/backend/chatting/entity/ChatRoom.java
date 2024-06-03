@@ -1,5 +1,5 @@
 package com.easytrip.backend.chatting.entity;
-//
+
 
 import com.easytrip.backend.member.domain.MemberEntity;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
 
 @Entity
 @AllArgsConstructor
@@ -34,9 +34,8 @@ public class ChatRoom {
 
 
 
-
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
-//    @OrderBy ( "createdAt DESC" )
+    @OrderBy(value = "sendTime DESC")
     private List<ChatMessage> chatMessageList = new ArrayList<>();
 
 

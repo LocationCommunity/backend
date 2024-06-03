@@ -30,7 +30,7 @@ public class MatchingController {
   }
 
   @PostMapping
-  public void acceptMatching(HttpServletRequest request, @RequestParam Long memberId) {
+  public void acceptMatching(HttpServletRequest request, @RequestParam(value = "memberId") Long memberId) {
     String accessToken = jwtTokenProvider.resolveToken(request);
     matchingService.accept(accessToken, memberId);
   }

@@ -217,7 +217,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
 
 
-//        have benn deleted post
+
         if (ex.getStatus().equals(ExStatus.INACTIVE)) {
             throw new DeletePostException();
         }

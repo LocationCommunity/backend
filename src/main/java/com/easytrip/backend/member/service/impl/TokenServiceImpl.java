@@ -25,8 +25,15 @@ public class TokenServiceImpl implements TokenService {
   @Override
   public TokenDto create(String email, Boolean adminYn, Platform platform) {
 
+    MemberEntity member = memberRepository.findByEmail(email)
+
+            .orElseThrow(() -> new NotFoundMemberException());
+
+    String nickname = member.getNickname();
+    Long memberId = member.getMemberId();
+
     // AccessToken, RefreshToken 생성
-    TokenDto token = jwtTokenProvider.createTokens(email, adminYn, platform);
+    TokenDto token = jwtTokenProvider.createTokens(email, adminYn, platform, nickname, memberId);
 
     // Redis 에 RefreshToken 저장
     String refreshToken = token.getRefreshToken();
@@ -49,8 +56,7 @@ public class TokenServiceImpl implements TokenService {
     // Redis에서 해당 사용자의 refreshToken이 있는지 화인하고 있다면 동일한지 확인
     Claims refreshTokenClaims = jwtTokenProvider.getClaimsFromToken(refreshToken);
     String email = refreshTokenClaims.getSubject();
-    String platformString = refreshTokenClaims.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(refreshToken);
 
     String storedRefreshToken = (String) redisTemplate.opsForValue().get("RefreshToken: " + email + ", Platform: " + platform);
     if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
@@ -61,7 +67,7 @@ public class TokenServiceImpl implements TokenService {
     MemberEntity member = memberRepository.findByEmail(email)
         .orElseThrow(() -> new NotFoundMemberException());
 
-    String newAccessToken = jwtTokenProvider.reissue(member.getEmail(), member.getAdminYn());
+    String newAccessToken = jwtTokenProvider.reissue(member.getEmail(), member.getAdminYn(), platform);
 
     return "accessToke: " + newAccessToken;
   }

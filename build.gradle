@@ -11,6 +11,10 @@ java {
     sourceCompatibility = '17'
 }
 
+compileJava {
+    options.compilerArgs << "-parameters"
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -37,6 +41,10 @@ dependencies {
     // EmailValidator
     implementation 'commons-validator:commons-validator:1.7'
 
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -48,9 +56,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+    implementation 'org.springframework:spring-web-reactive:5.0.0.M4'
+
     // json 파싱 Jackson
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.3'
 
+
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     annotationProcessor 'org.projectlombok:lombok'

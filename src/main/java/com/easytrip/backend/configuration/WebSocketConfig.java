@@ -43,10 +43,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         // SimpleBroker는 해당하는 경로를 SUBSCRIBE하는 Client에게 메세지를 전달하는 간단한 작업을 수행
         // "/sub"으로 시작하는 메시지가 메시지 브로커로 라우팅됩니다.
-        config.enableSimpleBroker("/sub");
+//
 
         //enableStompBrokerRelay
         //SimpleBroker의 기능과 외부 Message Broker( RabbitMQ, ActiveMQ 등 )에 메세지를 전달하는 기능을 가짐
+//
+//        config.enableSimpleBroker("/sub");
+        config.enableStompBrokerRelay("/queue", "/topic", "/exchange", "/amq/queue");
 
 
 

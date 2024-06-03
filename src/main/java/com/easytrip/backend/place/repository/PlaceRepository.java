@@ -18,7 +18,9 @@ public interface PlaceRepository extends JpaRepository<PlaceEntity, Long> {
   Optional<PlaceEntity> findByPlaceId(Long placeId);
 
   // MariaDB에서는 좌표 간 거리를 계산하는 공식인 Haversine formula를 사용
-  @Query(value = "SELECT * FROM eztrip.place " +
+
+  @Query(value = "SELECT * FROM easytrip.place " +
+
       "WHERE " +
       "6371 * acos(cos(radians(:y)) * cos(radians(place.y)) * cos(radians(place.x) - radians(:x)) + "
       + "sin(radians(:y)) * sin(radians(place.y))) <= 3", nativeQuery = true)

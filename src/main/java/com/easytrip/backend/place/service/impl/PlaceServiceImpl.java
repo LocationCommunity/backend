@@ -47,6 +47,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -74,9 +75,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -131,7 +130,7 @@ public class PlaceServiceImpl implements PlaceService {
 
       ImageEntity image = ImageEntity.builder()
           .fileName(fileName)
-          .filePath(projectPath + "\\" + fileName)
+          .filePath("/places/" + fileName)
           .useType(UseType.PLACE)
           .placeId(place)
           .build();
@@ -151,9 +150,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -197,9 +194,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -243,7 +238,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         ImageEntity image = ImageEntity.builder()
             .fileName(fileName)
-            .filePath(projectPath + "\\" + fileName)
+            .filePath("/places/" + fileName)
             .useType(UseType.PLACE)
             .placeId(place)
             .build();
@@ -270,9 +265,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -295,6 +288,7 @@ public class PlaceServiceImpl implements PlaceService {
     imageRepository.deleteAll(images);
   }
 
+  @CrossOrigin
   @Override
   public PlaceDto getInfo(String accessToken, Long placeId) {
 
@@ -305,9 +299,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -321,7 +313,7 @@ public class PlaceServiceImpl implements PlaceService {
     List<ImageEntity> images = imageRepository.findByPlaceId(place);
     List<String> imageUrl = new ArrayList<>();
     for (ImageEntity image : images) {
-      imageUrl.add(image.getFilePath());
+      imageUrl.add(image.getFileName());
     }
 
     PlaceDto result = new PlaceDto();
@@ -332,6 +324,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     result = PlaceDto.of(place, false, imageUrl);
+
 
     return result;
   }
@@ -359,9 +352,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
@@ -383,7 +374,7 @@ public class PlaceServiceImpl implements PlaceService {
       List<String> url = new ArrayList<>();
       List<ImageEntity> images = imageRepository.findByPlaceId(place);
       for (ImageEntity image : images) {
-        url.add(image.getFilePath());
+        url.add(image.getFileName());
       }
       imageUrl.add(url);
     }
@@ -430,9 +421,7 @@ public class PlaceServiceImpl implements PlaceService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
-    String platformString = claimsFromToken.get("platform", String.class);
-    Platform platform = Platform.valueOf(platformString);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());

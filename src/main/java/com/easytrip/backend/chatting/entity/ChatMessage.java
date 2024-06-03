@@ -25,6 +25,8 @@ public class ChatMessage {
 
     private LocalDateTime sendTime;
 
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     private MemberEntity sender;
@@ -37,6 +39,7 @@ public class ChatMessage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private ChatRoom chatRoom;
+
 
 
 
