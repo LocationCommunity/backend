@@ -353,17 +353,7 @@ public class BoardServiceImpl implements BoardService {
         Page<BoardEntity> boardPage = boardRepository.findByStatus(BoardStatus.ACTIVE, pageable);
 
 
-        List<BoardEntity> boardEntities = boardPage.getContent();
 
-        List<List<String>> imageUrl = new ArrayList<>();
-        for (BoardEntity board : boardEntities) {
-            List<String> url = new ArrayList<>();
-            List<ImageEntity> images = imageRepository.findByBoardId(board);
-            for (ImageEntity image : images) {
-                url.add(image.getFilePath());
-            }
-            imageUrl.add(url);
-        }
 
 
         List<BoardEntity> boardEntities = boardPage.getContent();
@@ -454,6 +444,8 @@ return boardDetailDto;
         MemberEntity member = memberRepository.findByEmail(email)
             .orElseThrow(InvalidTokenException::new);
 
+        List<BoardEntity> boards = boardRepository.findByMemberIdAndStatus(member, BoardStatus.ACTIVE);
+
 
         List<List<String>> imageUrls = new ArrayList<>();
 
@@ -467,15 +459,7 @@ return boardDetailDto;
         }
 
 
-        List<List<String>> imageUrl = new ArrayList<>();
-        for (BoardEntity board : boards) {
-            List<String> url = new ArrayList<>();
-            List<ImageEntity> images = imageRepository.findByBoardId(board);
-            for (ImageEntity image : images) {
-                url.add(image.getFilePath());
-            }
-            imageUrl.add(url);
-        }
+
 
 
 
@@ -553,7 +537,7 @@ return boardDetailDto;
         }
 
 
-        }
+
 
         List<List<String>> imageUrls = new ArrayList<>();
 
@@ -608,18 +592,5 @@ return boardDetailDto;
 
 
         return BoardListDto.listOf(boards, imageUrls);
-
-
-        List<List<String>> imageUrl = new ArrayList<>();
-        for (BoardEntity board : boards) {
-            List<String> url = new ArrayList<>();
-            List<ImageEntity> images = imageRepository.findByBoardId(board);
-            for (ImageEntity image : images) {
-                url.add(image.getFilePath());
-            }
-            imageUrl.add(url);
-        }
-
-        return BoardListDto.listOf(boards, imageUrl);
     }
 }
