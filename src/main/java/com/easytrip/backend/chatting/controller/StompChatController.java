@@ -44,7 +44,7 @@ public class StompChatController {
     @MessageMapping("chat.talk.{roomId}")
     public void talk(@RequestBody ChatMessageDto.Send message, @DestinationVariable(value = "roomId") String roomId) {
 
-        message.setSendTime(LocalDateTime.now());
+//        message.setSendTime(LocalDateTime.now());
         chatMessageService.talk(message, roomId);
 
         log.info("메시지 : " + message.getMessage() + " 받는사람 : "+ message.getReceiverId() + " 보낸사람 : "+ message.getSenderId() + " - 메시지 전송완료 ");

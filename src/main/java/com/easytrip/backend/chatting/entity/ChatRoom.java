@@ -35,7 +35,7 @@ public class ChatRoom {
 
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
-    @OrderBy("sendTime DESC")
+    @OrderBy(value = "sendTime DESC")
     private List<ChatMessage> chatMessageList = new ArrayList<>();
 
 
