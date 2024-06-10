@@ -25,9 +25,8 @@ public class TokenServiceImpl implements TokenService {
   @Override
   public TokenDto create(String email, Boolean adminYn, Platform platform) {
 
-    MemberEntity member = memberRepository.findByEmail(email)
-
-            .orElseThrow(() -> new NotFoundMemberException());
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
+        .orElseThrow(() -> new NotFoundMemberException());
 
     String nickname = member.getNickname();
     Long memberId = member.getMemberId();
@@ -64,7 +63,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     // 새로운 accessToken 발급
-    MemberEntity member = memberRepository.findByEmail(email)
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
         .orElseThrow(() -> new NotFoundMemberException());
 
     String newAccessToken = jwtTokenProvider.reissue(member.getEmail(), member.getAdminYn(), platform);
