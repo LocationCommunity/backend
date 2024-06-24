@@ -29,7 +29,7 @@ public class SecurityConfiguration {
             requests -> requests
 
                 .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
-                    "/members/password", "/weather/**", "/chat/**", "/home/**", "/stomp/**","/boards/lists", "/api/**", "/images/**" ).permitAll()
+                    "/members/password", "/weather/**", "/chat/**", "/home/**", "/stomp/**","/boards/lists", "/api/**", "/images/**", "/exhibitions/lists/**" ).permitAll()
 
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
                     "/members/reissue", "/members/bookmark", "/members/interest",

@@ -38,6 +38,10 @@ public class ChatRoom {
     @OrderBy(value = "sendTime DESC")
     private List<ChatMessage> chatMessageList = new ArrayList<>();
 
+    private int unread;
+
+
+
 
 
 }

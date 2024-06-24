@@ -68,7 +68,7 @@ public class MemberController {
     Cookie cookie = new Cookie("accessToken", tokenDto.getAccessToken());
     cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
     // 쿠키를 전송할 도메인 설정 (예: localhost:3000)
-    cookie.setDomain("localhost");
+    cookie.setDomain("192.168.0.4");
     // 쿠키의 유효 시간 설정 (초 단위, 예: 1시간)
     cookie.setMaxAge(3600);
     // 쿠키를 HTTPS 프로토콜로만 전송되도록 설정 (보안을 강화)
@@ -91,7 +91,7 @@ public class MemberController {
     Cookie cookie = new Cookie("accessToken", response.getAccessToken());
     cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
     // 쿠키를 전송할 도메인 설정 (예: localhost:3000)
-    cookie.setDomain("localhost");
+    cookie.setDomain("192.168.0.4");
     // 쿠키의 유효 시간 설정 (초 단위, 예: 1시간)
     cookie.setMaxAge(3600);
     // 쿠키를 HTTPS 프로토콜로만 전송되도록 설정 (보안을 강화)
@@ -106,8 +106,24 @@ public class MemberController {
   }
 
   @GetMapping("/login/kakao")
-  public ResponseEntity<TokenDto> kakaoLogin(@RequestParam(name = "code") String code) {
+  public ResponseEntity<TokenDto> kakaoLogin(@RequestParam(name = "code") String code, HttpServletResponse responser) {
     TokenDto response = memberService.kakaoLogin(code, KAKAO);
+
+    // 토큰을 쿠키에 담아서 클라이언트에게 전달
+    Cookie cookie = new Cookie("accessToken", response.getAccessToken());
+    cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
+    // 쿠키를 전송할 도메인 설정 (예: localhost:3000)
+    cookie.setDomain("192.168.0.4");
+    // 쿠키의 유효 시간 설정 (초 단위, 예: 1시간)
+    cookie.setMaxAge(3600);
+    // 쿠키를 HTTPS 프로토콜로만 전송되도록 설정 (보안을 강화)
+    cookie.setSecure(false);
+    // 쿠키를 루트 경로에 저장 (모든 경로에서 접근 가능)
+    cookie.setPath("/");
+    // 응답 헤더에 쿠키 추가
+    responser.addCookie(cookie);
+
+    log.info("cookie :" + cookie);
     return ResponseEntity.ok(response);
   }
   @CrossOrigin
