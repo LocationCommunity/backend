@@ -19,6 +19,7 @@ import com.easytrip.backend.type.ExStatus;
 import com.easytrip.backend.type.UseType;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,10 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +44,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
     private final PlaceRepository placeRepository;
-    private final JwtTokenProvider  jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     // 전시회 등록
@@ -87,8 +85,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .memberId(member)
                 .placdId(place)
                 .status(ExStatus.ACTIVE)
-                .start_date(LocalDateTime.of(2024, 3, 26, 3, 0))
-                .end_date(LocalDateTime.of(2024, 4, 15, 6, 0))
+                .startDate(exhibitionDto.getStartDate())
+                .endDate(exhibitionDto.getEndDate())
                 .regDate(LocalDateTime.now())
                 .build();
         exhibitionRepository.save(exhibition);
@@ -96,7 +94,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         for (MultipartFile file : files) {
 
             // 저장 경로 설정 ~/exhibitions
-            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\exhibitions";
+            String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
             UUID uuid = UUID.randomUUID();
 
 
@@ -129,9 +127,6 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             }
 
 
-            File saveFile = new File(projectPath, fileName);
-
-
 
             ImageEntity image = ImageEntity.builder()
                     .fileName(fileName)
@@ -144,16 +139,11 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         }
 
 
-
-
-
-
     }
 
     // 전시회 정보 불러오기
     @Override
     public ExhibitionDto getEx(Long exId) {
-
 
 
         ExhibitionEntity ex = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);
@@ -175,10 +165,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .x(place.getX())
                 .y(place.getY())
                 .address(place.getAddress())
-                .start_date(ex.getStart_date())
-                .end_date(ex.getEnd_date())
+                .startDate(ex.getStartDate())
+                .endDate(ex.getEndDate())
                 .build();
-
 
 
         return exhibitionDto;
@@ -200,9 +189,6 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         ImageEntity image = new ImageEntity();
 
 
-
-
-
         if (authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
@@ -214,8 +200,6 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         } else {
             throw new NotMatchAuthorityException();
         }
-
-
 
 
         if (ex.getStatus().equals(ExStatus.INACTIVE)) {
@@ -232,8 +216,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         for (MultipartFile file : files) {
 
 
-            // 저장 경로 설정 ~/boards
-            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\exhibitions";
+            // 저장 경로 설정 ~/
+            String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
             UUID uuid = UUID.randomUUID();
 
             // 랜덤식별자_원래이름
@@ -267,8 +251,6 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             }
 
 
-
-
             // 이미지 저장 Board
             ImageEntity imageEntity = image.toBuilder()
                     .fileName(fileName)
@@ -285,18 +267,16 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         ExhibitionEntity exhibitionEntity = ex.toBuilder()
                 .title(exhibitionDto.getTitle())
                 .content(exhibitionDto.getContent())
-                .start_date(exhibitionDto.getStart_date())
-                .end_date(exhibitionDto.getEnd_date())
+                .startDate(exhibitionDto.getStartDate())
+                .endDate(exhibitionDto.getEndDate())
                 .placdId(place)
                 .modDate(LocalDateTime.now())
                 .build();
         exhibitionRepository.save(exhibitionEntity);
 
 
+    }
 
-
-
-        }
     // 전시회 삭제
     @Override
     public void deleteEx(String accessToken, Long exId) {
@@ -311,11 +291,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         ExhibitionEntity exhibition = new ExhibitionEntity();
 
 
-
         if (authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-
 
 
             exhibition = exhibitionRepository.findByExId(exId).orElseThrow(NotFoundExhibition::new);
@@ -333,31 +311,53 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         }
 
 
-
-
-
     }
 
 
     // 전시회 리스트
     @Override
-    public List<ExListDto> exList(Pageable pageable, String sort) {
+    public List<ExListDto> exList(Date date, int page, int size) {
 
 
 //
 
-        Sort.Direction direction = Sort.Direction.DESC;
-        String sortBy = sort.equals("id") ? "exId" : sort.equals("likes") ? "likeCnt" : null;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "exId"));
+        Page<ExhibitionEntity> exPage = exhibitionRepository.findByStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(ExStatus.ACTIVE, date, date, pageable);
 
-        if (sortBy != null) {
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(direction, sortBy));
+
+        List<ExhibitionEntity> exEntities = exPage.getContent();
+        List<List<String>> imageUrls = new ArrayList<>();
+        List<String> memberImageUrl = new ArrayList<>();
+
+        for (ExhibitionEntity exEntity : exEntities) {
+            List<String> url = new ArrayList<>();
+            List<ImageEntity> images = imageRepository.findByExId(exEntity);
+            for (ImageEntity image : images) {
+                url.add(image.getFileName());
+            }
+            imageUrls.add(url);
+
+
+            MemberEntity memberEntity = exEntity.getMemberId();
+            if (memberEntity != null) {
+                List<ImageEntity> memberImages = imageRepository.findByMemberId(memberEntity);
+                if (!memberImages.isEmpty()) {
+                    // 여러 이미지 중 첫 번째 이미지를 사용
+                    memberImageUrl.add(memberImages.get(0).getFileName());
+                } else {
+                    memberImageUrl.add(""); // 이미지가 없을 경우 빈 문자열 추가
+                }
+            } else {
+                memberImageUrl.add(""); // 회원 정보가 없을 경우 빈 문자열 추가
+            }
         }
 
-        List<ExhibitionEntity> exhibitions = exhibitionRepository.findAll(pageable).getContent();
-        return ExListDto.ListOf(exhibitions);
-    }
+
+        return ExListDto.listOf(exEntities, imageUrls, memberImageUrl);
 
     }
+
+}
 
 
 

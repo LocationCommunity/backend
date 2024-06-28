@@ -37,6 +37,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -327,7 +328,7 @@ public class ManagementServiceImpl implements ManagementService {
 
     return MemberDto.of(member);
   }
-
+  @Transactional
   @Override
   public MemberDto update(String accessToken, UpdateRequest updateRequest, MultipartFile file) {
 
@@ -349,10 +350,12 @@ public class ManagementServiceImpl implements ManagementService {
       imageUrl = null;
     } else {
       String uuid = UUID.randomUUID().toString();
+
 //      String projectPath =
 //          System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
       String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
       String fileName = uuid + "_" + file.getOriginalFilename();
+
 
       // 파일 이름에서 확장자 추출
       String fileExtension = StringUtils.getFilenameExtension(fileName);
@@ -390,6 +393,12 @@ public class ManagementServiceImpl implements ManagementService {
         .introduction(updateRequest.getIntroduction())
         .build();
     memberRepository.save(updateMember);
+
+    List<BoardEntity> boards = boardRepository.findByMemberId(member);
+    for (BoardEntity board : boards) {
+      board.setNickname(updateRequest.getNickname());
+    }
+    boardRepository.saveAll(boards);
 
     return MemberDto.of(updateMember);
   }

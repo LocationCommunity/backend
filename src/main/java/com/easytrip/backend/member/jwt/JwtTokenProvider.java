@@ -168,4 +168,24 @@ public class JwtTokenProvider {
     return Platform.valueOf(platformString);
   }
 
+
+
+
+    public Long getUserId(String token) {
+      try {
+        Claims claims = Jwts.parser()
+                .setSigningKey(key)
+                .parseClaimsJws(token)
+                .getBody();
+
+        // Assuming you store memberId in claims as a Long
+        return claims.get("memberId", Long.class);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Invalid token", e);
+      }
+    }
+
+
+
+
 }

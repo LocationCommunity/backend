@@ -1,11 +1,9 @@
 package com.easytrip.backend.board.service;
 
-import com.easytrip.backend.board.domain.BoardEntity;
+
 import com.easytrip.backend.board.dto.*;
 
 import com.easytrip.backend.type.SearchOption;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

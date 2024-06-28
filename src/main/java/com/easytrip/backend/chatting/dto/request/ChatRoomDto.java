@@ -1,6 +1,5 @@
 package com.easytrip.backend.chatting.dto.request;
 
-import com.easytrip.backend.chatting.entity.ChatMessage;
 import com.easytrip.backend.chatting.entity.ChatRoom;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.MemberDto;
@@ -34,6 +33,7 @@ public class ChatRoomDto {
     }
 
     @Getter
+    @Setter
     @AllArgsConstructor
     @Builder
     public static class Response {
@@ -43,6 +43,10 @@ public class ChatRoomDto {
         private MemberDto.Response matchedMember1;
 
         private MemberDto.Response matchedMember2;
+
+        private int unread;
+
+        private String lastMessage;
 
         public static Response of(ChatRoom chatRoom) {
             MemberDto.Response matchedMember1 = null, matchedMember2 = null;
@@ -57,6 +61,7 @@ public class ChatRoomDto {
                     .id(chatRoom.getId())
                     .matchedMember1(matchedMember1)
                     .matchedMember2(matchedMember2)
+                    .unread(chatRoom.getUnread())
                     .build();
 
 
@@ -65,6 +70,7 @@ public class ChatRoomDto {
 
         @Builder
         @Getter
+        @Setter
         @AllArgsConstructor
         public static class Detail {
 
@@ -73,6 +79,7 @@ public class ChatRoomDto {
             private MemberDto.Response matchedMember2;
             private MemberDto.Response nickname;
             private List<ChatMessageDto.Response> messages;
+            private int unread;
 
             public static Detail of(ChatRoom chatRoom) {
 
@@ -81,6 +88,7 @@ public class ChatRoomDto {
                         .matchedMember1(MemberDto.Response.of(chatRoom.getMatchedMember1()))
                         .matchedMember2(MemberDto.Response.of(chatRoom.getMatchedMember2()))
                         .messages(chatRoom.getChatMessageList().stream().map(ChatMessageDto.Response::of).collect(Collectors.toList()))
+                        .unread(chatRoom.getUnread())
                         .build();
             }
         }

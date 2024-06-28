@@ -7,7 +7,9 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -39,6 +41,13 @@ public class ChatMessage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private ChatRoom chatRoom;
+
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL)
+    private List<MessageReadStatus> readStatuses = new ArrayList<>();
+
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int unread;
+
 
 
 

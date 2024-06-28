@@ -50,22 +50,22 @@ public class ChatRoomController {
 
     //채팅방 디테일
     @GetMapping("/chat/room/{roomId}")
-    public ResponseEntity<BasicResponse> getChatRoomDetail(HttpServletRequest request, @PathVariable(value = "roomId") Long roomId) {
+    public ResponseEntity<BasicResponse> getChatRoomDetail(HttpServletRequest request, @PathVariable(value = "roomId") Long roomId, int page, int size) {
 
         String accessToken = jwtTokenProvider.resolveToken(request);
-        return ResponseEntity.ok(new Result<>(chatRoomService.getRoomDetail(accessToken, roomId)));
+        return ResponseEntity.ok(new Result<>(chatRoomService.getRoomDetail(accessToken, roomId, page, size)));
 
 
     }
 
 
 
-
-
-
-
-
-
+    @PostMapping("/chat/room/{messageId}/read")
+    public ResponseEntity<?> markMessageAsRead(HttpServletRequest request, @PathVariable Long messageId) {
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        chatRoomService.markMessageAsRead(accessToken, messageId);
+        return ResponseEntity.ok().build();
+    }
 
 
 
