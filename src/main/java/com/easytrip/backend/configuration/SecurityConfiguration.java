@@ -27,16 +27,13 @@ public class SecurityConfiguration {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             requests -> requests
-
                 .requestMatchers( "/members/sign-up", "/members/auth", "/members/login/**",
                     "/members/password", "/weather/**", "/chat/**", "/home/**", "/stomp/**","/boards/lists", "/api/**", "/images/**" ).permitAll()
-
                 .requestMatchers("/members/logout", "/members/my-info", "/members/withdrawal",
                     "/members/reissue", "/members/bookmark", "/members/interest",
                     "/boards/**", "/matching/**", "/place/**").hasRole("USER")
                 .requestMatchers(HttpMethod.GET, "/exhibitions/**").hasRole("USER")
                 .requestMatchers("/admin/**", "/exhibitions/**").hasRole("ADMIN"))
-
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class).build();

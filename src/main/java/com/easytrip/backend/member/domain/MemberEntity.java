@@ -50,4 +50,5 @@ public class MemberEntity {
   private LocalDateTime passwordDate;
   private LocalDateTime regDate;
   private LocalDateTime modDate;
+  private String snsToken;
 }

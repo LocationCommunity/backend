@@ -1,6 +1,5 @@
 package com.easytrip.backend.member.service;
 
-import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
@@ -30,6 +29,10 @@ public interface MemberService {
   void logout(String accessToken);
 
   void withdrawal(String accessToken);
+
+  void naverWithdrawal(String accessToken);
+
+  void kakaoWithdrawal(String accessToken);
 
   void resetPassword(ResetRequest resetRequest, Platform platform);
 

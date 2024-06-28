@@ -1,19 +1,21 @@
 package com.easytrip.backend.member.service.sns.impl;
 
 import com.easytrip.backend.configuration.NaverConfiguration;
-import com.easytrip.backend.exception.impl.NotFoundPlaceException;
+import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.NaverMemberDto;
 import com.easytrip.backend.member.dto.NaverTokenDto;
+import com.easytrip.backend.member.jwt.JwtTokenProvider;
+import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.member.service.sns.OAuth2LoginService;
-import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.Platform;
-import java.lang.reflect.Member;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -24,6 +26,8 @@ public class NaverLoginServiceImpl implements OAuth2LoginService {
 
   private final RestTemplate restTemplate = new RestTemplate();
   private final NaverConfiguration naverConfiguration;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final MemberRepository memberRepository;
 
   @Override
   public MemberEntity toEntityUser(String code, Platform platForm) {
@@ -37,7 +41,21 @@ public class NaverLoginServiceImpl implements OAuth2LoginService {
         .name(profile.getName())
         .nickname(profile.getNickname())
         .imageUrl(profile.getImageUrl())
+        .snsToken(accessToken)
         .build();
+  }
+
+  @Override
+  public void withdrawl(String accessToken) {
+
+    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+    String email = authentication.getName();
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
+        .orElseThrow(() -> new NotFoundMemberException());
+
+    restTemplate.exchange(naverConfiguration.getWithdrawURL(member.getSnsToken()), HttpMethod.GET, null, String.class);
   }
 
   private String toRequestAccessToken(String code) {

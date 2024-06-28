@@ -30,11 +30,15 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -50,6 +54,7 @@ public class ManagementServiceImpl implements ManagementService {
   private final ImageRepository imageRepository;
   private final BoardRepository boardRepository;
   private final InterestRepository interestRepository;
+  private final RestTemplate restTemplate = new RestTemplate();
 
   @Override
   public void signUp(SignUpRequest signUpRequest, MultipartFile file, Platform platForm) {
@@ -87,8 +92,9 @@ public class ManagementServiceImpl implements ManagementService {
       member = memberRepository.save(SignUpRequest.signUpInput(member, signUpRequest, null));
     } else {
       String uuid = UUID.randomUUID().toString();
-      String projectPath =
-          System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
+//      String projectPath =
+//          System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
+      String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
       String fileName = uuid + "_" + file.getOriginalFilename();
 
       // 파일 이름에서 확장자 추출
@@ -213,6 +219,23 @@ public class ManagementServiceImpl implements ManagementService {
     long accessTokenExpiresIn = expiration - now;
     redisTemplate.opsForValue()
         .set(accessToken, "logout", accessTokenExpiresIn, TimeUnit.MILLISECONDS);
+
+    // 카카오 로그인 일 때
+    if (platform == Platform.KAKAO) {
+      String email = authentication.getName();
+
+      MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
+          .orElseThrow(() -> new NotFoundMemberException());
+      String snsToken = member.getSnsToken();
+
+      // kakao logout API 호출
+      String kakaoLogoutUrl = "https://kapi.kakao.com/v1/user/logout";
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("Authorization", "Bearer " + snsToken);
+      HttpEntity<String> entity = new HttpEntity<>(headers);
+
+      restTemplate.exchange(kakaoLogoutUrl, HttpMethod.POST, entity, String.class);
+    }
   }
 
   @Override
@@ -326,8 +349,9 @@ public class ManagementServiceImpl implements ManagementService {
       imageUrl = null;
     } else {
       String uuid = UUID.randomUUID().toString();
-      String projectPath =
-          System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
+//      String projectPath =
+//          System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\members";
+      String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
       String fileName = uuid + "_" + file.getOriginalFilename();
 
       // 파일 이름에서 확장자 추출
@@ -567,8 +591,8 @@ public class ManagementServiceImpl implements ManagementService {
   }
 
   private TokenCreateDto snsLogin(MemberEntity snsMember, Platform platForm) {
-    Optional<MemberEntity> byEmail = memberRepository.findByEmailAndPlatform(snsMember.getEmail(),
-        platForm);
+    Optional<MemberEntity> byEmail = memberRepository.findByEmailAndPlatform(snsMember.getEmail(), platForm);
+
     // 기존에 가입한 회원
     if (byEmail.isPresent()) {
       MemberEntity member = byEmail.get();
@@ -576,18 +600,22 @@ public class ManagementServiceImpl implements ManagementService {
       if (member.getStatus().equals(MemberStatus.SUSPENDED)) {
         throw new SuspendedMemberException();
       } else if (member.getStatus().equals(MemberStatus.WITHDRAWN)) {
-        MemberEntity memberEntity = member.toBuilder()
+        member = member.toBuilder()
+            .imageUrl(snsMember.getImageUrl())
             .status(MemberStatus.ACTIVE)
             .regDate(LocalDateTime.now())
             .build();
-        memberRepository.save(memberEntity);
       }
 
-      TokenCreateDto result = TokenCreateDto.builder()
+      member = member.toBuilder()
+          .snsToken(snsMember.getSnsToken())
+          .build();
+      memberRepository.save(member);
+
+      return TokenCreateDto.builder()
           .email(member.getEmail())
           .adminYn(member.getAdminYn())
           .build();
-      return result;
     } else {
       // 새로운 회원(sns로 회원가입과 동시에 로그인)
       MemberEntity newMember = snsMember.toBuilder()
@@ -595,14 +623,14 @@ public class ManagementServiceImpl implements ManagementService {
           .adminYn(false)
           .status(MemberStatus.ACTIVE)
           .regDate(LocalDateTime.now())
+          .snsToken(snsMember.getSnsToken())
           .build();
       memberRepository.save(newMember);
 
-      TokenCreateDto result = TokenCreateDto.builder()
+      return TokenCreateDto.builder()
           .email(newMember.getEmail())
           .adminYn(newMember.getAdminYn())
           .build();
-      return result;
     }
   }
 

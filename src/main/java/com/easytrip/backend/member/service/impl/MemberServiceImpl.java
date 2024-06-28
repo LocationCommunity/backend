@@ -20,7 +20,6 @@ import com.easytrip.backend.type.Platform;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -78,6 +77,18 @@ public class MemberServiceImpl implements MemberService {
 
   @Override
   public void withdrawal(String accessToken) {
+    managementService.withdrawal(accessToken);
+  }
+
+  @Override
+  public void naverWithdrawal(String accessToken) {
+    naverLoginService.withdrawl(accessToken);
+    managementService.withdrawal(accessToken);
+  }
+
+  @Override
+  public void kakaoWithdrawal(String accessToken) {
+    kakaoLoginService.withdrawl(accessToken);
     managementService.withdrawal(accessToken);
   }
 

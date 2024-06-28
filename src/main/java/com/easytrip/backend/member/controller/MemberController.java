@@ -14,6 +14,7 @@ import com.easytrip.backend.member.dto.request.UpdateRequest;
 import com.easytrip.backend.member.jwt.JwtTokenProvider;
 import com.easytrip.backend.member.service.MemberService;
 import com.easytrip.backend.type.Interest;
+import com.easytrip.backend.type.Platform;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -64,6 +65,7 @@ public class MemberController {
     cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
     // 쿠키를 전송할 도메인 설정 (예: localhost:3000)
     cookie.setDomain("localhost");
+//    cookie.setDomain("192.168.219.187");
     // 쿠키의 유효 시간 설정 (초 단위, 예: 1시간)
     cookie.setMaxAge(3600);
     // 쿠키를 HTTPS 프로토콜로만 전송되도록 설정 (보안을 강화)
@@ -137,9 +139,25 @@ public class MemberController {
   }
 
   @DeleteMapping("/withdrawal")
-  public void withdrawal(HttpServletRequest request) {
+  public void withdrawal(HttpServletRequest request, HttpServletResponse response) {
+    Cookie cookie = new Cookie("accessToken", null);
+    cookie.setHttpOnly(false);
+    cookie.setDomain("localhost");
+    cookie.setMaxAge(0);
+    cookie.setPath("/");
+    response.addCookie(cookie);
     String accessToken = jwtTokenProvider.resolveToken(request);
-    memberService.withdrawal(accessToken);
+    Platform platform = jwtTokenProvider.getPlatform(accessToken);
+
+    if (platform == LOCAL) {
+      memberService.withdrawal(accessToken);
+    } else if (platform == NAVER) {
+      // 네이버 가입 회원일 경우
+      memberService.naverWithdrawal(accessToken);
+    } else {
+      // 카카오 가입 회원일 경우
+      memberService.kakaoWithdrawal(accessToken);
+    }
   }
 
   @PutMapping("/password")

@@ -6,4 +6,6 @@ import com.easytrip.backend.type.Platform;
 public interface OAuth2LoginService {
 
   MemberEntity toEntityUser(String code, Platform platForm);
+
+  void withdrawl(String accessToken);
 }

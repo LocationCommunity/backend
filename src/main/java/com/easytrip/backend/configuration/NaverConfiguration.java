@@ -10,8 +10,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "naver")
-
-
 public class NaverConfiguration {
 
   private String requestTokenUrl;
@@ -24,6 +22,15 @@ public class NaverConfiguration {
         .queryParam("client_id", clientId)
         .queryParam("client_secret", clientSecret)
         .queryParam("code", code)
+        .toUriString();
+  }
+
+  public String getWithdrawURL(String token) {
+    return UriComponentsBuilder.fromHttpUrl(requestTokenUrl)
+        .queryParam("grant_type", "delete")
+        .queryParam("client_id", clientId)
+        .queryParam("client_secret", clientSecret)
+        .queryParam("access_token", token)
         .toUriString();
   }
 }

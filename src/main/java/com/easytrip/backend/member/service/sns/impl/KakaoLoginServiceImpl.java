@@ -1,9 +1,12 @@
 package com.easytrip.backend.member.service.sns.impl;
 
 import com.easytrip.backend.configuration.KakaoConfiguration;
+import com.easytrip.backend.exception.impl.NotFoundMemberException;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.KakaoMemberDto;
 import com.easytrip.backend.member.dto.KakaoTokenDto;
+import com.easytrip.backend.member.jwt.JwtTokenProvider;
+import com.easytrip.backend.member.repository.MemberRepository;
 import com.easytrip.backend.member.service.sns.OAuth2LoginService;
 import com.easytrip.backend.type.Platform;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,6 +25,8 @@ public class KakaoLoginServiceImpl implements OAuth2LoginService {
 
   private final RestTemplate restTemplate = new RestTemplate();
   private final KakaoConfiguration kakaoConfiguration;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final MemberRepository memberRepository;
 
   @Override
   public MemberEntity toEntityUser(String code, Platform platForm) {
@@ -35,7 +41,26 @@ public class KakaoLoginServiceImpl implements OAuth2LoginService {
         .name(profile.getKakaoAccount().getProfile().getNickname())
         .nickname(profile.getKakaoAccount().getProfile().getNickname())
         .imageUrl(profile.getKakaoAccount().getProfile().getProfileImageUrl())
+        .snsToken(accessToken)
         .build();
+  }
+
+  @Override
+  public void withdrawl(String accessToken) {
+    Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+    String email = authentication.getName();
+
+    MemberEntity member = memberRepository.findByEmailAndPlatform(email, Platform.KAKAO)
+        .orElseThrow(() -> new NotFoundMemberException());
+    String snsToken = member.getSnsToken();
+
+    // kakao 연결 끊기 API 호출
+    String kakaoLogoutUrl = "https://kapi.kakao.com/v1/user/unlink";
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "Bearer " + snsToken);
+    HttpEntity<String> entity = new HttpEntity<>(headers);
+
+    restTemplate.exchange(kakaoLogoutUrl, HttpMethod.POST, entity, String.class);
   }
 
   private String toRequestAccessToken(String code) {
