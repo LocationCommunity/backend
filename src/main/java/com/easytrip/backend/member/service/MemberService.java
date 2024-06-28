@@ -48,5 +48,4 @@ public interface MemberService {
   void setInterest(String accessToken, List<Interest> interestList);
 
   void changeInterest(String accessToken, List<Interest> interestList);
-
 }

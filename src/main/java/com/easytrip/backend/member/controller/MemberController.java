@@ -3,9 +3,7 @@ package com.easytrip.backend.member.controller;
 import static com.easytrip.backend.type.Platform.KAKAO;
 import static com.easytrip.backend.type.Platform.LOCAL;
 import static com.easytrip.backend.type.Platform.NAVER;
-
 import com.easytrip.backend.exception.impl.InterestValidationException;
-import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.member.dto.BookmarkDto;
 import com.easytrip.backend.member.dto.MemberDto;
 import com.easytrip.backend.member.dto.TokenDto;
@@ -61,9 +59,6 @@ public class MemberController {
   public ResponseEntity<TokenDto> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
     TokenDto tokenDto = memberService.login(loginRequest, LOCAL);
 
-
-
-
     // 토큰을 쿠키에 담아서 클라이언트에게 전달
     Cookie cookie = new Cookie("accessToken", tokenDto.getAccessToken());
     cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
@@ -77,9 +72,7 @@ public class MemberController {
     cookie.setPath("/");
     // 응답 헤더에 쿠키 추가
     response.addCookie(cookie);
-
     log.info("cookie :" + cookie);
-
 
     return ResponseEntity.ok(tokenDto);
   }
@@ -87,6 +80,7 @@ public class MemberController {
   @GetMapping("/login/naver")
   public ResponseEntity<TokenDto> naverLogin(@RequestParam(value = "code") String code, HttpServletResponse responser) {
     TokenDto response = memberService.naverLogin(code, NAVER);
+
     // 토큰을 쿠키에 담아서 클라이언트에게 전달
     Cookie cookie = new Cookie("accessToken", response.getAccessToken());
     cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
@@ -100,8 +94,8 @@ public class MemberController {
     cookie.setPath("/");
     // 응답 헤더에 쿠키 추가
     responser.addCookie(cookie);
-
     log.info("cookie :" + cookie);
+
     return ResponseEntity.ok(response);
   }
 
@@ -113,7 +107,7 @@ public class MemberController {
     Cookie cookie = new Cookie("accessToken", response.getAccessToken());
     cookie.setHttpOnly(false); // 클라이언트에서 쿠키에 접근하지 못하도록 설정
     // 쿠키를 전송할 도메인 설정 (예: localhost:3000)
-    cookie.setDomain("192.168.0.4");
+    cookie.setDomain("localhost");
     // 쿠키의 유효 시간 설정 (초 단위, 예: 1시간)
     cookie.setMaxAge(3600);
     // 쿠키를 HTTPS 프로토콜로만 전송되도록 설정 (보안을 강화)
@@ -124,12 +118,13 @@ public class MemberController {
     responser.addCookie(cookie);
 
     log.info("cookie :" + cookie);
+    
     return ResponseEntity.ok(response);
   }
+
   @CrossOrigin
   @PostMapping("/logout")
   public void logout(HttpServletRequest request, HttpServletResponse response) {
-
     Cookie cookie = new Cookie("accessToken", null);
     cookie.setHttpOnly(false);
     cookie.setDomain("localhost");
@@ -140,7 +135,6 @@ public class MemberController {
     memberService.logout(accessToken);
     log.info(accessToken);
     log.info("로그아웃 성공");
-
   }
 
   @DeleteMapping("/withdrawal")

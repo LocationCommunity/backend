@@ -26,8 +26,7 @@ public class TokenServiceImpl implements TokenService {
   public TokenDto create(String email, Boolean adminYn, Platform platform) {
 
     MemberEntity member = memberRepository.findByEmailAndPlatform(email, platform)
-
-            .orElseThrow(() -> new NotFoundMemberException());
+        .orElseThrow(() -> new NotFoundMemberException());
 
     String nickname = member.getNickname();
     Long memberId = member.getMemberId();
