@@ -35,18 +35,19 @@ public class BoardListDto {
     private Integer likeCnt;
     private Integer viewCnt;
     private List<String> boardImage;
+    private String memberImage;
 
 
     //entity to dto
 
-    public static List<BoardListDto> listOf(List<BoardEntity> boardEntities, List<List< String >> imageUrls) {
+    public static List<BoardListDto> listOf(List<BoardEntity> boardEntities, List<List< String >> imageUrls, List<String> memberImage) {
 
 //        return boardEntities.stream()
 //                .map(BoardListDto::of)
 //                .collect(Collectors.toList());
 
         return IntStream.range(0, boardEntities.size())
-                .mapToObj(i -> of(boardEntities.get(i), imageUrls.get(i)))
+                .mapToObj(i -> of(boardEntities.get(i), imageUrls.get(i), memberImage.get(i)))
                 .collect(Collectors.toList());
 
 
@@ -54,7 +55,7 @@ public class BoardListDto {
     }
 
 
-    public static BoardListDto of(BoardEntity boardEntity, List<String>  imageUrl) {
+    public static BoardListDto of(BoardEntity boardEntity, List<String>  imageUrl, String memberImage) {
 
         return BoardListDto.builder()
                 .boardId(boardEntity.getBoardId())
@@ -65,6 +66,7 @@ public class BoardListDto {
                 .createDate(boardEntity.getCreateDate())
                 .likeCnt(boardEntity.getLikeCnt())
                 .viewCnt(boardEntity.getViewCnt())
+                .memberImage(memberImage)
                 .boardImage(imageUrl)
                 .build();
 

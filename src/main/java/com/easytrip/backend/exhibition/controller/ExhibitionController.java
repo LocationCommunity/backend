@@ -10,10 +10,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -79,11 +81,11 @@ public class ExhibitionController {
 
     // 전시회 리스트
     @GetMapping("/lists")
-    public List<ExListDto> exList(
-            @PageableDefault(page = 0, size = 5) Pageable pageable,
-            @RequestParam (value = "sort", required = false) String sort) {
+    public List<ExListDto> exList(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+            @RequestParam int page,
+            @RequestParam int size) {
 
-        return exhibitionService.exList(pageable, sort);
+        return exhibitionService.exList(date, page, size);
 
 
 

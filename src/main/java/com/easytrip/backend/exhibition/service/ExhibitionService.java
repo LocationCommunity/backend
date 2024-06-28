@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -31,7 +32,7 @@ public interface ExhibitionService {
     void deleteEx(String accessToken, Long exId);
 
     //전시회 리스트
-    List<ExListDto> exList(Pageable pageable, String sort);
+    List<ExListDto> exList(Date date, int page, int size);
 
 
 

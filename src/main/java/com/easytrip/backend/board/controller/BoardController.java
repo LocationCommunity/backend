@@ -48,9 +48,9 @@ public class BoardController {
     @PutMapping("/{boardId}")
     public void updatePost(HttpServletRequest request,
                            @PathVariable("boardId") Long boardId,
-                           @RequestPart(value = "placeId", required = false) Long placeId,
-                           @RequestPart(value = ("boardRequestDto")) BoardRequestDto boardRequestDto,
-                           @RequestPart(value = ("files"), required = false) List<MultipartFile> files) throws Exception {
+                           @RequestParam(value = "placeId", required = false) Long placeId,
+                           @ModelAttribute BoardRequestDto boardRequestDto,
+                           @RequestParam(value = ("files"), required = false) List<MultipartFile> files) throws Exception {
 
        String accessToken = jwtTokenProvider.resolveToken(request);
 

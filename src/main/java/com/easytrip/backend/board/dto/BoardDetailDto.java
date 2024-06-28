@@ -23,6 +23,8 @@ public class BoardDetailDto {
 
     private LocalDateTime createDate;
 
+    private String visitDate;
+
     private Long placeId;
 
     private String placeName;
