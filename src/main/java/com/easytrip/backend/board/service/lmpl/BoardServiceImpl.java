@@ -197,7 +197,6 @@ public class BoardServiceImpl implements BoardService {
     return BoardListDto.listOf(boardEntities, imageUrls, memberImageUrl);
   }
 
-
   @Override
   public BoardDetailDto getDetail(Long boardId, String accessToken) {
 
@@ -216,33 +215,9 @@ public class BoardServiceImpl implements BoardService {
       imageUrls.add(image.getFileName());
     }
 
-    // 조회수
-    Integer viewCnt = board.getViewCnt();
-
-    viewCnt++;
-
-    board.setViewCnt(viewCnt);
-
     boardRepository.save(board);
 
-    BoardDetailDto boardDetailDto = BoardDetailDto.builder()
-
-        .title(board.getTitle())
-        .content(board.getContent())
-        .images(imageUrls)
-        .nickname(board.getNickname())
-        .placeId(board.getPlaceId().getPlaceId())
-        .placeName(place.getPlaceName())
-        .placeLink("http://localhost:8080/place/info/" + place.getPlaceId())
-        .visitDate(board.getVisitDate())
-        .x(place.getX())
-        .y(place.getY())
-        .viewCnt(board.getViewCnt())
-        .address(place.getAddress())
-        .likeCnt(board.getLikeCnt())
-        .build();
-
-    return boardDetailDto;
+    return BoardDetailDto.getDetail(board, place, imageUrls);
   }
 
   //나의 게시물
