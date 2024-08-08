@@ -261,7 +261,6 @@ public class BoardServiceImpl implements BoardService {
     return BoardListDto.listOf(boards, imageUrls, memberImageUrl);
   }
 
-  // 게시물 좋아요
   @Override
   @Transactional
   public void likes(Long boardId, String accessToken) {
