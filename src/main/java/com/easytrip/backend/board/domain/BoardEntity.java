@@ -28,13 +28,11 @@ public class BoardEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long boardId;
 
-
     private String title;
 
     private String nickname;
 
     private String content;
-
 
     @ManyToOne
     @JoinColumn(name = "memberId")
@@ -44,8 +42,8 @@ public class BoardEntity {
     @JoinColumn(name = "placeId")
     private PlaceEntity placeId;
 
-
     private Integer likeCnt;
+
     private Integer viewCnt;
 
     private LocalDateTime createDate;
@@ -54,19 +52,10 @@ public class BoardEntity {
 
     private LocalDateTime deleteDate;
 
-
     private String visitDate;
-
 
     @Enumerated(EnumType.STRING)
     private BoardStatus status;
-
-
-
-
-
-
-
 }
 
 
