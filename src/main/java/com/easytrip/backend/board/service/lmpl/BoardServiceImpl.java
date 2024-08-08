@@ -57,9 +57,7 @@ public class BoardServiceImpl implements BoardService {
   public void writePost(String accessToken, BoardRequestDto boardRequestDto,
       List<MultipartFile> files, Long placeId) throws Exception {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
@@ -94,95 +92,35 @@ public class BoardServiceImpl implements BoardService {
         .build();
     boardRepository.save(board);
 
-    for (MultipartFile file : files) {
-
-      String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
-
-      UUID uuid = UUID.randomUUID();
-
-      String fileName = uuid + "_" + file.getOriginalFilename();
-
-      String fileExtension = StringUtils.getFilenameExtension(fileName);
-
-      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
-      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
-
-        File saveFile = new File(projectPath, fileName);
-
-        file.transferTo(saveFile);
-
-      } else {
-
-        throw new UnsupportedImageTypeException();
-      }
-
-      ImageEntity image = ImageEntity.builder()
-          .fileName(fileName)
-          .filePath("/boards/" + fileName)
-          .boardId(board)
-          .useType(UseType.BOARD)
-          .build();
-
-      imageRepository.save(image);
-    }
+    handleFileUpload(files, board);
   }
 
-  // 게시물 수정
   @Transactional
   @Override
   public void updatePost(String accessToken, Long boardId, Long placeId,
       BoardRequestDto boardRequestDto, List<MultipartFile> files) {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    MemberEntity member = new MemberEntity();
-    BoardEntity board = new BoardEntity();
-    ImageEntity image = new ImageEntity();
-
-    String email = null;
-
-    // naver , kakao
     Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
     String platformString = claimsFromToken.get("platform", String.class);
     Platform platform = Platform.valueOf(platformString);
 
-    if (authentication.getAuthorities().stream()
-        .map(GrantedAuthority::getAuthority)
-        .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-      // admin
+    MemberEntity member = getAuthenticatedMember(authentication, platform, boardId);
+    BoardEntity board = boardRepository.findByBoardId(boardId)
+            .orElseThrow(NotFoundPostException::new);
 
-      board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
-      Long memberId = board.getMemberId().getMemberId();
-      member = memberRepository.findByMemberId(memberId)
-          .orElseThrow(NotFoundMemberException::new);
-
-
-    } else {
-      // member
-      email = authentication.getName();
-      member = memberRepository.findByEmailAndPlatform(email, platform)
-          .orElseThrow(NotFoundMemberException::new);
-
-      // post exist
-      board = boardRepository.findByBoardId(boardId)
-          .orElseThrow(NotFoundPostException::new);
-    }
-
-//        have benn deleted post
     if (board.getStatus().equals(BoardStatus.INACTIVE)) {
       throw new DeletePostException();
     }
 
-    // ??boardId
     board = boardRepository.findByBoardIdAndMemberId(boardId, member)
         .orElseThrow(NotMyPostException::new);
 
     PlaceEntity place = placeRepository.findByPlaceId(placeId)
         .orElseThrow(SelectPlaceException::new);
+
     BoardEntity boardEntity = board.toBuilder()
         .title(boardRequestDto.getTitle())
         .content(boardRequestDto.getContent())
@@ -191,71 +129,7 @@ public class BoardServiceImpl implements BoardService {
         .build();
     boardRepository.save(boardEntity);
 
-    if (!files.isEmpty() || files != null) {
-      // 기존의 이미지를 삭제하고 새로운 이미지로 대체
-      List<ImageEntity> images = imageRepository.findAllByBoardId(board);
-      imageRepository.deleteAll(images);
-    }
-
-    for (MultipartFile file : files) {
-
-      // 저장 경로 설정 ~/boards
-//            String projectPath =
-//                System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
-      String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
-      UUID uuid = UUID.randomUUID();
-
-      // 랜덤식별자_원래이름
-      String fileName = uuid + "_" + file.getOriginalFilename();
-
-      // 파일 이름에서 확장자 추출
-      String fileExtension = StringUtils.getFilenameExtension(fileName);
-
-      // 지원하는 이미지 파일 확장자 목록
-      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
-      // 확장자가 이미지 파일인지 확인
-      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
-
-        // 빈 껍데기 생성
-        File saveFile = new File(projectPath, fileName);
-
-        // transferTo --> Exception 필요
-        try {
-          file.transferTo(saveFile);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-
-      } else {
-        // 이미지 파일이 아닌 경우에 대한 처리
-        throw new UnsupportedImageTypeException();
-      }
-
-      // 이미지 저장 Board
-      ImageEntity imageEntity = image.toBuilder()
-          .fileName(fileName)
-          .filePath("/boards/" + fileName)
-          .boardId(board)
-          .useType(UseType.BOARD)
-          .build();
-
-      imageRepository.save(imageEntity);
-    }
-
-    //로그처리
-//        if (authentication.getAuthorities().stream()
-//                .map(GrantedAuthority::getAuthority)
-//                .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-//            log.info(
-//                    "post update admin: {}, postId: {}, post content - title: {}, content: {}",
-//                    email, boardId, boardRequestDto.getTitle(), boardRequestDto.getContent());
-//        } else {
-//            log.info(
-//                    "post update user: {}, postId: {}, post content - title: {}, content: {}",
-//                    email, boardId, boardRequestDto.getTitle(), boardRequestDto.getContent());
-//        }
-
+    handleFileUpload(files, board);
   }
 
   // 게시글 삭제 ( INACTIVE )
@@ -585,5 +459,93 @@ public class BoardServiceImpl implements BoardService {
     }
 
     return BoardListDto.listOf(boards, imageUrls, memberImageUrl);
+  }
+
+  private void validateAccessToken(String accessToken) {
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+  }
+
+  private MemberEntity getAuthenticatedMember(Authentication authentication, Platform platform, Long boardId) {
+    if (isAdmin(authentication)) {
+      return getMemberByBoardId(boardId);
+    } else {
+      String email = authentication.getName();
+      return memberRepository.findByEmailAndPlatform(email, platform)
+              .orElseThrow(NotFoundMemberException::new);
+    }
+  }
+
+  private boolean isAdmin(Authentication authentication) {
+    return authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(role -> role.equals("ROLE_ADMIN"));
+  }
+
+  private MemberEntity getMemberByBoardId(Long boardId) {
+    BoardEntity board = boardRepository.findByBoardIdWithMember(boardId)
+            .orElseThrow(NotFoundPostException::new);
+
+    return board.getMemberId();
+  }
+
+  private void handleFileUpload(List<MultipartFile> files, BoardEntity board) {
+    if (files == null || files.isEmpty()) {
+      return;
+    }
+
+    deleteExistingImages(board);
+
+    for (MultipartFile file : files) {
+      validateAndSaveFile(file, board);
+    }
+  }
+
+  private void deleteExistingImages(BoardEntity board) {
+    List<ImageEntity> images = imageRepository.findAllByBoardId(board);
+    imageRepository.deleteAll(images);
+  }
+
+  private void validateAndSaveFile(MultipartFile file, BoardEntity board) {
+    String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
+    String fileName = generateFileName(file);
+
+    if (isValidImageExtension(fileName)) {
+      saveFile(file, projectPath, fileName);
+      saveImageEntity(fileName, board);
+    } else {
+      throw new UnsupportedImageTypeException();
+    }
+  }
+
+  private String generateFileName(MultipartFile file) {
+    UUID uuid = UUID.randomUUID();
+    return uuid + "_" + file.getOriginalFilename();
+  }
+
+  private boolean isValidImageExtension(String fileName) {
+    String fileExtension = StringUtils.getFilenameExtension(fileName);
+    List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+    return fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase());
+  }
+
+  private void saveFile(MultipartFile file, String projectPath, String fileName) {
+    File saveFile = new File(projectPath, fileName);
+    try {
+      file.transferTo(saveFile);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void saveImageEntity(String fileName, BoardEntity board) {
+    ImageEntity imageEntity = ImageEntity.builder()
+            .fileName(fileName)
+            .filePath("/boards/" + fileName)
+            .boardId(board)
+            .useType(UseType.BOARD)
+            .build();
+    imageRepository.save(imageEntity);
   }
 }
