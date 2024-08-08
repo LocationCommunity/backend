@@ -3,12 +3,12 @@ package com.easytrip.backend.board.dto;
 
 import lombok.*;
 
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Builder
 public class BoardPlaceDto {
-
 
     private String placeName;
 
@@ -19,6 +19,4 @@ public class BoardPlaceDto {
     private Double y;
 
     private String placeLink;
-
-
 }
