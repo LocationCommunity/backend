@@ -132,60 +132,35 @@ public class BoardServiceImpl implements BoardService {
     handleFileUpload(files, board);
   }
 
-  // 게시글 삭제 ( INACTIVE )
   @Override
   public void deletePost(String accessToken, Long boardId) {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
 
-    MemberEntity member = new MemberEntity();
-    BoardEntity board = new BoardEntity();
-    String email = null;
+    MemberEntity member = getAuthenticatedMember(authentication, platform, boardId);
+    BoardEntity board = boardRepository.findByBoardId(boardId)
+            .orElseThrow(NotFoundPostException::new);
 
-    if (authentication.getAuthorities().stream()
-        .map(GrantedAuthority::getAuthority)
-        .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-
-      //admin
-      email = authentication.getName();
-      board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
-
-    } else {
-
-      //member
-      email = authentication.getName();
-      member = memberRepository.findByEmail(email).orElseThrow(InvalidTokenException::new);
-      board = boardRepository.findByBoardIdAndMemberId(boardId, member)
-          .orElseThrow(NotMyPostException::new);
-    }
-    // have been deleted post
     if (board.getStatus().equals(BoardStatus.INACTIVE)) {
       throw new DeletePostException();
     }
-    board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
+
+    board = boardRepository.findByBoardIdAndMemberId(boardId, member)
+            .orElseThrow(NotMyPostException::new);
+
     BoardEntity deletePost = board.toBuilder()
         .status(BoardStatus.INACTIVE)
         .deleteDate(LocalDateTime.now())
         .build();
     boardRepository.save(deletePost);
 
-    // 좋아요 삭제 처리
     List<BoardLikeEntity> deletePostLikes = boardLikeRepository.findByBoardId(board);
     boardLikeRepository.deleteAll(deletePostLikes);
-
-//            // 로그 처리
-//            if (authentication.getAuthorities().stream()
-//                    .map(GrantedAuthority::getAuthority)
-//                    .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-//
-//                log.info("post delete admin: {}, postId: {}", email, boardId);
-//            } else {
-//                log.info("post delete user: {}, postId: {}", email, boardId);
-//            }
   }
 
   // 게시판 상세
