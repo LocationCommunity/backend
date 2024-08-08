@@ -64,20 +64,9 @@ public class BoardServiceImpl implements BoardService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-        /*
-        if ( placeId == null) {
-
-            throw new SelectPlaceException();
-
-        }
-
-         */
-
-    // 장소
     PlaceEntity place = placeRepository.findByPlaceId(placeId)
         .orElseThrow(SelectPlaceException::new);
 
-    // naver , kakao
     Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
     String platformString = claimsFromToken.get("platform", String.class);
     Platform platform = Platform.valueOf(platformString);
@@ -105,42 +94,29 @@ public class BoardServiceImpl implements BoardService {
         .build();
     boardRepository.save(board);
 
-//        [     이미지    ]
-
-    // 여러개의 파일 저장
     for (MultipartFile file : files) {
 
-      // 저장 경로 설정 ~/boards
-
-//            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
       String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
 
       UUID uuid = UUID.randomUUID();
 
-      // 랜덤식별자_원래이름
       String fileName = uuid + "_" + file.getOriginalFilename();
 
-      // 파일 이름에서 확장자 추출
       String fileExtension = StringUtils.getFilenameExtension(fileName);
 
-      // 지원하는 이미지 파일 확장자 목록
       List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
 
-      // 확장자가 이미지 파일인지 확인
       if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
 
-        // 빈 껍데기 생성
         File saveFile = new File(projectPath, fileName);
 
-        // transferTo --> Exception 필요
         file.transferTo(saveFile);
 
       } else {
-        // 이미지 파일이 아닌 경우에 대한 처리
+
         throw new UnsupportedImageTypeException();
       }
 
-      // 이미지 저장 Board
       ImageEntity image = ImageEntity.builder()
           .fileName(fileName)
           .filePath("/boards/" + fileName)
@@ -149,14 +125,7 @@ public class BoardServiceImpl implements BoardService {
           .build();
 
       imageRepository.save(image);
-
-
     }
-
-//        log.info(
-//                "post write admin: {}, post content - title: {}, content: {},",
-//                email, boardRequestDto.getTitle(), boardRequestDto.getContent());
-
   }
 
   // 게시물 수정
