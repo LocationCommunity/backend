@@ -8,10 +8,7 @@ import com.easytrip.backend.place.domain.PlaceEntity;
 import com.easytrip.backend.type.BoardStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 import java.time.LocalDate;
@@ -19,7 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
@@ -30,13 +28,11 @@ public class BoardEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long boardId;
 
-
     private String title;
 
     private String nickname;
 
     private String content;
-
 
     @ManyToOne
     @JoinColumn(name = "memberId")
@@ -46,8 +42,8 @@ public class BoardEntity {
     @JoinColumn(name = "placeId")
     private PlaceEntity placeId;
 
-
     private Integer likeCnt;
+
     private Integer viewCnt;
 
     private LocalDateTime createDate;
@@ -56,19 +52,10 @@ public class BoardEntity {
 
     private LocalDateTime deleteDate;
 
-
     private String visitDate;
-
 
     @Enumerated(EnumType.STRING)
     private BoardStatus status;
-
-
-
-
-
-
-
 }
 
 

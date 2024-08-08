@@ -57,27 +57,14 @@ public class BoardServiceImpl implements BoardService {
   public void writePost(String accessToken, BoardRequestDto boardRequestDto,
       List<MultipartFile> files, Long placeId) throws Exception {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-        /*
-        if ( placeId == null) {
-
-            throw new SelectPlaceException();
-
-        }
-
-         */
-
-    // 장소
     PlaceEntity place = placeRepository.findByPlaceId(placeId)
         .orElseThrow(SelectPlaceException::new);
 
-    // naver , kakao
     Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
     String platformString = claimsFromToken.get("platform", String.class);
     Platform platform = Platform.valueOf(platformString);
@@ -105,115 +92,35 @@ public class BoardServiceImpl implements BoardService {
         .build();
     boardRepository.save(board);
 
-//        [     이미지    ]
-
-    // 여러개의 파일 저장
-    for (MultipartFile file : files) {
-
-      // 저장 경로 설정 ~/boards
-
-//            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
-      String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
-
-      UUID uuid = UUID.randomUUID();
-
-      // 랜덤식별자_원래이름
-      String fileName = uuid + "_" + file.getOriginalFilename();
-
-      // 파일 이름에서 확장자 추출
-      String fileExtension = StringUtils.getFilenameExtension(fileName);
-
-      // 지원하는 이미지 파일 확장자 목록
-      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
-      // 확장자가 이미지 파일인지 확인
-      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
-
-        // 빈 껍데기 생성
-        File saveFile = new File(projectPath, fileName);
-
-        // transferTo --> Exception 필요
-        file.transferTo(saveFile);
-
-      } else {
-        // 이미지 파일이 아닌 경우에 대한 처리
-        throw new UnsupportedImageTypeException();
-      }
-
-      // 이미지 저장 Board
-      ImageEntity image = ImageEntity.builder()
-          .fileName(fileName)
-          .filePath("/boards/" + fileName)
-          .boardId(board)
-          .useType(UseType.BOARD)
-          .build();
-
-      imageRepository.save(image);
-
-
-    }
-
-//        log.info(
-//                "post write admin: {}, post content - title: {}, content: {},",
-//                email, boardRequestDto.getTitle(), boardRequestDto.getContent());
-
+    handleFileUpload(files, board);
   }
 
-  // 게시물 수정
   @Transactional
   @Override
   public void updatePost(String accessToken, Long boardId, Long placeId,
       BoardRequestDto boardRequestDto, List<MultipartFile> files) {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    MemberEntity member = new MemberEntity();
-    BoardEntity board = new BoardEntity();
-    ImageEntity image = new ImageEntity();
-
-    String email = null;
-
-    // naver , kakao
     Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
     String platformString = claimsFromToken.get("platform", String.class);
     Platform platform = Platform.valueOf(platformString);
 
-    if (authentication.getAuthorities().stream()
-        .map(GrantedAuthority::getAuthority)
-        .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-      // admin
+    MemberEntity member = getAuthenticatedMember(authentication, platform, boardId);
+    BoardEntity board = boardRepository.findByBoardId(boardId)
+            .orElseThrow(NotFoundPostException::new);
 
-      board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
-      Long memberId = board.getMemberId().getMemberId();
-      member = memberRepository.findByMemberId(memberId)
-          .orElseThrow(NotFoundMemberException::new);
-
-
-    } else {
-      // member
-      email = authentication.getName();
-      member = memberRepository.findByEmailAndPlatform(email, platform)
-          .orElseThrow(NotFoundMemberException::new);
-
-      // post exist
-      board = boardRepository.findByBoardId(boardId)
-          .orElseThrow(NotFoundPostException::new);
-    }
-
-//        have benn deleted post
     if (board.getStatus().equals(BoardStatus.INACTIVE)) {
       throw new DeletePostException();
     }
 
-    // ??boardId
     board = boardRepository.findByBoardIdAndMemberId(boardId, member)
         .orElseThrow(NotMyPostException::new);
 
     PlaceEntity place = placeRepository.findByPlaceId(placeId)
         .orElseThrow(SelectPlaceException::new);
+
     BoardEntity boardEntity = board.toBuilder()
         .title(boardRequestDto.getTitle())
         .content(boardRequestDto.getContent())
@@ -222,130 +129,40 @@ public class BoardServiceImpl implements BoardService {
         .build();
     boardRepository.save(boardEntity);
 
-    if (!files.isEmpty() || files != null) {
-      // 기존의 이미지를 삭제하고 새로운 이미지로 대체
-      List<ImageEntity> images = imageRepository.findAllByBoardId(board);
-      imageRepository.deleteAll(images);
-    }
-
-    for (MultipartFile file : files) {
-
-      // 저장 경로 설정 ~/boards
-//            String projectPath =
-//                System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files\\boards";
-      String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
-      UUID uuid = UUID.randomUUID();
-
-      // 랜덤식별자_원래이름
-      String fileName = uuid + "_" + file.getOriginalFilename();
-
-      // 파일 이름에서 확장자 추출
-      String fileExtension = StringUtils.getFilenameExtension(fileName);
-
-      // 지원하는 이미지 파일 확장자 목록
-      List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
-
-      // 확장자가 이미지 파일인지 확인
-      if (fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase())) {
-
-        // 빈 껍데기 생성
-        File saveFile = new File(projectPath, fileName);
-
-        // transferTo --> Exception 필요
-        try {
-          file.transferTo(saveFile);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-
-      } else {
-        // 이미지 파일이 아닌 경우에 대한 처리
-        throw new UnsupportedImageTypeException();
-      }
-
-      // 이미지 저장 Board
-      ImageEntity imageEntity = image.toBuilder()
-          .fileName(fileName)
-          .filePath("/boards/" + fileName)
-          .boardId(board)
-          .useType(UseType.BOARD)
-          .build();
-
-      imageRepository.save(imageEntity);
-    }
-
-    //로그처리
-//        if (authentication.getAuthorities().stream()
-//                .map(GrantedAuthority::getAuthority)
-//                .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-//            log.info(
-//                    "post update admin: {}, postId: {}, post content - title: {}, content: {}",
-//                    email, boardId, boardRequestDto.getTitle(), boardRequestDto.getContent());
-//        } else {
-//            log.info(
-//                    "post update user: {}, postId: {}, post content - title: {}, content: {}",
-//                    email, boardId, boardRequestDto.getTitle(), boardRequestDto.getContent());
-//        }
-
+    handleFileUpload(files, board);
   }
 
-  // 게시글 삭제 ( INACTIVE )
   @Override
   public void deletePost(String accessToken, Long boardId) {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Claims claimsFromToken = jwtTokenProvider.getClaimsFromToken(accessToken);
+    String platformString = claimsFromToken.get("platform", String.class);
+    Platform platform = Platform.valueOf(platformString);
 
-    MemberEntity member = new MemberEntity();
-    BoardEntity board = new BoardEntity();
-    String email = null;
+    MemberEntity member = getAuthenticatedMember(authentication, platform, boardId);
+    BoardEntity board = boardRepository.findByBoardId(boardId)
+            .orElseThrow(NotFoundPostException::new);
 
-    if (authentication.getAuthorities().stream()
-        .map(GrantedAuthority::getAuthority)
-        .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-
-      //admin
-      email = authentication.getName();
-      board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
-
-    } else {
-
-      //member
-      email = authentication.getName();
-      member = memberRepository.findByEmail(email).orElseThrow(InvalidTokenException::new);
-      board = boardRepository.findByBoardIdAndMemberId(boardId, member)
-          .orElseThrow(NotMyPostException::new);
-    }
-    // have been deleted post
     if (board.getStatus().equals(BoardStatus.INACTIVE)) {
       throw new DeletePostException();
     }
-    board = boardRepository.findByBoardId(boardId).orElseThrow(NotFoundPostException::new);
+
+    board = boardRepository.findByBoardIdAndMemberId(boardId, member)
+            .orElseThrow(NotMyPostException::new);
+
     BoardEntity deletePost = board.toBuilder()
         .status(BoardStatus.INACTIVE)
         .deleteDate(LocalDateTime.now())
         .build();
     boardRepository.save(deletePost);
 
-    // 좋아요 삭제 처리
     List<BoardLikeEntity> deletePostLikes = boardLikeRepository.findByBoardId(board);
     boardLikeRepository.deleteAll(deletePostLikes);
-
-//            // 로그 처리
-//            if (authentication.getAuthorities().stream()
-//                    .map(GrantedAuthority::getAuthority)
-//                    .anyMatch(role -> role.equals("ROLE_ADMIN"))) {
-//
-//                log.info("post delete admin: {}, postId: {}", email, boardId);
-//            } else {
-//                log.info("post delete user: {}, postId: {}", email, boardId);
-//            }
   }
 
-  // 게시판 상세
   public List<BoardListDto> getList(int page, int size) {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "boardId"));
@@ -367,19 +184,18 @@ public class BoardServiceImpl implements BoardService {
       if (memberEntity != null) {
         List<ImageEntity> memberImages = imageRepository.findByMemberId(memberEntity);
         if (!memberImages.isEmpty()) {
-          // 여러 이미지 중 첫 번째 이미지를 사용
+
           memberImageUrl.add(memberImages.get(0).getFileName());
         } else {
-          memberImageUrl.add(""); // 이미지가 없을 경우 빈 문자열 추가
+          memberImageUrl.add("");
         }
       } else {
-        memberImageUrl.add(""); // 회원 정보가 없을 경우 빈 문자열 추가
+        memberImageUrl.add("");
       }
     }
 
     return BoardListDto.listOf(boardEntities, imageUrls, memberImageUrl);
   }
-
 
   @Override
   public BoardDetailDto getDetail(Long boardId, String accessToken) {
@@ -399,42 +215,15 @@ public class BoardServiceImpl implements BoardService {
       imageUrls.add(image.getFileName());
     }
 
-    // 조회수
-    Integer viewCnt = board.getViewCnt();
-
-    viewCnt++;
-
-    board.setViewCnt(viewCnt);
-
     boardRepository.save(board);
 
-    BoardDetailDto boardDetailDto = BoardDetailDto.builder()
-
-        .title(board.getTitle())
-        .content(board.getContent())
-        .images(imageUrls)
-        .nickname(board.getNickname())
-        .placeId(board.getPlaceId().getPlaceId())
-        .placeName(place.getPlaceName())
-        .placeLink("http://localhost:8080/place/info/" + place.getPlaceId())
-        .visitDate(board.getVisitDate())
-        .x(place.getX())
-        .y(place.getY())
-        .viewCnt(board.getViewCnt())
-        .address(place.getAddress())
-        .likeCnt(board.getLikeCnt())
-        .build();
-
-    return boardDetailDto;
+    return BoardDetailDto.getDetail(board, place, imageUrls);
   }
 
-  //나의 게시물
   @Override
   public List<BoardListDto> getMyPost(String accessToken) {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
@@ -459,20 +248,19 @@ public class BoardServiceImpl implements BoardService {
       if (memberEntity != null) {
         List<ImageEntity> memberImages = imageRepository.findByMemberId(memberEntity);
         if (!memberImages.isEmpty()) {
-          // 여러 이미지 중 첫 번째 이미지를 사용
+
           memberImageUrl.add(memberImages.get(0).getFileName());
         } else {
-          memberImageUrl.add(""); // 이미지가 없을 경우 빈 문자열 추가
+          memberImageUrl.add("");
         }
       } else {
-        memberImageUrl.add(""); // 회원 정보가 없을 경우 빈 문자열 추가
+        memberImageUrl.add("");
       }
     }
 
     return BoardListDto.listOf(boards, imageUrls, memberImageUrl);
   }
 
-  // 게시물 좋아요
   @Override
   @Transactional
   public void likes(Long boardId, String accessToken) {
@@ -616,5 +404,93 @@ public class BoardServiceImpl implements BoardService {
     }
 
     return BoardListDto.listOf(boards, imageUrls, memberImageUrl);
+  }
+
+  private void validateAccessToken(String accessToken) {
+    if (!jwtTokenProvider.validateToken(accessToken)) {
+      throw new InvalidTokenException();
+    }
+  }
+
+  private MemberEntity getAuthenticatedMember(Authentication authentication, Platform platform, Long boardId) {
+    if (isAdmin(authentication)) {
+      return getMemberByBoardId(boardId);
+    } else {
+      String email = authentication.getName();
+      return memberRepository.findByEmailAndPlatform(email, platform)
+              .orElseThrow(NotFoundMemberException::new);
+    }
+  }
+
+  private boolean isAdmin(Authentication authentication) {
+    return authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(role -> role.equals("ROLE_ADMIN"));
+  }
+
+  private MemberEntity getMemberByBoardId(Long boardId) {
+    BoardEntity board = boardRepository.findByBoardIdWithMember(boardId)
+            .orElseThrow(NotFoundPostException::new);
+
+    return board.getMemberId();
+  }
+
+  private void handleFileUpload(List<MultipartFile> files, BoardEntity board) {
+    if (files == null || files.isEmpty()) {
+      return;
+    }
+
+    deleteExistingImages(board);
+
+    for (MultipartFile file : files) {
+      validateAndSaveFile(file, board);
+    }
+  }
+
+  private void deleteExistingImages(BoardEntity board) {
+    List<ImageEntity> images = imageRepository.findAllByBoardId(board);
+    imageRepository.deleteAll(images);
+  }
+
+  private void validateAndSaveFile(MultipartFile file, BoardEntity board) {
+    String projectPath = System.getProperty("user.home") + "\\Desktop\\images\\";
+    String fileName = generateFileName(file);
+
+    if (isValidImageExtension(fileName)) {
+      saveFile(file, projectPath, fileName);
+      saveImageEntity(fileName, board);
+    } else {
+      throw new UnsupportedImageTypeException();
+    }
+  }
+
+  private String generateFileName(MultipartFile file) {
+    UUID uuid = UUID.randomUUID();
+    return uuid + "_" + file.getOriginalFilename();
+  }
+
+  private boolean isValidImageExtension(String fileName) {
+    String fileExtension = StringUtils.getFilenameExtension(fileName);
+    List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+    return fileExtension != null && allowedExtensions.contains(fileExtension.toLowerCase());
+  }
+
+  private void saveFile(MultipartFile file, String projectPath, String fileName) {
+    File saveFile = new File(projectPath, fileName);
+    try {
+      file.transferTo(saveFile);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void saveImageEntity(String fileName, BoardEntity board) {
+    ImageEntity imageEntity = ImageEntity.builder()
+            .fileName(fileName)
+            .filePath("/boards/" + fileName)
+            .boardId(board)
+            .useType(UseType.BOARD)
+            .build();
+    imageRepository.save(imageEntity);
   }
 }

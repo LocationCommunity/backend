@@ -15,7 +15,4 @@ public interface BoardLikeRepository extends JpaRepository<BoardLikeEntity, Long
     List<BoardLikeEntity> findByBoardId(BoardEntity board);
 
     Optional<BoardLikeEntity> findByBoardIdAndMemberId(BoardEntity board, MemberEntity member);
-
-
-
 }

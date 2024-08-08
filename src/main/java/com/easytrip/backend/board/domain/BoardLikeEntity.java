@@ -26,5 +26,4 @@ public class BoardLikeEntity {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private MemberEntity memberId;
-
 }
