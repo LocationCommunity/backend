@@ -163,7 +163,6 @@ public class BoardServiceImpl implements BoardService {
     boardLikeRepository.deleteAll(deletePostLikes);
   }
 
-  // 게시판 상세
   public List<BoardListDto> getList(int page, int size) {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "boardId"));
@@ -185,13 +184,13 @@ public class BoardServiceImpl implements BoardService {
       if (memberEntity != null) {
         List<ImageEntity> memberImages = imageRepository.findByMemberId(memberEntity);
         if (!memberImages.isEmpty()) {
-          // 여러 이미지 중 첫 번째 이미지를 사용
+
           memberImageUrl.add(memberImages.get(0).getFileName());
         } else {
-          memberImageUrl.add(""); // 이미지가 없을 경우 빈 문자열 추가
+          memberImageUrl.add("");
         }
       } else {
-        memberImageUrl.add(""); // 회원 정보가 없을 경우 빈 문자열 추가
+        memberImageUrl.add("");
       }
     }
 
