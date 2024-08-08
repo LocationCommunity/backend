@@ -220,13 +220,10 @@ public class BoardServiceImpl implements BoardService {
     return BoardDetailDto.getDetail(board, place, imageUrls);
   }
 
-  //나의 게시물
   @Override
   public List<BoardListDto> getMyPost(String accessToken) {
 
-    if (!jwtTokenProvider.validateToken(accessToken)) {
-      throw new InvalidTokenException();
-    }
+    validateAccessToken(accessToken);
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
@@ -251,13 +248,13 @@ public class BoardServiceImpl implements BoardService {
       if (memberEntity != null) {
         List<ImageEntity> memberImages = imageRepository.findByMemberId(memberEntity);
         if (!memberImages.isEmpty()) {
-          // 여러 이미지 중 첫 번째 이미지를 사용
+
           memberImageUrl.add(memberImages.get(0).getFileName());
         } else {
-          memberImageUrl.add(""); // 이미지가 없을 경우 빈 문자열 추가
+          memberImageUrl.add("");
         }
       } else {
-        memberImageUrl.add(""); // 회원 정보가 없을 경우 빈 문자열 추가
+        memberImageUrl.add("");
       }
     }
 
