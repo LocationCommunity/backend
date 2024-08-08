@@ -1,16 +1,10 @@
 package com.easytrip.backend.board.dto;
 
 
-import com.easytrip.backend.type.UseType;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

@@ -2,21 +2,13 @@ package com.easytrip.backend.board.dto;
 
 
 import com.easytrip.backend.board.domain.BoardEntity;
-import com.easytrip.backend.board.repository.BoardRepository;
-import com.easytrip.backend.common.image.domain.ImageEntity;
-import com.easytrip.backend.exception.impl.NotFoundPlaceException;
-import com.easytrip.backend.exception.impl.NotFoundPostException;
-import com.easytrip.backend.place.domain.PlaceEntity;
 import java.util.stream.IntStream;
 
 import lombok.*;
-import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Getter
 @Setter

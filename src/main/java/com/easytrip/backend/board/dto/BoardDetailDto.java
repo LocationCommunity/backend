@@ -41,6 +41,4 @@ public class BoardDetailDto {
     private Double y;
 
     private String placeLink;
-
-
 }

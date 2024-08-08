@@ -1,10 +1,8 @@
 package com.easytrip.backend.board.repository;
 
 import com.easytrip.backend.board.domain.BoardEntity;
-import com.easytrip.backend.common.image.domain.ImageEntity;
 import com.easytrip.backend.member.domain.MemberEntity;
 import com.easytrip.backend.type.BoardStatus;
-import com.easytrip.backend.type.Platform;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,9 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
-
-
-
 
     Optional<BoardEntity> findByBoardId(Long boardId);
 
@@ -45,5 +40,4 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
     List<BoardEntity> findByMemberId(MemberEntity member);
 
     Page<BoardEntity> findByStatus(BoardStatus status, Pageable pageable);
-
 }
